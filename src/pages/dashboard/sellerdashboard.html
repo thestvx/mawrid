@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mawrid Premium Vendor Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-tertiary-container": "#0f00a2",
+                        "tertiary-container": "#8589ff",
+                        "secondary-container": "#e2dfde",
+                        "primary": "#a53c00",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#7e2c00",
+                        "surface-container-high": "#e7e8e9",
+                        "primary-container": "#ff6201",
+                        "inverse-primary": "#ffb597",
+                        "surface-tint": "#a53c00",
+                        "surface-container": "#edeeef",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "on-primary-fixed": "#360f00",
+                        "error": "#ba1a1a",
+                        "on-surface": "#191c1d",
+                        "on-primary-container": "#541b00",
+                        "on-secondary-fixed-variant": "#474746",
+                        "on-surface-variant": "#5a4137",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary-fixed": "#e5e2e1",
+                        "outline-variant": "#e3bfb1",
+                        "on-background": "#191c1d",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "secondary": "#5f5e5e",
+                        "surface": "#f8f9fa",
+                        "on-secondary-container": "#636262",
+                        "background": "#f8f9fa",
+                        "surface-variant": "#e1e3e4",
+                        "surface-dim": "#d9dadb",
+                        "surface-bright": "#f8f9fa",
+                        "primary-fixed-dim": "#ffb597",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "outline": "#8f7065",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "tertiary": "#494bd6",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#e1e0ff",
+                        "primary-fixed": "#ffdbcd",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "inverse-on-surface": "#f0f1f2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "sm": "0.25rem",
+                        "md": "0.75rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["IBM Plex Sans Arabic", "sans-serif"],
+                        "display": ["IBM Plex Sans Arabic", "sans-serif"],
+                        "body": ["IBM Plex Sans Arabic", "sans-serif"],
+                        "label": ["IBM Plex Sans Arabic", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'IBM Plex Sans Arabic', sans-serif; background-color: #f8f9fa; color: #191c1d; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .soft-shadow { box-shadow: 0px 4px 20px rgba(0,0,0,0.04); }
+        .soft-shadow-hover:hover { box-shadow: 0px 12px 32px rgba(0,0,0,0.08); transform: translateY(-2px); transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-surface flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-surface-container-low shadow-md flex flex-col p-4 space-y-2 hidden md:flex">
+<div class="mb-8 px-4 flex items-center justify-between">
+<div>
+<img alt="Mawrid Logo" class="h-10 mb-2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVBVCnWdt9Vhyoldgjs8Q3fD15dGBtIZCduhDWTuYq4WdE1DgH05fGx61BG9m60WV55-LOnFtqNpnB6YPCBnVBhoqwm59d1hGZ8ScdMOsshQBlnSzfybn1WimcLmy3pYwDm-yuUXJfzAyL0WKeGe94Fxl4SGeRYatqB3dTjDtMz0Cs7Z38B9bRc3sNHJJpWHd9u02D0uV9ks2hlHXUnGeRIdavrcx0vWwrhqMr2i7tYyDkqqUUHwBbrrI4pfMN8JU"/>
+<h2 class="text-headline-md font-display font-bold text-primary">Mawrid Premium</h2>
+<p class="text-label-md text-secondary">Vendor Portal</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2 font-body text-label-md">
+<a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg px-4 py-3 font-semibold duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 hover:bg-secondary-container/30 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+                My Products
+            </a>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 hover:bg-secondary-container/30 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+                Orders
+            </a>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 hover:bg-secondary-container/30 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+                Earnings
+            </a>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 hover:bg-secondary-container/30 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+                Storefront
+            </a>
+</nav>
+<div class="mt-auto space-y-2 font-body text-label-md pt-4 border-t border-surface-variant">
+<button class="w-full bg-primary-container text-on-primary-container hover:bg-primary-container/90 py-3 rounded-lg font-semibold flex justify-center items-center gap-2 transition-colors mb-4">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+                Submit New Product
+            </button>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 hover:bg-secondary-container/30 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 hover:bg-secondary-container/30 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 ml-0 md:ml-64 flex flex-col h-screen overflow-y-auto">
+<!-- Top Header -->
+<header class="bg-surface/80 backdrop-blur-md sticky top-0 z-30 px-8 py-6 flex justify-between items-center shadow-sm">
+<div>
+<h1 class="text-headline-lg font-headline font-semibold text-on-surface">Welcome back, Vendor Co.</h1>
+<p class="text-body-md text-secondary">Here's what's happening with your store today.</p>
+</div>
+<div class="flex items-center gap-6">
+<div class="text-right">
+<p class="text-label-sm text-secondary uppercase tracking-wider">Available Balance</p>
+<p class="text-title-lg font-bold text-on-surface">SAR 12,450.00</p>
+</div>
+<div class="h-10 w-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container cursor-pointer relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 h-3 w-3 bg-error rounded-full border-2 border-surface"></span>
+</div>
+<div class="h-10 w-10 rounded-full bg-surface-variant overflow-hidden cursor-pointer cursor-pointer active:scale-95 transition-transform">
+<img class="h-full w-full object-cover" data-alt="A professional headshot of a vendor profile picture. A middle-aged person looking confident and approachable. Studio lighting with a clean, light mode neutral gray background. High resolution, clear and sharp focus on the face." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBI_3wnNP_IIGs_r-ndzdi4DZVp_na5RQh0unLQlH6yKw05_PFchc24fvlQTywOwewElKqEcwNH6GP-_JfbHJ0b0KoRbp38_cjG-TkZHgvnO8cfQPrtzmRNX2jff5czD-typl0EOJjcP2Lshlt6MH08D1Lzxm2PDwzGTfFGvAdNAtYmRHDnLYrj_ynIHHGk5JGWDizOE5P_HiVxa7yNthpx2BrcYb3saQ10T9-TgtUpLWq-3FwC-g"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-8 max-w-[1440px] mx-auto w-full space-y-8">
+<!-- Quick Stats Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Stat Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow soft-shadow-hover flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[28px]" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<span class="text-label-sm font-semibold text-tertiary bg-tertiary/10 px-2 py-1 rounded-full">+14.5%</span>
+</div>
+<div>
+<p class="text-label-md text-secondary mb-1">Total Revenue</p>
+<h3 class="text-headline-lg font-bold text-on-surface">SAR 48,290</h3>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow soft-shadow-hover flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="h-12 w-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[28px]" data-icon="shopping_bag">shopping_bag</span>
+</div>
+<span class="text-label-sm font-semibold text-tertiary bg-tertiary/10 px-2 py-1 rounded-full">+5.2%</span>
+</div>
+<div>
+<p class="text-label-md text-secondary mb-1">Orders this Month</p>
+<h3 class="text-headline-lg font-bold text-on-surface">342</h3>
+</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow soft-shadow-hover flex flex-col justify-between relative overflow-hidden">
+<div class="absolute -right-4 -top-4 opacity-5 text-primary">
+<span class="material-symbols-outlined text-[120px]" data-icon="star" data-weight="fill">star</span>
+</div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="h-12 w-12 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[28px]" data-icon="star_rate">star_rate</span>
+</div>
+</div>
+<div class="relative z-10">
+<p class="text-label-md text-secondary mb-1">Store Rating</p>
+<div class="flex items-end gap-2">
+<h3 class="text-headline-lg font-bold text-on-surface">4.8</h3>
+<p class="text-label-sm text-secondary mb-2">/ 5.0</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Charts & Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Sales Performance Chart -->
+<div class="lg:col-span-2 bg-surface-container-lowest rounded-[24px] p-6 soft-shadow border border-surface-variant/30">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-title-lg font-semibold text-on-surface">Sales Performance</h3>
+<select class="bg-surface-container-low border-none rounded-md text-label-md py-2 px-4 focus:ring-primary">
+<option>This Week</option>
+<option>This Month</option>
+<option>This Year</option>
+</select>
+</div>
+<div class="h-72 w-full">
+<canvas id="salesChart"></canvas>
+</div>
+</div>
+<!-- Recent Activity / Action Needed -->
+<div class="bg-surface-container-lowest rounded-[24px] p-6 soft-shadow border border-surface-variant/30 flex flex-col">
+<h3 class="text-title-lg font-semibold text-on-surface mb-6">Action Needed</h3>
+<div class="flex-1 space-y-4">
+<div class="flex gap-4 p-4 rounded-xl bg-error-container/30 border border-error-container">
+<div class="text-on-error-container mt-1">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+</div>
+<div>
+<h4 class="text-label-md font-semibold text-on-surface">Low Stock Alert</h4>
+<p class="text-label-sm text-secondary mt-1">2 premium items are running low.</p>
+<button class="text-primary text-label-sm font-semibold mt-2 hover:underline">Restock Now</button>
+</div>
+</div>
+<div class="flex gap-4 p-4 rounded-xl bg-surface-container-low">
+<div class="text-secondary mt-1">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+</div>
+<div>
+<h4 class="text-label-md font-semibold text-on-surface">New Customer Message</h4>
+<p class="text-label-sm text-secondary mt-1">Regarding order #ORD-8921</p>
+<button class="text-primary text-label-sm font-semibold mt-2 hover:underline">Reply</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Orders Table -->
+<div class="bg-surface-container-lowest rounded-[24px] soft-shadow border border-surface-variant/30 overflow-hidden">
+<div class="p-6 border-b border-surface-variant/50 flex justify-between items-center">
+<h3 class="text-title-lg font-semibold text-on-surface">Recent Orders</h3>
+<button class="text-primary font-semibold text-label-md hover:underline">View All</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-secondary text-label-sm uppercase tracking-wider">
+<th class="p-4 font-medium">Order ID</th>
+<th class="p-4 font-medium">Product</th>
+<th class="p-4 font-medium">Date</th>
+<th class="p-4 font-medium">Amount</th>
+<th class="p-4 font-medium">Status</th>
+</tr>
+</thead>
+<tbody class="text-body-md text-on-surface divide-y divide-surface-variant/50">
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="p-4 font-medium">#ORD-9012</td>
+<td class="p-4 flex items-center gap-3">
+<div class="h-10 w-10 rounded bg-surface-variant overflow-hidden">
+<img class="h-full w-full object-cover" data-alt="A high-end minimal desk lamp. Modern industrial design with brushed steel and matte black finishes. Soft warm lighting. Studio product photography on a pure white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBaqE2ZF4tHT5hpI3ndQ-lGubdBOgwioEbBfMsM1PFdA0lPC-l-phyzNeoeWAhakl8t_yKu7tBa_iVxXXMQ9pBH-zcYhcqwSouxQpPsaOnJBeOIRD2hDWGiAo06ZZF8-7WqS2gCn_9wO0YCer9YNwfztDyNch6CFeYhTXcUAEEnVhOVPjuiGLfhpOfYpXIJ4mmpM5gXP9Cb6CpOzcUQ4Kumh3XQBW3Gh5Y10fM3aatx9e7MUS46w"/>
+</div>
+                                    Lumina Desk Lamp
+                                </td>
+<td class="p-4 text-secondary">Oct 24, 2023</td>
+<td class="p-4 font-semibold">SAR 450</td>
+<td class="p-4"><span class="px-3 py-1 rounded-full bg-tertiary/10 text-tertiary text-label-sm font-semibold">Processing</span></td>
+</tr>
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="p-4 font-medium">#ORD-9011</td>
+<td class="p-4 flex items-center gap-3">
+<div class="h-10 w-10 rounded bg-surface-variant overflow-hidden">
+<img class="h-full w-full object-cover" data-alt="Premium ceramic coffee dripper set. Matte white glaze with a wooden base. Minimalist and elegant design. Soft morning light product photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFeZp1tFA0inUYOgaaIJarBcXHbZBoRvlrOybmh60LyamdhndR1nfsYLO43QJEjRZkfRwYHeR4nO6WCRIEFm-evM6U7_-IX7gKfsJAG6csquthYvwlR8PngXmdKLovxYvgQPa5Mkhjn20MkTymZSKtMoCwFT4mKfil7fqqr-w0owYhD9LwWtAK_uJVM5thBCUiwIwYbd7hmMWzhIu4i-xL-lIG0whoSNqUzRDstjenE-XT640bNw"/>
+</div>
+                                    Artisan Coffee Set
+                                </td>
+<td class="p-4 text-secondary">Oct 23, 2023</td>
+<td class="p-4 font-semibold">SAR 280</td>
+<td class="p-4"><span class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-label-sm font-semibold">Shipped</span></td>
+</tr>
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="p-4 font-medium">#ORD-9010</td>
+<td class="p-4 flex items-center gap-3">
+<div class="h-10 w-10 rounded bg-surface-variant overflow-hidden">
+<img class="h-full w-full object-cover" data-alt="A sleek minimalist mechanical keyboard. Aluminum chassis with white and gray keycaps. High-tech premium look. Top-down view on a light grey background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBen3I78bYGNQhz24cJujk0IodJcFl7VPUDPYK3rPAtu6rxhHQ21wlnsqio4XuW2A93ynAdAOkzVihat2HRmgT9bhZOICHgk7ulWU1bnkUtl6tXcRZgGYBYo4_GAEdfcNeae4Lj_I0LXPbK4vJiDmNr6Jw3DxI0u1x_eIa1rMrh1cPm8XzZB9y3F8tWO8aCTBNPNtLs5Y6I-iTCpFFV6MxPKiVhakdn8pLnuKsr6movtEa_QmVEAw"/>
+</div>
+                                    Mechanical Keyboard
+                                </td>
+<td class="p-4 text-secondary">Oct 22, 2023</td>
+<td class="p-4 font-semibold">SAR 890</td>
+<td class="p-4"><span class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-label-sm font-semibold">Delivered</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Chart.js initialization for Sales Performance
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            
+            // Create a gradient fill for the line chart
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(255, 98, 1, 0.2)'); // primary color with opacity
+            gradient.addColorStop(1, 'rgba(255, 98, 1, 0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Revenue (SAR)',
+                        data: [1200, 1900, 1500, 2200, 1800, 2800, 2400],
+                        borderColor: '#ff6201', // primary
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#ff6201',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.4 // smooth curves
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#2e3132',
+                            titleFont: { family: 'IBM Plex Sans Arabic', size: 14 },
+                            bodyFont: { family: 'IBM Plex Sans Arabic', size: 14 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#e7e8e9', // surface-container-high
+                                drawBorder: false,
+                                borderDash: [5, 5]
+                            },
+                            ticks: {
+                                color: '#5f5e5e', // secondary
+                                font: { family: 'IBM Plex Sans Arabic', size: 12 }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#5f5e5e', // secondary
+                                font: { family: 'IBM Plex Sans Arabic', size: 12 }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                }
+            });
+        });
+    </script>
+</body></html>

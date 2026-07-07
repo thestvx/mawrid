@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mawrid Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-tertiary-container": "#0f00a2",
+                        "tertiary-container": "#8589ff",
+                        "secondary-container": "#e2dfde",
+                        "primary": "#a53c00",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#7e2c00",
+                        "surface-container-high": "#e7e8e9",
+                        "primary-container": "#ff6201",
+                        "inverse-primary": "#ffb597",
+                        "surface-tint": "#a53c00",
+                        "surface-container": "#edeeef",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "on-primary-fixed": "#360f00",
+                        "error": "#ba1a1a",
+                        "on-surface": "#191c1d",
+                        "on-primary-container": "#541b00",
+                        "on-secondary-fixed-variant": "#474746",
+                        "on-surface-variant": "#5a4137",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary-fixed": "#e5e2e1",
+                        "outline-variant": "#e3bfb1",
+                        "on-background": "#191c1d",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "secondary": "#5f5e5e",
+                        "surface": "#f8f9fa",
+                        "on-secondary-container": "#636262",
+                        "background": "#f8f9fa",
+                        "surface-variant": "#e1e3e4",
+                        "surface-dim": "#d9dadb",
+                        "surface-bright": "#f8f9fa",
+                        "primary-fixed-dim": "#ffb597",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "outline": "#8f7065",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "tertiary": "#494bd6",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#e1e0ff",
+                        "primary-fixed": "#ffdbcd",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "inverse-on-surface": "#f0f1f2"
+                    },
+                    fontFamily: {
+                        "headline": ["IBM Plex Sans Arabic", "sans-serif"],
+                        "display": ["IBM Plex Sans Arabic", "sans-serif"],
+                        "body": ["IBM Plex Sans Arabic", "sans-serif"],
+                        "label": ["IBM Plex Sans Arabic", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "sm": "0.25rem",
+                        "md": "0.75rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px rgba(0, 0, 0, 0.04)',
+                        'hover': '0 12px 32px rgba(0, 0, 0, 0.08)',
+                        'glow-primary': '0 0 20px rgba(255, 98, 1, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            background-color: #f8f9fa; /* background */
+            color: #191c1d; /* on-background */
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Enhanced Glassmorphism with Spotlight */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(600px circle at var(--mouse-x, -100%) var(--mouse-y, -100%), rgba(255, 255, 255, 0.6), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: -1;
+            border-radius: inherit;
+        }
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-slide-in-right {
+            animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+
+        @keyframes pulseSoft {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+        .animate-pulse-soft {
+            animation: pulseSoft 2.5s infinite ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-150%) skewX(-20deg); }
+            100% { transform: translateX(150%) skewX(-20deg); }
+        }
+        .shimmer-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-effect::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 3s infinite;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden bg-background font-body text-on-background">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 z-40 bg-surface-container-low shadow-md p-4 space-y-2 border-r border-surface-variant/30 animate-slide-in-right">
+<div class="flex items-center gap-4 px-4 py-6 mb-4 border-b border-surface-variant/30">
+<img alt="Mawrid Logo" class="h-10 w-10 object-contain rounded-full shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7JITCHBlQbXIoE6uKcK8XyxnrN6mTc3o7ak-83bTh7JZByCjTI-_KgN9iB2jnc3aGYduhOK1SBiLkNz-eHHi_USLRW1j4Y4S3NlZwPCzbdn3IvY543qGAq1-FCbJfkCK67fBZKb30Mx_Ko6iYdu3FomKDwVqgpL6r4oJkPnaIK5K0d146-Iw1pf-rn7rGlSyme_UKrKZjQ-Fx7phL7KINBb8cf5tjcjnMeomjejpj1vIQwr8OO_EQY4QvbBQLHO4"/>
+<div>
+<h1 class="text-headline-md font-display font-bold text-primary leading-tight">Mawrid</h1>
+<p class="text-label-sm text-on-surface-variant font-medium">Admin Portal</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg px-4 py-3 font-semibold transition-all duration-300 ease-in-out shadow-sm hover:translate-x-1.5" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-label-md">Overview</span>
+</a>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 transition-all duration-300 ease-in-out hover:text-on-surface hover:translate-x-1.5" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="text-label-md">Vendor Verification</span>
+</a>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 transition-all duration-300 ease-in-out hover:text-on-surface hover:translate-x-1.5" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="text-label-md">Listing Moderation</span>
+</a>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 transition-all duration-300 ease-in-out hover:text-on-surface hover:translate-x-1.5" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-label-md">Payouts</span>
+</a>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 transition-all duration-300 ease-in-out hover:text-on-surface hover:translate-x-1.5" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="text-label-md">Reports</span>
+</a>
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 transition-all duration-300 ease-in-out hover:text-on-surface hover:translate-x-1.5" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-label-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-surface-variant/30 pt-4 space-y-1">
+<a class="flex items-center gap-3 text-secondary hover:bg-secondary-container/50 rounded-lg px-4 py-3 transition-all duration-300 ease-in-out hover:translate-x-1.5" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 flex flex-col h-screen overflow-hidden bg-surface">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-20 px-8 bg-surface/80 backdrop-blur-md shadow-sm sticky top-0 z-30 animate-fade-in-up">
+<div class="flex-1 flex items-center max-w-2xl">
+<div class="relative w-full max-w-md hidden md:block">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/70">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-3 pl-12 pr-4 text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all" placeholder="Search vendors, listings, or IDs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="relative p-2 text-on-surface-variant hover:text-primary transition-transform duration-200 hover:scale-105 active:scale-95 rounded-full hover:bg-surface-container-low">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface animate-pulse-soft"></span>
+</button>
+<div class="h-8 w-px bg-surface-variant mx-2"></div>
+<div class="flex items-center gap-3 cursor-pointer group hover:scale-105 transition-transform duration-300">
+<div class="text-right hidden md:block">
+<p class="text-label-md font-semibold text-on-surface group-hover:text-primary transition-colors">Admin Super</p>
+<p class="text-label-sm text-on-surface-variant">Operations Lead</p>
+</div>
+<img class="h-10 w-10 rounded-full object-cover border-2 border-surface-container-low group-hover:border-primary transition-colors" data-alt="A professional portrait of a business executive in a modern, brightly lit office environment. Soft natural light, high-end corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAACZwPY05fagmQzqvk1yRU0LI_bELybPRZO4jurka5RLB0gnKIc6yDK_7-pt1bk3GjI0aY2fKQPLQb4cIk6EsTlIXKvJefFGPWC-BagojJQx-9567juDuQqjI6EUMi9f3nda6sSQB4YxWfH1P2j_vKXmzgPwG16_ZhW63pxRKxmcHvGlTj0IUYztXLRcZnUkYh1383EXgygQpBG84kEA2TdX-BuCu79j3SPr0VxYi2u5hdC0DMsA"/>
+</div>
+</div>
+</header>
+<!-- Scrollable Content Canvas -->
+<div class="flex-1 overflow-y-auto p-8 space-y-8 pb-24">
+<div class="flex justify-between items-end animate-fade-in-up delay-100">
+<div>
+<h2 class="text-headline-lg font-display font-bold text-on-surface">Platform Overview</h2>
+<p class="text-body-md text-on-surface-variant mt-1">Real-time marketplace health and operational queue.</p>
+</div>
+<button class="flex items-center gap-2 bg-white text-on-surface border border-surface-variant px-4 py-2 rounded-lg hover:border-primary hover:text-primary transition-all duration-300 text-label-md shadow-sm font-semibold hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-95">
+<span class="material-symbols-outlined text-[20px]">download</span>
+                    Export Report
+                </button>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Analytics Cards (Top Row) -->
+<div class="col-span-1 lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Metric 1 -->
+<div class="glass-card rounded-xl p-6 shadow-soft hover:shadow-glow-primary hover:-translate-y-1.5 transition-all duration-300 relative group shimmer-effect animate-fade-in-up delay-200 cursor-default">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-container/20 rounded-full blur-xl group-hover:bg-primary-container/40 transition-all duration-500"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div>
+<p class="text-label-md text-on-surface-variant font-medium mb-1">Total GMV (30d)</p>
+<h3 class="text-display-lg font-bold text-on-surface leading-none" id="gmv-number">$1.24M</h3>
+</div>
+<div class="p-3 bg-primary-container/10 rounded-lg text-primary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-label-sm mt-4 relative z-10">
+<span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center font-bold">
+<span class="material-symbols-outlined text-[14px] mr-1">arrow_upward</span> 12.5%
+                            </span>
+<span class="text-on-surface-variant">vs last month</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="glass-card rounded-xl p-6 shadow-soft hover:shadow-hover hover:-translate-y-1.5 transition-all duration-300 relative group shimmer-effect animate-fade-in-up delay-300 cursor-default">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-tertiary-container/20 rounded-full blur-xl group-hover:bg-tertiary-container/40 transition-all duration-500"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div>
+<p class="text-label-md text-on-surface-variant font-medium mb-1">Active Vendors</p>
+<h3 class="text-display-lg font-bold text-on-surface leading-none" id="vendors-number">842</h3>
+</div>
+<div class="p-3 bg-tertiary-container/10 rounded-lg text-tertiary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined">storefront</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-label-sm mt-4 relative z-10">
+<span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center font-bold">
+<span class="material-symbols-outlined text-[14px] mr-1">arrow_upward</span> 4.2%
+                            </span>
+<span class="text-on-surface-variant">vs last month</span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="glass-card rounded-xl p-6 shadow-soft hover:shadow-hover hover:-translate-y-1.5 transition-all duration-300 relative group shimmer-effect animate-fade-in-up delay-400 cursor-default">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-error-container/20 rounded-full blur-xl group-hover:bg-error-container/40 transition-all duration-500"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div>
+<p class="text-label-md text-on-surface-variant font-medium mb-1">Pending Approvals</p>
+<h3 class="text-display-lg font-bold text-on-surface leading-none" id="pending-number">28</h3>
+</div>
+<div class="p-3 bg-error-container/30 rounded-lg text-on-error-container group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-label-sm mt-4 relative z-10">
+<span class="text-error bg-error-container/50 px-2 py-0.5 rounded-full flex items-center font-bold animate-pulse-soft inline-block">
+                                Requires attention
+                            </span>
+</div>
+</div>
+</div>
+<!-- Vendor Verification Queue (Spans 2 columns) -->
+<div class="col-span-1 lg:col-span-2 glass-card rounded-xl shadow-soft p-6 flex flex-col animate-fade-in-up delay-400">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-title-lg font-bold text-on-surface">Vendor Verification Queue</h3>
+<a class="text-label-md font-semibold text-primary hover:text-primary-container hover:underline transition-colors" href="#">View All</a>
+</div>
+<div class="overflow-x-auto flex-1">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-surface-variant/50 text-label-sm text-on-surface-variant uppercase tracking-wider">
+<th class="pb-3 font-medium">Applicant</th>
+<th class="pb-3 font-medium">Business Type</th>
+<th class="pb-3 font-medium">Date Applied</th>
+<th class="pb-3 font-medium">Status</th>
+<th class="pb-3 font-medium text-right">Action</th>
+</tr>
+</thead>
+<tbody class="text-body-md text-on-surface divide-y divide-surface-variant/30">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/80 transition-colors group">
+<td class="py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold group-hover:scale-105 transition-transform">
+                                                AZ
+                                            </div>
+<div>
+<p class="font-semibold group-hover:text-primary transition-colors">Azure Tech Supplies</p>
+<p class="text-label-sm text-on-surface-variant">ID: V-8892</p>
+</div>
+</div>
+</td>
+<td class="py-4 text-on-surface-variant">Electronics</td>
+<td class="py-4 text-on-surface-variant">Today, 09:41 AM</td>
+<td class="py-4">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-label-sm font-semibold bg-primary-container/10 text-primary border border-primary/20 hover:bg-primary-container/20 hover:scale-105 transition-all active:scale-95">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse-soft"></span> Review
+                                        </button>
+</td>
+<td class="py-4 text-right">
+<button class="text-primary hover:bg-primary-container/10 p-2 rounded-lg transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 focus:opacity-100">
+<span class="material-symbols-outlined">arrow_forward_ios</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/80 transition-colors group">
+<td class="py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded bg-surface-variant flex items-center justify-center text-on-surface-variant font-bold group-hover:scale-105 transition-transform">
+                                                OL
+                                            </div>
+<div>
+<p class="font-semibold group-hover:text-primary transition-colors">Oasis Logistics</p>
+<p class="text-label-sm text-on-surface-variant">ID: V-8890</p>
+</div>
+</div>
+</td>
+<td class="py-4 text-on-surface-variant">Services</td>
+<td class="py-4 text-on-surface-variant">Yesterday</td>
+<td class="py-4">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-label-sm font-semibold bg-surface-variant text-on-surface-variant border border-outline-variant hover:bg-surface-variant/80 hover:scale-105 transition-all active:scale-95">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span> Docs Pending
+                                        </button>
+</td>
+<td class="py-4 text-right">
+<button class="text-primary hover:bg-primary-container/10 p-2 rounded-lg transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 focus:opacity-100">
+<span class="material-symbols-outlined">arrow_forward_ios</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/80 transition-colors group">
+<td class="py-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded bg-tertiary-container flex items-center justify-center text-on-tertiary-container font-bold group-hover:scale-105 transition-transform">
+                                                NM
+                                            </div>
+<div>
+<p class="font-semibold group-hover:text-primary transition-colors">Nova Manufacturing</p>
+<p class="text-label-sm text-on-surface-variant">ID: V-8885</p>
+</div>
+</div>
+</td>
+<td class="py-4 text-on-surface-variant">Industrial</td>
+<td class="py-4 text-on-surface-variant">Oct 24, 2023</td>
+<td class="py-4">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-label-sm font-semibold bg-error-container/30 text-error border border-error/20 hover:bg-error-container/40 hover:scale-105 transition-all active:scale-95">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> Flagged
+                                        </button>
+</td>
+<td class="py-4 text-right">
+<button class="text-primary hover:bg-primary-container/10 p-2 rounded-lg transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 focus:opacity-100">
+<span class="material-symbols-outlined">arrow_forward_ios</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Critical Alerts (1 Column) -->
+<div class="col-span-1 flex flex-col gap-6 animate-fade-in-up delay-500">
+<div class="glass-card rounded-xl shadow-soft p-6 flex-1">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-error animate-pulse-soft">warning</span>
+<h3 class="text-title-lg font-bold text-on-surface">Critical Alerts</h3>
+</div>
+<div class="space-y-4">
+<!-- Alert 1 -->
+<div class="p-4 rounded-lg bg-error-container/20 border border-error/10 hover:border-error/40 hover:bg-error-container/30 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex gap-3 items-start group shadow-sm hover:shadow-md">
+<div class="mt-0.5">
+<span class="w-2 h-2 rounded-full bg-error block mt-1.5 group-hover:scale-125 transition-transform duration-300"></span>
+</div>
+<div>
+<h4 class="text-label-md font-semibold text-on-surface mb-1 group-hover:text-error transition-colors">High Chargeback Rate</h4>
+<p class="text-label-sm text-on-surface-variant line-clamp-2">Vendor 'TechNova' has exceeded the 2% chargeback threshold in the last 7 days.</p>
+<span class="text-label-sm text-error font-medium mt-2 block animate-pulse-soft">Action Required</span>
+</div>
+</div>
+<!-- Alert 2 -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-surface-variant/50 hover:border-surface-variant hover:bg-surface-container hover:-translate-y-1 transition-all duration-300 cursor-pointer flex gap-3 items-start group shadow-sm hover:shadow-md">
+<div class="mt-0.5">
+<span class="w-2 h-2 rounded-full bg-primary block mt-1.5 group-hover:scale-125 transition-transform duration-300"></span>
+</div>
+<div>
+<h4 class="text-label-md font-semibold text-on-surface mb-1 group-hover:text-primary transition-colors">API Rate Limit Approaching</h4>
+<p class="text-label-sm text-on-surface-variant line-clamp-2">Payment gateway API calls at 85% capacity for current hour.</p>
+<span class="text-label-sm text-on-surface-variant mt-2 block">12 mins ago</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-2.5 rounded-lg border border-surface-variant text-label-md font-semibold text-on-surface hover:bg-surface-container-low hover:text-primary hover:border-primary/50 hover:shadow-sm active:scale-95 transition-all duration-300">
+                            View All Alerts
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+    // Spotlight Effect for Glass Cards
+    document.querySelectorAll('.glass-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.setProperty('--mouse-x', `-100%`);
+            card.style.setProperty('--mouse-y', `-100%`);
+        });
+    });
+
+    // Number Animation Counter
+    function animateValue(obj, start, end, duration, prefix = "", suffix = "") {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            // Ease out cubic
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            let current = start + easeProgress * (end - start);
+            
+            if (Number.isInteger(end)) {
+                current = Math.floor(current);
+            } else {
+                current = current.toFixed(2);
+            }
+            
+            obj.innerHTML = prefix + current + suffix;
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // Initialize animations on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const gmvEl = document.getElementById('gmv-number');
+        if (gmvEl) setTimeout(() => animateValue(gmvEl, 0, 1.24, 2500, "$", "M"), 200);
+
+        const vendorsEl = document.getElementById('vendors-number');
+        if (vendorsEl) setTimeout(() => animateValue(vendorsEl, 0, 842, 2500), 300);
+
+        const pendingEl = document.getElementById('pending-number');
+        if (pendingEl) setTimeout(() => animateValue(pendingEl, 0, 28, 2500), 400);
+    });
+</script>
+</body></html>

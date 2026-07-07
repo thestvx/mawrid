@@ -508,6 +508,15 @@
   padding: 32px 0;
 }
 
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
 /* Mobile */
 @media (max-width: 768px) {
   .dashboard__sidebar {
