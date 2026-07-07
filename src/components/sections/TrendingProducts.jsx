@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../contexts/LanguageContext';
 import ProductCard from '../marketplace/ProductCard';
 import './TrendingProducts.css';
 
@@ -46,7 +47,7 @@ const PRODUCTS = [
 export default function TrendingProducts() {
   const [visible, setVisible] = useState(false);
   const ref = useRef(null);
-  const isRtl = document.documentElement.dir === 'rtl';
+  const { t, dir } = useLanguage();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -60,11 +61,9 @@ export default function TrendingProducts() {
   return (
     <section ref={ref}>
       <div className="trending__header">
-        <h2 className="trending__title">
-          {isRtl ? 'منتجات رائجة' : 'Trending Products'}
-        </h2>
+        <h2 className="trending__title">{t('trending.title')}</h2>
         <Link to="/marketplace" className="trending__view-all">
-          {isRtl ? 'عرض الكل' : 'View All'} <span className="trending__arrow">→</span>
+          {t('trending.viewAll')} <span className="trending__arrow">{dir === 'rtl' ? '←' : '→'}</span>
         </Link>
       </div>
       <div className="trending__grid">

@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useLanguage } from '../../contexts/LanguageContext';
 import './Navbar.css';
 
 const NAV_LINKS = [
-  { label_ar: 'الرئيسية', label_en: 'Home', path: '/' },
-  { label_ar: 'السوق', label_en: 'Marketplace', path: '/marketplace' },
-  { label_ar: 'البرمجيات', label_en: 'Software', path: '/marketplace' },
-  { label_ar: 'التصميم', label_en: 'Design', path: '/marketplace' },
+  { key: 'nav.home', path: '/' },
+  { key: 'nav.marketplace', path: '/marketplace' },
+  { key: 'nav.software', path: '/marketplace' },
+  { key: 'nav.design', path: '/marketplace' },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const isRtl = document.documentElement.dir === 'rtl';
+  const { t, lang, toggleLanguage } = useLanguage();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -33,29 +34,39 @@ export default function Navbar() {
             src="/logos/Black-logo.png"
             alt="Mawrid - مَورد"
             className="navbar__logo-img"
-            width="180"
-            height="60"
+            width="240"
+            height="80"
           />
         </Link>
 
         <div className={`navbar__links ${mobileOpen ? 'navbar__links--open' : ''}`}>
           {NAV_LINKS.map((link) => (
             <Link
-              key={link.path + link.label_en}
+              key={link.key}
               to={link.path}
               className={`navbar__link ${location.pathname === link.path ? 'navbar__link--active' : ''}`}
             >
-              {isRtl ? link.label_ar : link.label_en}
+              {t(link.key)}
             </Link>
           ))}
+          <Link to="/dashboard" className={`navbar__link navbar__link--dashboard ${location.pathname.startsWith('/dashboard') ? 'navbar__link--active' : ''}`}>
+            {t('nav.dashboard')}
+          </Link>
         </div>
 
         <div className="navbar__actions">
+          <button onClick={toggleLanguage} className="navbar__lang-btn" aria-label={t('nav.langSwitch')}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            <span>{lang === 'ar' ? 'EN' : 'AR'}</span>
+          </button>
           <Link to="/auth" className="btn btn--outline navbar__action-btn">
-            {isRtl ? 'تسجيل الدخول' : 'Sign In'}
+            {t('nav.signIn')}
           </Link>
           <Link to="/storefront" className="btn btn--primary navbar__action-btn">
-            {isRtl ? 'فتح متجر' : 'Open Shop'}
+            {t('nav.openShop')}
           </Link>
           <button
             className="navbar__hamburger"

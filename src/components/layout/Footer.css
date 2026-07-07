@@ -1,42 +1,40 @@
 .footer {
   background: var(--color-surface-container-highest);
   border-top: 1px solid var(--color-outline-variant);
-  padding: 48px 0;
+  padding: 64px 0 0;
   margin-top: auto;
 }
 
-.footer__inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
-  text-align: center;
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
 }
 
-@media (min-width: 768px) {
-  .footer__inner {
-    flex-direction: row;
-    justify-content: space-between;
-    text-align: right;
+@media (min-width: 640px) {
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-.footer__brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+@media (min-width: 1024px) {
+  .footer__grid {
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  }
 }
 
-@media (min-width: 768px) {
-  .footer__brand {
-    align-items: flex-start;
-  }
+.footer__section--brand {
+  max-width: 360px;
+}
+
+.footer__logo-link {
+  display: inline-block;
+  margin-bottom: 16px;
 }
 
 .footer__logo {
   width: auto;
-  height: 36px;
+  height: 52px;
   object-fit: contain;
   opacity: 0.9;
   transition: opacity 0.2s;
@@ -46,35 +44,167 @@
   opacity: 1;
 }
 
+@media (min-width: 768px) {
+  .footer__logo {
+    height: 67px;
+  }
+}
+
 .footer__tagline {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: var(--color-on-secondary-fixed-variant);
-  max-width: 320px;
-  line-height: 1.6;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.footer__social {
+  display: flex;
+  gap: 12px;
+}
+
+.footer__social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-container);
+  color: var(--color-secondary);
+  transition: all 0.25s ease;
+}
+
+.footer__social-link:hover {
+  background: var(--color-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 98, 1, 0.3);
+}
+
+.footer__heading {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin-bottom: 20px;
 }
 
 .footer__links {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 24px;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .footer__link {
   font-size: 0.8125rem;
   color: var(--color-on-secondary-fixed-variant);
   transition: color 0.2s;
+  width: fit-content;
 }
 
 .footer__link:hover {
   color: var(--color-primary);
 }
 
-.footer__copy {
+.footer__newsletter {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.footer__newsletter-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-outline-variant);
+  background: var(--color-surface);
+  font-size: 0.8125rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.footer__newsletter-input:focus {
+  border-color: var(--color-primary-container);
+}
+
+.footer__newsletter-btn {
+  padding: 10px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-container);
+  color: var(--color-on-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+.footer__newsletter-btn:hover {
+  background: var(--color-primary);
+}
+
+.footer__payment {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer__payment-label {
+  font-size: 0.75rem;
+  color: var(--color-secondary);
+  font-weight: 500;
+}
+
+.footer__payment-icons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.footer__payment-icons svg {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.footer__bottom {
+  margin-top: 48px;
+  padding: 24px 0;
+  border-top: 1px solid var(--color-outline-variant);
+  text-align: center;
+}
+
+.footer__copyright {
   font-size: 0.8125rem;
   color: var(--color-secondary);
-  width: 100%;
-  text-align: center;
-  padding-top: 24px;
-  border-top: 1px solid var(--color-outline-variant);
+}
+
+.footer__copyright strong {
+  color: var(--color-on-surface);
+}
+
+@media (max-width: 639px) {
+  .footer {
+    padding: 40px 0 0;
+  }
+
+  .footer__grid {
+    text-align: center;
+  }
+
+  .footer__section--brand {
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer__links {
+    align-items: center;
+  }
+
+  .footer__newsletter {
+    flex-direction: column;
+  }
+
+  .footer__payment-icons {
+    justify-content: center;
+  }
 }

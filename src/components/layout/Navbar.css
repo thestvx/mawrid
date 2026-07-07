@@ -31,19 +31,19 @@
 
 .navbar__logo-img {
   width: auto;
-  height: 48px;
+  height: 56px;
   object-fit: contain;
   display: block;
   transition: transform 0.3s ease;
 }
 
 .navbar__logo-img:hover {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 @media (min-width: 768px) {
   .navbar__logo-img {
-    height: 60px;
+    height: 80px;
   }
 }
 
@@ -87,11 +87,41 @@
   font-family: var(--font-english);
 }
 
+.navbar__link--dashboard {
+  background: var(--color-primary-fixed);
+  color: var(--color-on-primary-fixed);
+  font-weight: 600;
+}
+
+.navbar__link--dashboard:hover {
+  background: var(--color-primary-fixed-dim);
+  color: var(--color-on-primary-fixed);
+}
+
 .navbar__actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex-shrink: 0;
+}
+
+.navbar__lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-secondary);
+  border: 1px solid var(--color-outline-variant);
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.navbar__lang-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .navbar__action-btn {
@@ -206,5 +236,9 @@
     border-radius: 0 0 var(--radius-xl) var(--radius-xl);
     gap: 4px;
     z-index: 100;
+  }
+
+  .navbar__lang-btn span {
+    display: none;
   }
 }

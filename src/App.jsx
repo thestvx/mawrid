@@ -7,6 +7,10 @@ import Marketplace from './pages/Marketplace';
 import Storefront from './pages/Storefront';
 import Details from './pages/Details';
 import Auth from './pages/Auth';
+import DashboardLayout from './pages/dashboard/DashboardLayout';
+import SellerDashboard from './pages/dashboard/SellerDashboard';
+import BuyerDashboard from './pages/dashboard/BuyerDashboard';
+import AdminDashboard from './pages/dashboard/AdminDashboard';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -27,6 +31,12 @@ export default function App() {
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/storefront" element={<Storefront />} />
           <Route path="/details" element={<Details />} />
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<BuyerDashboard />} />
+            <Route path="buyer" element={<BuyerDashboard />} />
+            <Route path="seller" element={<SellerDashboard />} />
+            <Route path="admin" element={<AdminDashboard />} />
+          </Route>
         </Route>
         <Route path="/auth" element={<Auth />} />
       </Routes>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
 import './Categories.css';
 
 const CATEGORIES = [
@@ -16,7 +17,7 @@ export default function Categories() {
   const [active, setActive] = useState(0);
   const [visible, setVisible] = useState(false);
   const ref = useRef(null);
-  const isRtl = document.documentElement.dir === 'rtl';
+  const { dir } = useLanguage();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -36,7 +37,7 @@ export default function Categories() {
             className={`categories__pill ${active === i ? 'categories__pill--active' : ''} ${visible ? `animate-slide-up stagger-${i + 1}` : ''}`}
             onClick={() => setActive(i)}
           >
-            {isRtl ? cat.label_ar : cat.label_en}
+            {dir === 'rtl' ? cat.label_ar : cat.label_en}
           </button>
         ))}
       </div>

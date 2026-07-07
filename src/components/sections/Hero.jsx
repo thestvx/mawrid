@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../contexts/LanguageContext';
 import DotGrid from '../ui/DotGrid';
 import './Hero.css';
 
 const stats = [
-  { value: '50K+', label_ar: 'منتج رقمي', label_en: 'Digital Products' },
-  { value: '12K+', label_ar: 'بائع نشط', label_en: 'Active Sellers' },
-  { value: '200K+', label_ar: 'مشتري سعيد', label_en: 'Happy Buyers' },
+  { value: '50K+', key: 'hero.stat.products' },
+  { value: '12K+', key: 'hero.stat.sellers' },
+  { value: '200K+', key: 'hero.stat.buyers' },
 ];
 
 const floatingElements = [
@@ -21,7 +22,7 @@ export default function Hero() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const heroRef = useRef(null);
-  const isRtl = document.documentElement.dir === 'rtl';
+  const { t, dir } = useLanguage();
 
   useEffect(() => {
     setIsVisible(true);
@@ -36,7 +37,6 @@ export default function Hero() {
         y: ((e.clientY - rect.top) / rect.height - 0.5) * 2,
       });
     };
-
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
@@ -75,65 +75,55 @@ export default function Hero() {
       <div className="container hero__content">
         <div className={`hero__text ${isVisible ? 'animate-fade-in' : ''}`}>
           <span className={`hero__badge ${isVisible ? 'animate-slide-up stagger-1' : ''}`}>
-            {isRtl ? '🛒 سوق رقمي متكامل' : '🛒 Premium Digital Marketplace'}
+            {t('hero.badge')}
           </span>
 
           <h1 className={`hero__title ${isVisible ? 'animate-slide-up stagger-2' : ''}`}>
-            {isRtl ? (
+            {dir === 'rtl' ? (
               <>
-                <span className="text-gradient-hero">مَورد</span>
+                <span className="text-gradient-hero">{t('hero.title.mawrid')}</span>
                 <br />
-                سوق المبدعين
+                {t('hero.title.line1')}
                 <br />
-                والمنتجات الرقمية
+                {t('hero.title.line2')}
               </>
             ) : (
               <>
-                <span className="text-gradient-hero">Mawrid</span>
+                <span className="text-gradient-hero">{t('hero.title.mawrid')}</span>
                 <br />
-                The Marketplace
+                {t('hero.title.line1')}
                 <br />
-                for Creators &amp; Digital Products
+                {t('hero.title.line2')}
               </>
             )}
           </h1>
 
           <p className={`hero__subtitle ${isVisible ? 'animate-slide-up stagger-3' : ''}`}>
-            {isRtl
-              ? 'اكتشف آلاف المنتجات الرقمية المميزة واشتراكات المنصات الشهيرة بأسعار استثنائية. انضم إلى مجتمع المبدعين والمشترين.'
-              : 'Discover thousands of premium digital products and platform subscriptions at exceptional prices. Join a community of creators and buyers.'}
+            {t('hero.subtitle')}
           </p>
 
           <div className={`hero__cta ${isVisible ? 'animate-slide-up stagger-4' : ''}`}>
             <Link to="/marketplace" className="hero__btn hero__btn--primary glow">
-              {isRtl ? 'ابدأ التسوق' : 'Start Shopping'}
-              <span className="hero__btn-arrow">{isRtl ? '←' : '→'}</span>
+              {t('hero.cta.shop')}
+              <span className="hero__btn-arrow">{dir === 'rtl' ? '←' : '→'}</span>
             </Link>
             <Link to="/storefront" className="hero__btn hero__btn--secondary">
-              {isRtl ? 'افتح متجرك' : 'Open Your Store'}
+              {t('hero.cta.store')}
             </Link>
           </div>
 
           <div className={`hero__trust ${isVisible ? 'animate-slide-up stagger-5' : ''}`}>
             <div className="hero__trust-avatars">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="hero__trust-avatar" style={{ zIndex: 4 - i, marginRight: i > 1 ? -12 : 0 }}>
-                  <img
-                    src={`https://i.pravatar.cc/40?img=${i + 10}`}
-                    alt=""
-                    width="40"
-                    height="40"
-                    loading="lazy"
-                  />
+                <div key={i} className="hero__trust-avatar" style={{ zIndex: 4 - i, [dir === 'rtl' ? 'marginLeft' : 'marginRight']: i > 1 ? -12 : 0 }}>
+                  <img src={`https://i.pravatar.cc/40?img=${i + 10}`} alt="" width="40" height="40" loading="lazy" />
                 </div>
               ))}
-              <div className="hero__trust-count">+2K</div>
+              <div className="hero__trust-count" style={dir === 'rtl' ? { marginLeft: -12 } : { marginRight: -12 }}>
+                +2K
+              </div>
             </div>
-            <p className="hero__trust-text">
-              {isRtl
-                ? 'انضم إلى أكثر من 200,000 مستخدم حول العالم'
-                : 'Join 200,000+ users worldwide'}
-            </p>
+            <p className="hero__trust-text">{t('hero.trust')}</p>
           </div>
         </div>
 
@@ -152,8 +142,8 @@ export default function Hero() {
                 <div className="hero__card-row">
                   <div className="hero__card-icon">🎨</div>
                   <div>
-                    <div className="hero__card-label">{isRtl ? 'حزمة واجهات UI' : 'UI Kit Pro'}</div>
-                    <div className="hero__card-meta">{isRtl ? '300+ مكون' : '300+ Components'}</div>
+                    <div className="hero__card-label">{t('hero.card.uiKit')}</div>
+                    <div className="hero__card-meta">{t('hero.card.uiKitComp')}</div>
                   </div>
                   <span className="hero__card-price">$89</span>
                 </div>
@@ -161,8 +151,8 @@ export default function Hero() {
                 <div className="hero__card-row">
                   <div className="hero__card-icon">📊</div>
                   <div>
-                    <div className="hero__card-label">{isRtl ? 'قالب لوحة تحكم' : 'Dashboard Template'}</div>
-                    <div className="hero__card-meta">{isRtl ? 'متجاوب بالكامل' : 'Fully Responsive'}</div>
+                    <div className="hero__card-label">{t('hero.card.dashboard')}</div>
+                    <div className="hero__card-meta">{t('hero.card.dashboardDesc')}</div>
                   </div>
                   <span className="hero__card-price">$49</span>
                 </div>
@@ -170,17 +160,15 @@ export default function Hero() {
                 <div className="hero__card-row">
                   <div className="hero__card-icon">🤖</div>
                   <div>
-                    <div className="hero__card-label">{isRtl ? 'اشتراك ChatGPT Pro' : 'ChatGPT Pro'}</div>
-                    <div className="hero__card-meta">{isRtl ? 'شهري' : 'Monthly'}</div>
+                    <div className="hero__card-label">{t('hero.card.chatgpt')}</div>
+                    <div className="hero__card-meta">{t('hero.card.monthly')}</div>
                   </div>
                   <span className="hero__card-price hero__card-price--promo">$19.99</span>
                 </div>
               </div>
               <div className="hero__card-footer">
-                <div className="hero__card-rating">
-                  {'★'.repeat(5)}
-                </div>
-                <span className="hero__card-reviews">(12.4K {isRtl ? 'تقييم' : 'reviews'})</span>
+                <div className="hero__card-rating">{'★'.repeat(5)}</div>
+                <span className="hero__card-reviews">(12.4K {t('hero.reviews')})</span>
               </div>
             </div>
           </div>
@@ -190,7 +178,7 @@ export default function Hero() {
           }}>
             <div className="hero__stat">
               <span className="hero__stat-value text-gradient">4.9</span>
-              <span className="hero__stat-label">{isRtl ? 'متوسط التقييم' : 'Avg. Rating'}</span>
+              <span className="hero__stat-label">{t('hero.avgRating')}</span>
             </div>
           </div>
 
@@ -198,7 +186,7 @@ export default function Hero() {
             transform: `perspective(1000px) rotateY(${mousePos.x * 4}deg) rotateX(${-mousePos.y * 4}deg)`,
           }}>
             <span className="hero__live-dot" />
-            <span>{isRtl ? 'مباشر الآن' : 'Live Now'}</span>
+            <span>{t('hero.liveNow')}</span>
           </div>
         </div>
       </div>
@@ -208,7 +196,7 @@ export default function Hero() {
           {stats.map((stat, i) => (
             <div key={i} className={`hero__stat-item ${isVisible ? `animate-slide-up stagger-${i + 5}` : ''}`}>
               <span className="hero__stat-number">{stat.value}</span>
-              <span className="hero__stat-desc">{isRtl ? stat.label_ar : stat.label_en}</span>
+              <span className="hero__stat-desc">{t(stat.key)}</span>
             </div>
           ))}
         </div>
