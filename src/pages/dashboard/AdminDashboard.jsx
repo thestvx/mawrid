@@ -188,19 +188,19 @@ export default function AdminDashboard() {
             </div>
 
             <div className="d-grid">
-              <a href="/dashboard/admin?tab=users" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/dashboard/admin?tab=users'; }}>
+              <a href="/owner?tab=users" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/owner?tab=users'; }}>
                 <span className="d-quick-card__icon">👥</span>
                 <span>{t('dashboard.userManagement')}</span>
               </a>
-              <a href="/dashboard/admin?tab=sellers" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/dashboard/admin?tab=sellers'; }}>
+              <a href="/owner?tab=sellers" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/owner?tab=sellers'; }}>
                 <span className="d-quick-card__icon">🏪</span>
                 <span>{t('dashboard.sellerManagement')}</span>
               </a>
-              <a href="/dashboard/admin?tab=products" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/dashboard/admin?tab=products'; }}>
+              <a href="/owner?tab=products" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/owner?tab=products'; }}>
                 <span className="d-quick-card__icon">📦</span>
                 <span>{t('dashboard.productModeration')}</span>
               </a>
-              <a href="/dashboard/admin?tab=reports" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/dashboard/admin?tab=reports'; }}>
+              <a href="/owner?tab=reports" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/owner?tab=reports'; }}>
                 <span className="d-quick-card__icon">📄</span>
                 <span>{t('dashboard.reports')}</span>
               </a>

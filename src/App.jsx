@@ -35,7 +35,9 @@ export default function App() {
             <Route index element={<BuyerDashboard />} />
             <Route path="buyer" element={<BuyerDashboard />} />
             <Route path="seller" element={<SellerDashboard />} />
-            <Route path="admin" element={<AdminDashboard />} />
+          </Route>
+          <Route path="/owner" element={<DashboardLayout />}>
+            <Route index element={<AdminDashboard />} />
           </Route>
         </Route>
         <Route path="/auth" element={<Auth />} />

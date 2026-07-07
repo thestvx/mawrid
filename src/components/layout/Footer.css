@@ -34,7 +34,7 @@
 
 .footer__logo {
   width: auto;
-  height: 52px;
+  height: 64px;
   object-fit: contain;
   opacity: 0.9;
   transition: opacity 0.2s;
@@ -46,7 +46,7 @@
 
 @media (min-width: 768px) {
   .footer__logo {
-    height: 67px;
+    height: 80px;
   }
 }
 
@@ -59,15 +59,15 @@
 
 .footer__social {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .footer__social-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-lg);
   background: var(--color-surface-container);
   color: var(--color-secondary);
@@ -97,7 +97,7 @@
 .footer__link {
   font-size: 0.8125rem;
   color: var(--color-on-secondary-fixed-variant);
-  transition: color 0.2s;
+  transition: color 0.2s ease;
   width: fit-content;
 }
 
@@ -105,10 +105,31 @@
   color: var(--color-primary);
 }
 
+.footer__payment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.footer__payment-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-outline-variant);
+}
+
+.footer__payment-item img {
+  width: auto;
+  height: 24px;
+  object-fit: contain;
+}
+
 .footer__newsletter {
   display: flex;
   gap: 8px;
-  margin-bottom: 20px;
 }
 
 .footer__newsletter-input {
@@ -119,7 +140,7 @@
   background: var(--color-surface);
   font-size: 0.8125rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s ease;
 }
 
 .footer__newsletter-input:focus {
@@ -139,29 +160,7 @@
 
 .footer__newsletter-btn:hover {
   background: var(--color-primary);
-}
-
-.footer__payment {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.footer__payment-label {
-  font-size: 0.75rem;
-  color: var(--color-secondary);
-  font-weight: 500;
-}
-
-.footer__payment-icons {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.footer__payment-icons svg {
-  border-radius: 4px;
-  overflow: hidden;
+  transform: translateY(-1px);
 }
 
 .footer__bottom {
@@ -204,7 +203,7 @@
     flex-direction: column;
   }
 
-  .footer__payment-icons {
-    justify-content: center;
+  .footer__payment-grid {
+    justify-items: center;
   }
 }

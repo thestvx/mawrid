@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
 import './Navbar.css';
 
 const NAV_LINKS = [
@@ -15,6 +16,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { t, lang, toggleLanguage } = useLanguage();
+  const { user, isAuthenticated, role, logout } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -25,6 +27,12 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
   }, [location]);
+
+  const getDashboardLink = () => {
+    if (role === 'admin') return '/owner';
+    if (role === 'seller') return '/dashboard/seller';
+    return '/dashboard/buyer';
+  };
 
   return (
     <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
@@ -49,9 +57,11 @@ export default function Navbar() {
               {t(link.key)}
             </Link>
           ))}
-          <Link to="/dashboard" className={`navbar__link navbar__link--dashboard ${location.pathname.startsWith('/dashboard') ? 'navbar__link--active' : ''}`}>
-            {t('nav.dashboard')}
-          </Link>
+          {isAuthenticated && (
+            <Link to={getDashboardLink()} className="navbar__link navbar__link--dashboard">
+              {t('nav.dashboard')}
+            </Link>
+          )}
         </div>
 
         <div className="navbar__actions">
@@ -62,12 +72,34 @@ export default function Navbar() {
             </svg>
             <span>{lang === 'ar' ? 'EN' : 'AR'}</span>
           </button>
-          <Link to="/auth" className="btn btn--outline navbar__action-btn">
-            {t('nav.signIn')}
-          </Link>
-          <Link to="/storefront" className="btn btn--primary navbar__action-btn">
-            {t('nav.openShop')}
-          </Link>
+
+          {isAuthenticated ? (
+            <>
+              <span className="navbar__user-name">{user?.name || 'User'}</span>
+              <button onClick={logout} className="btn btn--outline navbar__action-btn">
+                {lang === 'ar' ? 'تسجيل خروج' : 'Log Out'}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/auth" className="btn btn--outline navbar__action-btn">
+                {t('nav.signIn')}
+              </Link>
+            </>
+          )}
+
+          {isAuthenticated && role === 'seller' && (
+            <Link to="/storefront" className="btn btn--primary navbar__action-btn">
+              {t('nav.openShop')}
+            </Link>
+          )}
+
+          {!isAuthenticated && (
+            <Link to="/auth?mode=signup&role=seller" className="btn btn--primary navbar__action-btn">
+              {t('nav.openShop')}
+            </Link>
+          )}
+
           <button
             className="navbar__hamburger"
             onClick={() => setMobileOpen(!mobileOpen)}

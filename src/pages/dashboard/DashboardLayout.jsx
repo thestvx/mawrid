@@ -20,12 +20,12 @@ const BUYER_SIDEBAR = [
 ];
 
 const ADMIN_SIDEBAR = [
-  { key: 'dashboard.overview', path: '/dashboard/admin', icon: '📊' },
-  { key: 'dashboard.userManagement', path: '/dashboard/admin?tab=users', icon: '👥' },
-  { key: 'dashboard.sellerManagement', path: '/dashboard/admin?tab=sellers', icon: '🏪' },
-  { key: 'dashboard.productModeration', path: '/dashboard/admin?tab=products', icon: '📦' },
-  { key: 'dashboard.reports', path: '/dashboard/admin?tab=reports', icon: '📄' },
-  { key: 'dashboard.platformSettings', path: '/dashboard/admin?tab=settings', icon: '⚙️' },
+  { key: 'dashboard.overview', path: '/owner', icon: '📊' },
+  { key: 'dashboard.userManagement', path: '/owner?tab=users', icon: '👥' },
+  { key: 'dashboard.sellerManagement', path: '/owner?tab=sellers', icon: '🏪' },
+  { key: 'dashboard.productModeration', path: '/owner?tab=products', icon: '📦' },
+  { key: 'dashboard.reports', path: '/owner?tab=reports', icon: '📄' },
+  { key: 'dashboard.platformSettings', path: '/owner?tab=settings', icon: '⚙️' },
 ];
 
 export default function DashboardLayout() {
@@ -35,11 +35,11 @@ export default function DashboardLayout() {
 
   let sidebar = BUYER_SIDEBAR;
   if (path.includes('/seller')) sidebar = SELLER_SIDEBAR;
-  else if (path.includes('/admin')) sidebar = ADMIN_SIDEBAR;
+  else if (path.includes('/admin') || path.includes('/owner')) sidebar = ADMIN_SIDEBAR;
 
   let roleLabel = t('dashboard.role.buyer');
   if (path.includes('/seller')) roleLabel = t('dashboard.role.seller');
-  else if (path.includes('/admin')) roleLabel = t('dashboard.role.admin');
+  else if (path.includes('/admin') || path.includes('/owner')) roleLabel = t('dashboard.role.admin');
 
   return (
     <div className="dashboard" style={{ paddingTop: '80px' }}>
