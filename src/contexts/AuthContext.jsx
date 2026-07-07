@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
@@ -13,15 +13,25 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const handledRef = useRef(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (handledRef.current) {
+        setLoading(false);
+        return;
+      }
       if (firebaseUser) {
-        const docSnap = await getDoc(doc(db, 'users', firebaseUser.uid));
-        if (docSnap.exists()) {
-          setUser({ uid: firebaseUser.uid, email: firebaseUser.email, ...docSnap.data() });
-        } else {
-          setUser({ uid: firebaseUser.uid, email: firebaseUser.email, role: 'buyer', name: firebaseUser.displayName || '' });
+        try {
+          const docSnap = await getDoc(doc(db, 'users', firebaseUser.uid));
+          if (docSnap.exists()) {
+            setUser({ uid: firebaseUser.uid, email: firebaseUser.email, ...docSnap.data() });
+          } else {
+            setUser({ uid: firebaseUser.uid, email: firebaseUser.email, role: 'buyer', name: firebaseUser.displayName || '' });
+          }
+        } catch (err) {
+          console.error('Firestore read error:', err);
+          setUser({ uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName || '', role: 'buyer' });
         }
       } else {
         setUser(null);
@@ -32,14 +42,22 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (email, password) => {
+    handledRef.current = true;
     await signInWithEmailAndPassword(auth, email, password);
+    handledRef.current = false;
   }, []);
 
   const signup = useCallback(async ({ email, password, name, role, phone, storeName }) => {
+    handledRef.current = true;
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const userData = { name, email, role, phone: phone || '', storeName: storeName || '', createdAt: new Date().toISOString() };
-    await setDoc(doc(db, 'users', cred.user.uid), userData);
+    try {
+      await setDoc(doc(db, 'users', cred.user.uid), userData);
+    } catch (err) {
+      console.error('Firestore write error (user created in Auth):', err);
+    }
     setUser({ uid: cred.user.uid, ...userData });
+    handledRef.current = false;
   }, []);
 
   const logout = useCallback(async () => {
@@ -49,9 +67,13 @@ export function AuthProvider({ children }) {
 
   const refreshUser = useCallback(async () => {
     if (auth.currentUser) {
-      const docSnap = await getDoc(doc(db, 'users', auth.currentUser.uid));
-      if (docSnap.exists()) {
-        setUser({ uid: auth.currentUser.uid, email: auth.currentUser.email, ...docSnap.data() });
+      try {
+        const docSnap = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        if (docSnap.exists()) {
+          setUser({ uid: auth.currentUser.uid, email: auth.currentUser.email, ...docSnap.data() });
+        }
+      } catch (err) {
+        console.error('Firestore refresh error:', err);
       }
     }
   }, []);
