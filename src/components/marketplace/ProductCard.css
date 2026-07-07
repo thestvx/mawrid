@@ -1,0 +1,154 @@
+.product-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-container-lowest);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--color-surface-variant);
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.product-card--featured {
+  background: var(--color-primary-container);
+  border-color: transparent;
+  color: var(--color-on-primary);
+}
+
+.product-card__image-wrap {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--color-surface-container-low);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.product-card--featured .product-card__image-wrap {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.product-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transition: transform 0.5s ease;
+}
+
+.product-card--featured .product-card__img {
+  object-fit: cover;
+  mix-blend-mode: normal;
+}
+
+.product-card:hover .product-card__img {
+  transform: scale(1.05);
+}
+
+.product-card__badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--color-primary-fixed);
+  color: var(--color-on-primary-fixed);
+  z-index: 2;
+}
+
+.product-card__badge--featured {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--color-on-primary);
+  backdrop-filter: blur(8px);
+}
+
+.product-card__fav {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-secondary);
+  transition: all 0.2s;
+  z-index: 2;
+}
+
+.product-card__fav:hover {
+  color: var(--color-primary-container);
+  background: white;
+}
+
+.product-card__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.product-card__title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  flex: 1;
+}
+
+.product-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.product-card__price {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.product-card--featured .product-card__price {
+  color: var(--color-on-primary);
+}
+
+.product-card__cart {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--color-outline-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-on-surface);
+  transition: all 0.2s;
+}
+
+.product-card__cart:hover {
+  background: var(--color-primary-container);
+  color: var(--color-on-primary);
+  border-color: var(--color-primary-container);
+}
+
+.product-card--featured .product-card__cart {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--color-on-primary);
+}
+
+.product-card--featured .product-card__cart:hover {
+  background: white;
+  color: var(--color-primary-container);
+  border-color: white;
+}
