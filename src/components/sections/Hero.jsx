@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import './Hero.css';
@@ -22,7 +22,9 @@ export default function Hero() {
   return (
     <section className="hero">
       <div className="hero__bg">
-        <img src={bgImage} alt="" className="hero__bg-img" />
+        <div className="hero__bg-img-wrap">
+          <img src={bgImage} alt="" className="hero__bg-img" />
+        </div>
         <div className="hero__gradient-overlay" />
       </div>
 
@@ -33,23 +35,11 @@ export default function Hero() {
           </span>
 
           <h1 className={`hero__title ${isVisible ? 'animate-slide-up stagger-2' : ''}`}>
-            {dir === 'rtl' ? (
-              <>
-                <span className="text-gradient-hero">{t('hero.title.mawrid')}</span>
-                <br />
-                {t('hero.title.line1')}
-                <br />
-                {t('hero.title.line2')}
-              </>
-            ) : (
-              <>
-                <span className="text-gradient-hero">{t('hero.title.mawrid')}</span>
-                <br />
-                {t('hero.title.line1')}
-                <br />
-                {t('hero.title.line2')}
-              </>
-            )}
+            <span className="text-gradient-hero">{t('hero.title.mawrid')}</span>
+            <br />
+            {t('hero.title.line1')}
+            <br />
+            {t('hero.title.line2')}
           </h1>
 
           <p className={`hero__subtitle ${isVisible ? 'animate-slide-up stagger-3' : ''}`}>
@@ -64,12 +54,6 @@ export default function Hero() {
             <Link to="/auth?mode=signup&role=seller" className="hero__btn hero__btn--secondary">
               {t('hero.cta.store')}
             </Link>
-          </div>
-        </div>
-
-        <div className={`hero__visual ${isVisible ? 'animate-fade-in' : ''}`}>
-          <div className="hero__mockup">
-            <img src={bgImage} alt="" className="hero__mockup-img" />
           </div>
         </div>
       </div>

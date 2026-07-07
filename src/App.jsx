@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import LoadingScreen from './components/ui/LoadingScreen';
+import ClickSpark from './components/ui/ClickSpark';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
@@ -24,24 +25,26 @@ export default function App() {
   return (
     <>
       {loading && <LoadingScreen onFinish={() => setLoading(false)} />}
-      <ScrollToTop />
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/storefront" element={<Storefront />} />
-          <Route path="/details" element={<Details />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<BuyerDashboard />} />
-            <Route path="buyer" element={<BuyerDashboard />} />
-            <Route path="seller" element={<SellerDashboard />} />
+      <ClickSpark sparkColor="#F97316" sparkSize={16} sparkRadius={22} sparkCount={12} duration={400}>
+        <ScrollToTop />
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/storefront" element={<Storefront />} />
+            <Route path="/details" element={<Details />} />
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<BuyerDashboard />} />
+              <Route path="buyer" element={<BuyerDashboard />} />
+              <Route path="seller" element={<SellerDashboard />} />
+            </Route>
+            <Route path="/owner" element={<DashboardLayout />}>
+              <Route index element={<AdminDashboard />} />
+            </Route>
           </Route>
-          <Route path="/owner" element={<DashboardLayout />}>
-            <Route index element={<AdminDashboard />} />
-          </Route>
-        </Route>
-        <Route path="/auth" element={<Auth />} />
-      </Routes>
+          <Route path="/auth" element={<Auth />} />
+        </Routes>
+      </ClickSpark>
     </>
   );
 }

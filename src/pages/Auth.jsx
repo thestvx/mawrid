@@ -12,22 +12,46 @@ export default function Auth() {
 
   const [mode, setMode] = useState(initialMode);
   const [role, setRole] = useState(initialRole);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const { t } = useLanguage();
-  const { login } = useAuth();
+  const { login, signup } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSubmitting(true);
     const form = e.target;
-    const data = new FormData(form);
-    login({
-      name: data.get('name') || 'User',
-      email: data.get('email'),
-      role: role,
-    });
-    if (role === 'admin') navigate('/owner');
-    else if (role === 'seller') navigate('/dashboard/seller');
-    else navigate('/dashboard/buyer');
+    const email = form.email.value;
+    const password = form.password.value;
+
+    try {
+      if (mode === 'signin') {
+        await login(email, password);
+        navigate('/dashboard/buyer');
+      } else {
+        const name = form.name.value;
+        const phone = form.phone?.value || '';
+        const storeName = form.store?.value || '';
+        await signup({ email, password, name, role, phone, storeName });
+        if (role === 'seller') navigate('/dashboard/seller');
+        else navigate('/dashboard/buyer');
+      }
+    } catch (err) {
+      const code = err.code;
+      if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+        setError(t('auth.errorInvalid') || 'Invalid email or password');
+      } else if (code === 'auth/email-already-in-use') {
+        setError(t('auth.errorEmailInUse') || 'This email is already registered');
+      } else if (code === 'auth/weak-password') {
+        setError(t('auth.errorWeakPassword') || 'Password must be at least 6 characters');
+      } else {
+        setError(err.message || 'An error occurred');
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -84,29 +108,23 @@ export default function Auth() {
             <input type="email" name="email" placeholder={t('auth.placeholderEmail')} required />
           </div>
 
-          {mode === 'signup' && role === 'seller' && (
-            <>
-              <div className="auth__field">
-                <label>{t('auth.storeName')}</label>
-                <input type="text" name="store" placeholder={t('auth.placeholderStore')} required />
-              </div>
-              <div className="auth__field">
-                <label>{t('auth.phone')}</label>
-                <input type="tel" name="phone" placeholder={t('auth.placeholderPhone')} required />
-              </div>
-            </>
-          )}
-
-          {mode === 'signup' && role === 'buyer' && (
+          {mode === 'signup' && (
             <div className="auth__field">
               <label>{t('auth.phone')}</label>
               <input type="tel" name="phone" placeholder={t('auth.placeholderPhone')} />
             </div>
           )}
 
+          {mode === 'signup' && role === 'seller' && (
+            <div className="auth__field">
+              <label>{t('auth.storeName')}</label>
+              <input type="text" name="store" placeholder={t('auth.placeholderStore')} required />
+            </div>
+          )}
+
           <div className="auth__field">
             <label>{t('auth.password')}</label>
-            <input type="password" name="password" placeholder={t('auth.placeholderPassword')} required />
+            <input type="password" name="password" placeholder={t('auth.placeholderPassword')} required minLength={6} />
           </div>
 
           {mode === 'signup' && (
@@ -117,11 +135,13 @@ export default function Auth() {
           )}
 
           {mode === 'signin' && (
-            <a href="#" className="auth__forgot">{t('auth.forgot')}</a>
+            <a href="#" className="auth__forgot" onClick={(e) => { e.preventDefault(); }}>{t('auth.forgot')}</a>
           )}
 
-          <button type="submit" className="auth__submit">
-            {mode === 'signin' ? t('auth.signIn') : t('auth.create')}
+          {error && <p className="auth__error">{error}</p>}
+
+          <button type="submit" className="auth__submit" disabled={submitting}>
+            {submitting ? (mode === 'signin' ? '...' : '...') : (mode === 'signin' ? t('auth.signIn') : t('auth.create'))}
           </button>
         </form>
 

@@ -222,6 +222,16 @@
   text-decoration: underline;
 }
 
+.auth__error {
+  font-size: 0.8125rem;
+  color: var(--color-error);
+  background: var(--color-error-container);
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 500;
+}
+
 .auth__terms {
   font-size: 0.75rem;
   color: var(--color-secondary);

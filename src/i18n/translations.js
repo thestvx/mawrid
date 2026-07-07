@@ -221,7 +221,12 @@ export const ar = {
   'details.feature3': 'متوافق مع الوضع المظلم',
   'details.feature4': 'تصميم متجاوب لجميع الشاشات',
   'details.descriptionText': 'مجموعة واجهة المستخدم هي نظام تصميم شامل تم بناؤه خصيصاً لتطبيقات الويب الحديثة ولوحات القيادة.',
+  'auth.errorInvalid': 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+  'auth.errorEmailInUse': 'البريد الإلكتروني مسجل مسبقاً',
+  'auth.errorWeakPassword': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
 };
+
+
 
 export const en = {
   'nav.home': 'Home',
@@ -325,6 +330,9 @@ export const en = {
   'auth.catWriting': 'Writing & Translation',
   'auth.catBusiness': 'Business',
   'auth.catOther': 'Other',
+  'auth.errorInvalid': 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+  'auth.errorEmailInUse': 'البريد الإلكتروني مسجل مسبقاً',
+  'auth.errorWeakPassword': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
 
   'dashboard.title': 'Dashboard',
   'dashboard.overview': 'Overview',
@@ -446,4 +454,8 @@ export const en = {
   'details.feature3': 'Dark mode compatible',
   'details.feature4': 'Fully responsive layout',
   'details.descriptionText': 'This UI kit is a comprehensive design system built for modern web applications and complex dashboards.',
+  'auth.errorInvalid': 'Invalid email or password',
+  'auth.errorEmailInUse': 'This email is already registered',
+  'auth.errorWeakPassword': 'Password must be at least 6 characters',
 };
+
