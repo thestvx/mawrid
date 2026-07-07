@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import DotGrid from '../ui/DotGrid';
 import './Hero.css';
 
 const stats = [
@@ -44,6 +45,9 @@ export default function Hero() {
     <section ref={heroRef} className="hero">
       <div className="hero__bg">
         <div className="hero__gradient animate-gradient" />
+        <div className="hero__dotgrid">
+          <DotGrid dotSize={4} gap={20} baseColor="#e1e3e4" activeColor="#ff6201" proximity={100} opacity={0.4} />
+        </div>
         <div className="hero__gradient-overlay" />
         <div className="hero__grid-pattern" />
       </div>

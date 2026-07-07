@@ -33,8 +33,8 @@ export default function Navbar() {
             src="/logos/Black-logo.png"
             alt="Mawrid - مَورد"
             className="navbar__logo-img"
-            width="140"
-            height="48"
+            width="180"
+            height="60"
           />
         </Link>
 
@@ -51,7 +51,7 @@ export default function Navbar() {
         </div>
 
         <div className="navbar__actions">
-          <Link to="/storefront" className="btn btn--outline navbar__action-btn">
+          <Link to="/auth" className="btn btn--outline navbar__action-btn">
             {isRtl ? 'تسجيل الدخول' : 'Sign In'}
           </Link>
           <Link to="/storefront" className="btn btn--primary navbar__action-btn">

@@ -1,12 +1,63 @@
+import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { gsap } from 'gsap';
 import './ProductCard.css';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, index = 0 }) {
+  const cardRef = useRef(null);
   const isRtl = document.documentElement.dir === 'rtl';
   const badge = isRtl ? product.badge_ar : product.badge_en;
 
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    gsap.fromTo(
+      el,
+      { opacity: 0, y: 40, scale: 0.95 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        delay: index * 0.08,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          toggleActions: 'play none none none',
+        },
+      }
+    );
+  }, [index]);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const img = el.querySelector('.product-card__img');
+    const cartBtn = el.querySelector('.product-card__cart');
+
+    const onEnter = () => {
+      gsap.to(img, { scale: 1.08, duration: 0.5, ease: 'power2.out' });
+      if (cartBtn) gsap.to(cartBtn, { scale: 1.1, duration: 0.3, ease: 'back.out(2)' });
+    };
+
+    const onLeave = () => {
+      gsap.to(img, { scale: 1, duration: 0.5, ease: 'power2.out' });
+      if (cartBtn) gsap.to(cartBtn, { scale: 1, duration: 0.3, ease: 'power2.out' });
+    };
+
+    el.addEventListener('mouseenter', onEnter);
+    el.addEventListener('mouseleave', onLeave);
+    return () => {
+      el.removeEventListener('mouseenter', onEnter);
+      el.removeEventListener('mouseleave', onLeave);
+    };
+  }, []);
+
   return (
-    <Link to="/details" className={`product-card ${product.featured ? 'product-card--featured' : ''}`}>
+    <Link to="/details" ref={cardRef} className={`product-card ${product.featured ? 'product-card--featured' : ''}`}>
       <div className="product-card__image-wrap">
         {badge && (
           <span className={`product-card__badge ${product.featured ? 'product-card__badge--featured' : ''}`}>

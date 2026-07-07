@@ -25,6 +25,12 @@
   animation: gradient-shift 12s ease-in-out infinite alternate;
 }
 
+.hero__dotgrid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
 .hero__gradient-overlay {
   position: absolute;
   inset: 0;
