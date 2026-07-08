@@ -10,6 +10,25 @@ import { auth, db } from '../lib/firebase';
 
 const AuthContext = createContext(null);
 
+function saveUserRole(uid, role, name, email) {
+  try {
+    localStorage.setItem('mawrid_user', JSON.stringify({ uid, role, name, email }));
+  } catch {}
+}
+
+function getCachedUser() {
+  try {
+    const raw = localStorage.getItem('mawrid_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearCachedUser() {
+  try { localStorage.removeItem('mawrid_user'); } catch {}
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,17 +41,43 @@ export function AuthProvider({ children }) {
         return;
       }
       if (firebaseUser) {
+        let role = 'buyer';
+        let name = firebaseUser.displayName || '';
+        let extraData = {};
+
+        // Try Firestore first
         try {
           const docSnap = await getDoc(doc(db, 'users', firebaseUser.uid));
           if (docSnap.exists()) {
-            setUser({ uid: firebaseUser.uid, email: firebaseUser.email, ...docSnap.data() });
+            const data = docSnap.data();
+            role = data.role || 'buyer';
+            name = data.name || name;
+            extraData = data;
           } else {
-            setUser({ uid: firebaseUser.uid, email: firebaseUser.email, role: 'buyer', name: firebaseUser.displayName || '' });
+            // No Firestore doc — check localStorage
+            const cached = getCachedUser();
+            if (cached && cached.uid === firebaseUser.uid) {
+              role = cached.role || 'buyer';
+              name = cached.name || name;
+            }
           }
         } catch (err) {
-          console.error('Firestore read error:', err);
-          setUser({ uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName || '', role: 'buyer' });
+          // Firestore unavailable — use localStorage fallback
+          console.warn('Firestore unavailable, using localStorage:', err.message);
+          const cached = getCachedUser();
+          if (cached && cached.uid === firebaseUser.uid) {
+            role = cached.role || 'buyer';
+            name = cached.name || name;
+          }
         }
+
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          name,
+          role,
+          ...extraData,
+        });
       } else {
         setUser(null);
       }
@@ -44,24 +89,32 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     handledRef.current = true;
     await signInWithEmailAndPassword(auth, email, password);
-    handledRef.current = false;
+    // handledRef will be reset after onAuthStateChanged processes
+    setTimeout(() => { handledRef.current = false; }, 100);
   }, []);
 
   const signup = useCallback(async ({ email, password, name, role, phone, storeName }) => {
     handledRef.current = true;
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const userData = { name, email, role, phone: phone || '', storeName: storeName || '', createdAt: new Date().toISOString() };
+
+    // Always save to localStorage as backup
+    saveUserRole(cred.user.uid, role, name, email);
+
+    // Try Firestore (may fail if DB not created)
     try {
       await setDoc(doc(db, 'users', cred.user.uid), userData);
     } catch (err) {
-      console.error('Firestore write error (user created in Auth):', err);
+      console.warn('Firestore write skipped (DB may not exist):', err.message);
     }
+
     setUser({ uid: cred.user.uid, ...userData });
-    handledRef.current = false;
+    setTimeout(() => { handledRef.current = false; }, 100);
   }, []);
 
   const logout = useCallback(async () => {
     await signOut(auth);
+    clearCachedUser();
     setUser(null);
   }, []);
 
@@ -70,10 +123,10 @@ export function AuthProvider({ children }) {
       try {
         const docSnap = await getDoc(doc(db, 'users', auth.currentUser.uid));
         if (docSnap.exists()) {
-          setUser({ uid: auth.currentUser.uid, email: auth.currentUser.email, ...docSnap.data() });
+          setUser(prev => ({ ...prev, ...docSnap.data() }));
         }
-      } catch (err) {
-        console.error('Firestore refresh error:', err);
+      } catch {
+        // Firestore unavailable
       }
     }
   }, []);
