@@ -20,7 +20,7 @@ export default function Auth() {
 
   // Redirect after login based on role
   useEffect(() => {
-    if (user && mode === 'signin') {
+    if (user) {
       if (userRole === 'seller') {
         navigate('/dashboard/seller', { replace: true });
       } else if (userRole === 'buyer') {
@@ -29,7 +29,7 @@ export default function Auth() {
         navigate('/owner', { replace: true });
       }
     }
-  }, [user, userRole, mode, navigate]);
+  }, [user, userRole, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

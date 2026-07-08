@@ -163,7 +163,7 @@
 /* ── Stats bar ── */
 .hero__stats {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--color-border);

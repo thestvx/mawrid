@@ -282,17 +282,7 @@ ul, ol {
   }
 }
 
-/* ── Hero line divider ── */
-.hero-divider {
-  display: block;
-  width: 100%;
-  max-height: 220px;
-  object-fit: cover;
-  object-position: center;
-  margin: -1px 0 0 0;
-  line-height: 0;
-  font-size: 0;
-}
+/* ── Hero line divider (removed, now in Home.css) ── */
 
 @keyframes shimmer-sweep {
   0% { transform: translateX(-100%) skewX(-15deg); }

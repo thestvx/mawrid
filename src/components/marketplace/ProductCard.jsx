@@ -1,6 +1,5 @@
 import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { gsap } from 'gsap';
 import { useLanguage } from '../../contexts/LanguageContext';
 import './ProductCard.css';
 
@@ -13,20 +12,21 @@ export default function ProductCard({ product, index = 0 }) {
     const el = cardRef.current;
     if (!el) return;
 
-    gsap.fromTo(
-      el,
-      { opacity: 0, y: 40, scale: 0.95 },
-      {
-        opacity: 1, y: 0, scale: 1,
-        duration: 0.6, delay: index * 0.08,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' },
-      }
-    );
+    const timer = setTimeout(() => {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0) scale(1)';
+    }, 100 + index * 80);
+
+    return () => clearTimeout(timer);
   }, [index]);
 
   return (
-    <Link to="/details" ref={cardRef} className={`product-card ${product.featured ? 'product-card--featured' : ''}`}>
+    <Link
+      to="/details"
+      ref={cardRef}
+      className={`product-card ${product.featured ? 'product-card--featured' : ''}`}
+      style={{ opacity: 0, transform: 'translateY(30px) scale(0.97)', transition: 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1)' }}
+    >
       <div className="product-card__image-wrap">
         {badge && (
           <span className={`product-card__badge ${product.featured ? 'product-card__badge--featured' : ''}`}>

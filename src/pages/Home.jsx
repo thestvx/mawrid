@@ -4,17 +4,20 @@ import WhyMawrid from '../components/sections/WhyMawrid';
 import Testimonials from '../components/sections/Testimonials';
 import TrendingProducts from '../components/sections/TrendingProducts';
 import Categories from '../components/sections/Categories';
+import './Home.css';
 
 export default function Home() {
   return (
     <>
       <Hero />
-      <img
-        src="/images/backgrounds/line01.png"
-        alt=""
-        className="hero-divider"
-        aria-hidden="true"
-      />
+      <div className="hero-divider-wrap">
+        <img
+          src="/images/backgrounds/line01.png"
+          alt=""
+          className="hero-divider-img"
+          aria-hidden="true"
+        />
+      </div>
       <Features />
       <WhyMawrid />
       <Testimonials />

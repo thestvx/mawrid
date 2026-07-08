@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import AnimatedContent from '../ui/AnimatedContent';
 import './Features.css';
 
 const features = [
@@ -13,38 +13,27 @@ const features = [
 
 export default function Features() {
   const { t } = useLanguage();
-  const sectionRef = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { threshold: 0.15 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
 
   return (
-    <section className="features" ref={sectionRef} id="features">
+    <section className="features" id="features">
       <div className="container">
-        <div className={`features__header ${visible ? 'animate-section' : ''}`}>
-          <h2 className="features__title">{t('features.title')}</h2>
-          <p className="features__sub">{t('features.subtitle')}</p>
-        </div>
+        <AnimatedContent distance={60} delay={0}>
+          <div className="features__header">
+            <h2 className="features__title">{t('features.title')}</h2>
+            <p className="features__sub">{t('features.subtitle')}</p>
+          </div>
+        </AnimatedContent>
         <div className="features__grid">
           {features.map((f, i) => (
-            <div
-              key={i}
-              className={`features__card ${visible ? 'animate-section' : ''}`}
-              style={{ animationDelay: `${0.1 + i * 0.08}s` }}
-            >
-              <div className="features__icon-wrap" style={{ background: `${f.color}12`, color: f.color }}>
-                <span className="features__icon">{f.icon}</span>
+            <AnimatedContent key={i} distance={50} delay={0.08 + i * 0.08}>
+              <div className="features__card">
+                <div className="features__icon-wrap" style={{ background: `${f.color}12`, color: f.color }}>
+                  <span className="features__icon">{f.icon}</span>
+                </div>
+                <h3 className="features__card-title">{t(f.key)}</h3>
+                <p className="features__card-desc">{t(f.descKey)}</p>
               </div>
-              <h3 className="features__card-title">{t(f.key)}</h3>
-              <p className="features__card-desc">{t(f.descKey)}</p>
-            </div>
+            </AnimatedContent>
           ))}
         </div>
       </div>

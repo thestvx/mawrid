@@ -185,6 +185,7 @@ export const ar = {
   'features.growth.title': 'نمو مستمر',
   'features.growth.desc': 'أدوات تحليلات متكاملة لمساعدتك على تطوير متجرك.',
 
+  'whymawrid.badge': 'لماذا مَورد؟',
   'whymawrid.title': 'سوق المبدعين الرقمي',
   'whymawrid.subtitle': 'منصتك المثالية لشراء وبيع المنتجات الرقمية بكل سهولة وأمان',
   'whymawrid.stat1': 'منتج رقمي',
@@ -463,6 +464,7 @@ export const en = {
   'features.growth.title': 'Continuous Growth',
   'features.growth.desc': 'Integrated analytics tools to help grow your store.',
 
+  'whymawrid.badge': 'Why Mawrid?',
   'whymawrid.title': 'The Digital Creators Marketplace',
   'whymawrid.subtitle': 'Your ideal platform to buy and sell digital products with ease and security',
   'whymawrid.stat1': 'Digital Products',
