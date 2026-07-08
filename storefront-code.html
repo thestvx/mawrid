@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mawrid - Vendor Storefront Premium</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#ffb597",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e1e3e4",
+                        "surface": "#f8f9fa",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "tertiary": "#494bd6",
+                        "on-tertiary-container": "#0f00a2",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "on-primary-fixed-variant": "#7e2c00",
+                        "tertiary-container": "#8589ff",
+                        "surface-dim": "#d9dadb",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#e5e2e1",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "outline": "#8f7065",
+                        "primary-fixed-dim": "#ffb597",
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#e2dfde",
+                        "primary": "#a53c00",
+                        "surface-container": "#edeeef",
+                        "primary-container": "#ff6201",
+                        "on-surface-variant": "#5a4137",
+                        "on-primary-container": "#541b00",
+                        "on-background": "#191c1d",
+                        "on-secondary-container": "#636262",
+                        "surface-tint": "#a53c00",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "surface-bright": "#f8f9fa",
+                        "on-primary-fixed": "#360f00",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#e1e0ff",
+                        "outline-variant": "#e3bfb1",
+                        "surface-container-high": "#e7e8e9",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-container-low": "#f3f4f5",
+                        "background": "#f8f9fa",
+                        "on-surface": "#191c1d",
+                        "on-secondary-fixed-variant": "#474746",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#ffdbcd",
+                        "secondary": "#5f5e5e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.75rem",
+                        "sm": "0.5rem",
+                        "md": "1rem",
+                        "lg": "1.25rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["IBM Plex Sans Arabic", "sans-serif"],
+                        "display": ["IBM Plex Sans Arabic", "sans-serif"],
+                        "body": ["IBM Plex Sans Arabic", "sans-serif"],
+                        "label": ["IBM Plex Sans Arabic", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 12px 48px -12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Advanced Animations & Effects */
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .reveal-element.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .interactive-glow {
+            position: relative;
+            overflow: hidden;
+        }
+        .interactive-glow::before {
+            content: "";
+            position: absolute;
+            top: var(--mouse-y, 50%);
+            left: var(--mouse-x, 50%);
+            transform: translate(-50%, -50%);
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(255, 98, 1, 0.2) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .interactive-glow:hover::before {
+            opacity: 1;
+        }
+        
+        .product-card-hover {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .product-card-hover:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 50px -12px rgba(255, 98, 1, 0.18), 0 15px 25px -10px rgba(0, 0, 0, 0.08);
+        }
+        
+        @keyframes subtle-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 98, 1, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(255, 98, 1, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 98, 1, 0); }
+        }
+        .pulse-effect {
+            animation: subtle-pulse 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .shimmer-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+            animation: shimmer 4s infinite;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .filter-item {
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .filter-item:hover {
+            transform: translateX(-5px);
+        }
+        
+        .bg-gradient-anim {
+            background: linear-gradient(-45deg, #f8f9fa, #edeeef, #ffdbcd, #f8f9fa);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-anim antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 md:px-12 py-4 bg-surface/60 backdrop-blur-xl shadow-sm dark:bg-inverse-surface/60 border-b border-surface-variant/30 reveal-element" style="transition-delay: 100ms;">
+<div class="flex items-center gap-8">
+<a class="flex items-center gap-3 active:scale-95 transition-transform" href="#">
+<img alt="Mawrid Logo" class="h-10 w-10 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPqWv4GFhiMImZrqAeZTLy2LGm1zzzz5RNhh4CzHgctkT15RjOUPckx5kjlfK9cwL0hvv4495hLknJXVAxWrD05Cbb5USVKT3VLBeuJe8MWc6cf1L8kiNl0ch8O-8WTjLy3-ykAImYdtfaKCmunADAh4w0d-Gv8Xb-gwCPIunuGsIGJOPg7yrQHWVPG9SWYwpFPmAgqa-385X9bz3zYpldus5oxB4EvGG2aw5cg_X9EnPesswWYuNLpevMTeSWsdg"/>
+<span class="text-title-lg font-headline font-bold text-primary dark:text-inverse-primary hidden sm:block">موارد بريميوم</span>
+</a>
+<nav class="hidden md:flex items-center gap-6 ml-8">
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label text-label-md hover:scale-105 inline-block" href="#">السوق</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label text-label-md hover:scale-105 inline-block" href="#">المجموعات</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label text-label-md hover:scale-105 inline-block" href="#">لوحة التحكم</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label text-label-md hover:scale-105 inline-block" href="#">الدعم</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<!-- Search -->
+<div class="relative hidden sm:block group">
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+<input class="bg-surface-container-low/50 backdrop-blur border-none rounded-full py-2 pr-10 pl-4 w-64 focus:ring-2 focus:ring-primary text-body-sm transition-all duration-300 text-right focus:w-72" placeholder="البحث..." type="text"/>
+</div>
+<!-- Actions -->
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors duration-200 rounded-full hover:bg-surface-container active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors duration-200 rounded-full hover:bg-surface-container relative active:scale-95">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="absolute top-1 right-1 bg-primary-container text-on-primary-container text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center pulse-effect">2</span>
+</button>
+<!-- Profile -->
+<button class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-variant hover:border-primary transition-colors active:scale-95">
+<img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7vJPF0s5CMuffkLZJvioKwmrpygXbMJS4OA3hXYY_Suve8CBo8Ip3H7mWnfLuQCisppoXPRhAAlfenLVj2ADRduaIIaSfsvt15jpeEkubmJWojB6-shSTpVfK5Xmo_TSQ-5Qgblaucf7wYXFvK3JqkEDt2H-uBbW1g5-dVImGhG-Srgznj3uTCXBnmCzXORq0--HoEZBJT_yO6d_FU7bypewGK8vQBsM7QWu2AsxPIVKLHkSC6Q"/>
+</button>
+</div>
+</header>
+<main class="flex-grow pt-24 pb-16 px-4 md:px-8 max-w-[1600px] mx-auto w-full relative z-10">
+<!-- Hero Section -->
+<section class="relative mb-12 rounded-[32px] overflow-hidden reveal-element" style="transition-delay: 200ms;">
+<!-- Banner Image -->
+<div class="h-64 md:h-80 w-full relative group">
+<div class="bg-cover bg-center w-full h-full absolute inset-0 transition-transform duration-1000 group-hover:scale-105" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCQF3Vd6ddVm4c2vIhZtnmchGOgm1Mz7t6goc4Cqiy0UGkAkuZKax4105uVpw-b9nQeczVlAjHs07lC0YcwncVRp-VH7K-6c9jENrgcsenyFqlXuTp9mhPliMQG3MR-pg6PcCNTKEKgN_WkW2vKFf6dgH_Xt4gnUPtVQONRMIO4FKBODJC2u9_Vy7-M8uurt-JzYl9bH_haS6CzX6ztQuqRnHauPDtR-3YVj30BASGa3FzIfaA-Gw')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+</div>
+<!-- Profile Overlay Card -->
+<div class="relative -mt-24 md:-mt-36 px-4 md:px-12 z-10 pb-8">
+<div class="glass-card interactive-glow rounded-[28px] p-8 md:p-10 flex flex-col md:flex-row items-center md:items-start gap-8 relative shadow-2xl">
+<div class="shimmer-bg"></div>
+<!-- Avatar -->
+<div class="w-36 h-36 md:w-44 md:h-44 rounded-full border-[6px] border-white shadow-xl overflow-hidden shrink-0 relative z-10 hover:scale-105 transition-transform duration-300">
+<img alt="Vendor Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBbHmzvTUM_s48CrehPY1liqShXm6QJ5Rey95yxITDqnOAAkeJ8XO12D4aHJxayFtJ-WzqwhKYevvmFbiX5FKvJUSPaSPwzRMlMv2L0YfrQGpehWzCPQQchpqcarktr-yu725gxEl7cL_wEUYxpTjpbq5EHJSVfyuijSYIH2VLDoDEYzcJF5pn9yFVc6GiwSM8ObduP_sq_Y9hci_H6anW9o2WDBaxpr-ruOIHB8SnnDcAVe9Zuw"/>
+<div class="absolute bottom-2 right-4 bg-white rounded-full p-1.5 shadow-md pulse-effect">
+<span class="material-symbols-outlined text-primary text-2xl" data-weight="fill">verified</span>
+</div>
+</div>
+<!-- Info -->
+<div class="flex-grow text-center md:text-right mt-4 z-10">
+<div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-6">
+<div>
+<h1 class="text-display-sm md:text-headline-lg font-headline font-bold text-on-surface mb-3 flex items-center justify-center md:justify-start gap-3">
+                                ستوديو إبداع X
+                            </h1>
+<p class="text-body-lg text-on-surface-variant mb-6 max-w-2xl">أدوات تصميم واجهات متميزة وأصول رقمية للمصممين والمطورين المحترفين حول العالم.</p>
+<div class="flex flex-wrap items-center justify-center md:justify-start gap-6 text-label-md text-secondary">
+<span class="flex items-center gap-1.5 hover:text-primary transition-colors cursor-default"><span class="material-symbols-outlined text-sm">location_on</span> الولايات المتحدة</span>
+<span class="flex items-center gap-1.5 hover:text-primary transition-colors cursor-default"><span class="material-symbols-outlined text-sm">inventory_2</span> 150 منتج</span>
+<span class="flex items-center gap-1.5 hover:text-primary transition-colors cursor-default"><span class="material-symbols-outlined text-sm">shopping_bag</span> +12 ألف مبيعات</span>
+<span class="flex items-center gap-1.5 text-primary font-bold"><span class="material-symbols-outlined text-sm" data-weight="fill">star</span> 4.9 (124 تقييم)</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-4 w-full md:w-auto mt-6 md:mt-0">
+<button class="flex-1 md:flex-none bg-primary-container hover:bg-primary text-white font-label font-bold py-3 px-8 rounded-full shadow-lg shadow-primary/20 transition-all active:scale-95 pulse-effect">
+<span class="material-symbols-outlined text-sm">add</span> متابعة
+                            </button>
+<button class="flex-1 md:flex-none bg-white/50 backdrop-blur border-2 border-outline/30 hover:border-primary text-on-surface hover:text-primary font-label font-bold py-3 px-8 rounded-full transition-all active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-sm">mail</span> تواصل
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Content -->
+<div class="flex flex-col lg:flex-row gap-10">
+<!-- Sidebar -->
+<aside class="w-full lg:w-72 shrink-0 reveal-element" style="transition-delay: 300ms;">
+<div class="bg-surface-container-lowest/40 backdrop-blur-2xl rounded-2xl shadow-xl shadow-black/5 border border-white/50 p-6 sticky top-24">
+<h2 class="text-headline-sm font-bold text-on-surface mb-6 border-b border-surface-variant/30 pb-3">التصنيفات</h2>
+<nav class="flex flex-col gap-2.5 mb-10">
+<a class="bg-primary-container text-white rounded-xl p-3.5 flex items-center gap-3 font-bold transition-all shadow-md shadow-primary/20" href="#">
+<span class="material-symbols-outlined">grid_view</span> كل المنتجات
+                    </a>
+<a class="text-on-surface-variant hover:bg-surface-container/60 rounded-xl p-3.5 flex items-center gap-3 font-medium transition-all filter-item" href="#">
+<span class="material-symbols-outlined">description</span> القوالب
+                    </a>
+<a class="text-on-surface-variant hover:bg-surface-container/60 rounded-xl p-3.5 flex items-center gap-3 font-medium transition-all filter-item" href="#">
+<span class="material-symbols-outlined">layers</span> أدوات الواجهات
+                    </a>
+<a class="text-on-surface-variant hover:bg-surface-container/60 rounded-xl p-3.5 flex items-center gap-3 font-medium transition-all filter-item" href="#">
+<span class="material-symbols-outlined">insert_emoticon</span> الأيقونات
+                    </a>
+<a class="text-on-surface-variant hover:bg-surface-container/60 rounded-xl p-3.5 flex items-center gap-3 font-medium transition-all filter-item" href="#">
+<span class="material-symbols-outlined">play_circle</span> الدورات
+                    </a>
+</nav>
+<div class="mb-10">
+<h3 class="text-title-lg font-bold text-on-surface mb-5">نطاق السعر</h3>
+<div class="px-2">
+<div class="h-1.5 bg-surface-variant rounded-full relative mb-5">
+<div class="absolute left-1/4 right-0 h-full bg-primary rounded-full"></div>
+<div class="absolute left-1/4 -mt-1.5 w-4.5 h-4.5 bg-white border-2 border-primary rounded-full shadow-md cursor-pointer hover:scale-125 transition-transform"></div>
+<div class="absolute right-0 -mt-1.5 w-4.5 h-4.5 bg-white border-2 border-primary rounded-full shadow-md cursor-pointer hover:scale-125 transition-transform"></div>
+</div>
+<div class="flex justify-between text-label-sm font-bold text-secondary">
+<span>$0</span>
+<span>$1000+</span>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-title-lg font-bold text-on-surface mb-5">التقييم</h3>
+<div class="flex flex-col gap-3">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="rounded-md text-primary focus:ring-primary w-5 h-5 border-outline/30 bg-surface transition-transform active:scale-90" type="checkbox"/>
+<div class="flex items-center text-primary text-sm gap-1 group-hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+</div>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="rounded-md text-primary focus:ring-primary w-5 h-5 border-outline/30 bg-surface transition-transform active:scale-90" type="checkbox"/>
+<div class="flex items-center text-primary text-sm gap-1 group-hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-surface-variant/50" data-weight="fill">star</span>
+<span class="text-label-sm font-medium text-on-surface-variant mr-1">وأكثر</span>
+</div>
+</label>
+</div>
+</div>
+</div>
+</aside>
+<!-- Product Feed -->
+<div class="flex-grow">
+<!-- Feed Header / Tabs -->
+<div class="flex flex-col sm:flex-row justify-between items-center mb-10 gap-6 reveal-element" style="transition-delay: 400ms;">
+<div class="flex items-center gap-2 bg-surface-container-low/40 backdrop-blur p-1.5 rounded-full shadow-inner">
+<button class="px-6 py-2.5 rounded-full bg-white text-primary font-bold shadow-md text-label-md transition-all active:scale-95">كل المنتجات</button>
+<button class="px-6 py-2.5 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-white/50 font-bold text-label-md transition-all active:scale-95">المميزة</button>
+<button class="px-6 py-2.5 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-white/50 font-bold text-label-md transition-all active:scale-95">الأحدث</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-label-md font-medium text-secondary">ترتيب حسب:</span>
+<select class="bg-white/60 backdrop-blur border-outline/20 text-on-surface text-label-md rounded-full py-2.5 pl-10 pr-5 focus:ring-2 focus:ring-primary focus:border-primary transition-all cursor-pointer shadow-sm">
+<option>الأكثر شعبية</option>
+<option>الأحدث</option>
+<option>السعر: من الأقل للأعلى</option>
+</select>
+</div>
+</div>
+<!-- Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+<!-- Product Card 1 -->
+<div class="bg-white/80 backdrop-blur-sm rounded-[24px] shadow-xl shadow-black/5 overflow-hidden border border-white group relative flex flex-col h-full reveal-element product-card-hover interactive-glow" style="transition-delay: 500ms;">
+<div class="absolute top-4 right-4 z-20 bg-primary-container text-white text-[11px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest pulse-effect shadow-lg">
+                        الأكثر مبيعاً
+                    </div>
+<button class="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur rounded-full p-2 text-on-surface-variant hover:text-error transition-all shadow-md active:scale-90">
+<span class="material-symbols-outlined text-lg">favorite</span>
+</button>
+<div class="aspect-[4/3] bg-surface-container-low relative overflow-hidden p-6 flex items-center justify-center z-10 group-hover:bg-primary/5 transition-colors">
+<img alt="Product 1" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJDQvUNdeAVzAkfmQQlNiL4JMGfJp5L69Em3Fd_gIdXbFls0dQsw5SKiSvSw_-91z9xgjJ2-BnKQAnNPQ2Z2R5bgfAHyEyDNC0MzhoKfRR2z-EF3J4116cbP8_m_-we-c63bAWj3pDueGVSxrahCeGnuYH5lkzfq--xjd2mxpAa9eRu_U_g1dgENJEgGHLOiUi6NMidGxqt2-izcSzqdKsXvvonHAxLiv9X6e_SPYJKEWCzDUmfQ"/>
+</div>
+<div class="p-6 flex flex-col flex-grow z-10 bg-white/40 relative">
+<div class="flex items-center gap-1.5 mb-3">
+<span class="material-symbols-outlined text-primary text-[16px]" data-weight="fill">star</span>
+<span class="text-label-md font-black text-on-surface">4.9</span>
+<span class="text-label-md text-secondary font-medium">(42)</span>
+</div>
+<h3 class="text-headline-sm font-bold text-on-surface mb-2 line-clamp-1 group-hover:text-primary transition-colors">Nexus Pro Dashboard UI Kit</h3>
+<p class="text-body-md text-on-surface-variant mb-6 line-clamp-2">قالب لوحة تحكم متطور مع أكثر من 100 مكون مصمم بعناية فائقة.</p>
+<div class="mt-auto flex justify-between items-center pt-5 border-t border-surface-variant/30">
+<span class="text-headline-md font-black text-primary">$49.00</span>
+<button class="bg-primary-container/10 hover:bg-primary-container text-primary hover:text-white rounded-full p-3 transition-all active:scale-90 shadow-sm">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-white/80 backdrop-blur-sm rounded-[24px] shadow-xl shadow-black/5 overflow-hidden border border-white group relative flex flex-col h-full reveal-element product-card-hover interactive-glow" style="transition-delay: 600ms;">
+<button class="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur rounded-full p-2 text-on-surface-variant hover:text-error transition-all shadow-md active:scale-90">
+<span class="material-symbols-outlined text-lg">favorite</span>
+</button>
+<div class="aspect-[4/3] bg-surface-container-low relative overflow-hidden p-6 flex items-center justify-center z-10 group-hover:bg-primary/5 transition-colors">
+<img alt="Product 2" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEFxVXJETeWBfBM9c7z65-eKptBWTcTb2U1iMy8M_aRP-EDZDr-ObqzP58xJ2HIQD8KeMW6sfeaQsaClvzkV2yr6caQ8wLgScICPqFtJorbvPVHtTv1U5eEHcyPy1EWgCuuKZIEHbrOrpZuQb-ebDbdAs8P_yDbthSBod_CPhvy9UoRDJTvH1W2xbeie0MQ5vH7350WIB7-0jroeOWHaqR4meWVaJSXUwTWN3l8SFCnpFKRpdcXw"/>
+</div>
+<div class="p-6 flex flex-col flex-grow z-10 bg-white/40 relative">
+<div class="flex items-center gap-1.5 mb-3">
+<span class="material-symbols-outlined text-primary text-[16px]" data-weight="fill">star</span>
+<span class="text-label-md font-black text-on-surface">4.8</span>
+<span class="text-label-md text-secondary font-medium">(18)</span>
+</div>
+<h3 class="text-headline-sm font-bold text-on-surface mb-2 line-clamp-1 group-hover:text-primary transition-colors">Premium 3D Icon Pack</h3>
+<p class="text-body-md text-on-surface-variant mb-6 line-clamp-2">مجموعة من 50 أيقونة ثلاثية الأبعاد عالية الجودة لمشروعك القادم.</p>
+<div class="mt-auto flex justify-between items-center pt-5 border-t border-surface-variant/30">
+<span class="text-headline-md font-black text-primary">$24.00</span>
+<button class="bg-primary-container/10 hover:bg-primary-container text-primary hover:text-white rounded-full p-3 transition-all active:scale-90 shadow-sm">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-white/80 backdrop-blur-sm rounded-[24px] shadow-xl shadow-black/5 overflow-hidden border border-white group relative flex flex-col h-full reveal-element product-card-hover interactive-glow" style="transition-delay: 700ms;">
+<button class="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur rounded-full p-2 text-on-surface-variant hover:text-error transition-all shadow-md active:scale-90">
+<span class="material-symbols-outlined text-lg">favorite</span>
+</button>
+<div class="aspect-[4/3] bg-surface-container-low relative overflow-hidden p-6 flex items-center justify-center z-10 group-hover:bg-primary/5 transition-colors">
+<img alt="Product 3" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2plZ0OLzw78nH4RJBXZzcyv_pL44BYqaF-eYztS2LkwC6phz1Jk-BmUpuX4CU7ri1hLzCASsfQ7849WEDacFdgQ5GfFZa-yZTiE_0zJb1xvQPGvt8ys_Gif9t794aMfqkbnDEF1dPpzcR4QoPc9ib4NG1gj0kEw0advYCvaptXJP1Z03v7VXvgpeDkdIvcN-RwTbWQQwpesTO17T37pg-LbJ6EKN-YBPhL_29TEEUNcbkuVD84Q"/>
+</div>
+<div class="p-6 flex flex-col flex-grow z-10 bg-white/40 relative">
+<div class="flex items-center gap-1.5 mb-3">
+<span class="material-symbols-outlined text-primary text-[16px]" data-weight="fill">star</span>
+<span class="text-label-md font-black text-on-surface">5.0</span>
+<span class="text-label-md text-secondary font-medium">(8)</span>
+</div>
+<h3 class="text-headline-sm font-bold text-on-surface mb-2 line-clamp-1 group-hover:text-primary transition-colors">Wireflow Master Kit</h3>
+<p class="text-body-md text-on-surface-variant mb-6 line-clamp-2">أدوات تخطيط سريعة واحترافية للتطبيقات والمواقع الإلكترونية.</p>
+<div class="mt-auto flex justify-between items-center pt-5 border-t border-surface-variant/30">
+<span class="text-headline-md font-black text-primary">$32.00</span>
+<button class="bg-primary-container/10 hover:bg-primary-container text-primary hover:text-white rounded-full p-3 transition-all active:scale-90 shadow-sm">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-16 flex justify-center reveal-element" style="transition-delay: 900ms;">
+<nav class="flex items-center gap-3 bg-white/40 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-white/50">
+<button class="p-2.5 rounded-xl border border-surface-variant/30 text-on-surface-variant hover:bg-white/60 disabled:opacity-50 active:scale-95 transition-transform"><span class="material-symbols-outlined">chevron_right</span></button>
+<button class="w-11 h-11 rounded-xl bg-primary-container text-white font-black flex items-center justify-center shadow-lg shadow-primary/30 active:scale-95 transition-transform">1</button>
+<button class="w-11 h-11 rounded-xl border border-surface-variant/30 text-on-surface font-bold hover:bg-white/60 flex items-center justify-center active:scale-95 transition-transform">2</button>
+<button class="w-11 h-11 rounded-xl border border-surface-variant/30 text-on-surface font-bold hover:bg-white/60 flex items-center justify-center active:scale-95 transition-transform">3</button>
+<span class="px-2 font-bold text-on-surface-variant">...</span>
+<button class="p-2.5 rounded-xl border border-surface-variant/30 text-on-surface-variant hover:bg-white/60 active:scale-95 transition-transform"><span class="material-symbols-outlined">chevron_left</span></button>
+</nav>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-high/80 backdrop-blur-md dark:bg-surface-container-highest border-t border-outline-variant/30 mt-auto relative z-10 reveal-element" style="transition-delay: 1000ms;">
+<div class="w-full py-12 px-6 md:px-12 flex flex-col md:flex-row justify-between items-center max-w-[1600px] mx-auto gap-8">
+<div class="flex items-center gap-3 group">
+<img alt="Mawrid Logo" class="h-10 w-10 object-contain opacity-70 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1yuu5yIrcTWR58errQ9RQ5P402UBGorT4VwgpkujwkkDUTYqV-A7bkF6r1i0mNIeyjg--8j6iZHJ-wEfQstqicYJLWLYy5EFoHz7lI-WYkTH1viraPUOF6yfUuWS5_IS605G4X9rtczK-LKozjXRcTZ15ml2eLBmUBvvaZEW7NRoH5mlMXoej-bPgeiF3Pl6ym0SsT1ScwjBITVfvSYmHm7JQcTBztfm2T3lpAlF8BmhcRPl8yvbMLUyEtrVvHf0"/>
+<span class="text-label-md font-bold text-on-surface-variant">© 2024 Mawrid Premium. جميع الحقوق محفوظة.</span>
+</div>
+<nav class="flex flex-wrap justify-center gap-8 text-label-md font-bold">
+<a class="text-on-surface-variant hover:text-primary transition-all hover:-translate-y-0.5" href="#">شروط الخدمة</a>
+<a class="text-on-surface-variant hover:text-primary transition-all hover:-translate-y-0.5" href="#">سياسة الخصوصية</a>
+<a class="text-on-surface-variant hover:text-primary transition-all hover:-translate-y-0.5" href="#">اتصل بالدعم</a>
+<a class="text-on-surface-variant hover:text-primary transition-all hover:-translate-y-0.5" href="#">برنامج الشركاء</a>
+</nav>
+</div>
+</footer>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Entrance Animations Reveal
+        setTimeout(() => {
+            const revealElements = document.querySelectorAll('.reveal-element');
+            revealElements.forEach(el => {
+                el.classList.add('revealed');
+            });
+        }, 100);
+
+        // Mouse Tracking Glow Effect
+        const interactiveCards = document.querySelectorAll('.interactive-glow');
+        
+        interactiveCards.forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    });
+</script>
+</body></html>

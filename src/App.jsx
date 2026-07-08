@@ -5,7 +5,8 @@ import ClickSpark from './components/ui/ClickSpark';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
-import Storefront from './pages/Storefront';
+import Storefront from './components/storefront/Storefront';
+import AdminDashboardStitch from './components/storefront/AdminDashboardStitch';
 import Details from './pages/Details';
 import Auth from './pages/Auth';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
@@ -38,9 +39,7 @@ export default function App() {
               <Route path="buyer" element={<BuyerDashboard />} />
               <Route path="seller" element={<SellerDashboard />} />
             </Route>
-            <Route path="/owner" element={<DashboardLayout />}>
-              <Route index element={<AdminDashboard />} />
-            </Route>
+            <Route path="/owner" element={<AdminDashboardStitch />} />
           </Route>
           <Route path="/auth" element={<Auth />} />
         </Routes>
