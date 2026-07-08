@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
+import './Dashboard.css';
 
 const PRODUCTS = [
   { id: 1, name: 'Nitec Pro UI Kit', price: 129, sales: 342, revenue: 44118, status: 'active', color: '#ff6201', initials: 'NP' },
@@ -76,7 +78,15 @@ const avatarStyle = (color, initials, size = 40) => ({
 
 export default function SellerDashboard() {
   const { t, dir } = useLanguage();
+  const { user, role } = useAuth();
+  const navigate = useNavigate();
   const tab = new URLSearchParams(window.location.search).get('tab') || 'overview';
+
+  useEffect(() => {
+    if (role !== 'seller' && user) {
+      navigate('/dashboard/seller');
+    }
+  }, [role, user, navigate]);
 
   const renderContent = () => {
     switch (tab) {

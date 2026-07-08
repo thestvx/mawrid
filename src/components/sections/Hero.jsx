@@ -9,17 +9,28 @@ const stats = [
   { value: '47,000+', key: 'hero.stat.buyers' },
 ];
 
-const particles = Array.from({ length: 28 }, (_, i) => ({
+const particles = Array.from({ length: 35 }, (_, i) => ({
   id: i,
-  size: 2 + (i % 4),
-  x: (i * 13.7) % 100,
-  y: (i * 7.3 + 10) % 100,
-  delay: (i * 0.7) % 4,
-  duration: 4 + (i % 3),
+  size: 2 + (i % 5),
+  x: (i * 11.7) % 100,
+  y: (i * 8.3 + 5) % 100,
+  delay: (i * 0.5) % 5,
+  duration: 5 + (i % 4),
+  opacity: 0.15 + (i % 3) * 0.1,
 }));
+
+const floatingElements = [
+  { id: 1, icon: '📦', x: 8, y: 15, delay: 0, duration: 6 },
+  { id: 2, icon: '💎', x: 92, y: 20, delay: 0.5, duration: 7 },
+  { id: 3, icon: '🚀', x: 15, y: 75, delay: 1, duration: 5.5 },
+  { id: 4, icon: '⭐', x: 85, y: 80, delay: 1.5, duration: 6.5 },
+  { id: 5, icon: '🎨', x: 5, y: 45, delay: 2, duration: 7.5 },
+  { id: 6, icon: '⚡', x: 95, y: 60, delay: 2.5, duration: 6 },
+];
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
   const statsRef = useRef(null);
   const statsVisible = useRef(false);
   const [animateStats, setAnimateStats] = useState(false);
@@ -42,15 +53,22 @@ export default function Hero() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const bgImage = dir === 'rtl' ? '/images/backgrounds/hero-background-ar.png' : '/images/backgrounds/hero-background-en.png';
 
   return (
-    <section className="hero">
+    <section className="hero" style={{ '--scroll-y': scrollY }}>
       <div className="hero__bg">
         <div className="hero__bg-img-wrap">
-          <img src={bgImage} alt="" className="hero__bg-img" loading="eager" />
+          <img src={bgImage} alt="" className="hero__bg-img" loading="eager" style={{ transform: `translateY(${scrollY * 0.15}px)` }} />
         </div>
         <div className="hero__gradient-overlay" />
+        
         <div className="hero__particles" aria-hidden="true">
           {particles.map((p) => (
             <span
@@ -63,8 +81,26 @@ export default function Hero() {
                 top: `${p.y}%`,
                 animationDelay: `${p.delay}s`,
                 animationDuration: `${p.duration}s`,
+                opacity: p.opacity,
               }}
             />
+          ))}
+        </div>
+
+        <div className="hero__floating-elements" aria-hidden="true">
+          {floatingElements.map((el) => (
+            <span
+              key={el.id}
+              className="hero__floating-icon"
+              style={{
+                left: `${el.x}%`,
+                top: `${el.y}%`,
+                animationDelay: `${el.delay}s`,
+                animationDuration: `${el.duration}s`,
+              }}
+            >
+              {el.icon}
+            </span>
           ))}
         </div>
       </div>

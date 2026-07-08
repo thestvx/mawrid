@@ -9,13 +9,16 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <div className="hero-divider" aria-hidden="true">
+        <img src="/images/backgrounds/line01.png" alt="" />
+      </div>
       <Features />
       <WhyMawrid />
+      <Testimonials />
       <div className="container" style={{ paddingTop: 0, paddingBottom: 64 }}>
         <Categories />
         <TrendingProducts />
       </div>
-      <Testimonials />
     </>
   );
 }

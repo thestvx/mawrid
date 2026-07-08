@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
+import './Dashboard.css';
 
 const RECENT_ORDERS = [
   { id: '#ORD-8923', date: '2026-07-07', product: 'SaaS Admin Pro Kit', amount: 49, status: 'completed', customer: 'Alex M.' },
@@ -12,12 +14,12 @@ const RECENT_ORDERS = [
 ];
 
 const FAVORITES = [
-  { title: 'Abstract 3D Shape Pack', price: 29, image: '🎨' },
-  { title: 'Fintech Admin Dashboard', price: 55, image: '📊' },
-  { title: 'Corporate Vector Pack', price: 24, image: '📄' },
-  { title: 'Isometric Illustration Kit', price: 35, image: '🏗️' },
-  { title: 'Wireframe UI Starter', price: 19, image: '📐' },
-  { title: 'Motion Graphics Bundle', price: 45, image: '🎬' },
+  { title: 'Abstract 3D Shape Pack', price: 29, color: '#ff6201', initials: '3D' },
+  { title: 'Fintech Admin Dashboard', price: 55, color: '#494bd6', initials: 'FD' },
+  { title: 'Corporate Vector Pack', price: 24, color: '#10b981', initials: 'CV' },
+  { title: 'Isometric Illustration Kit', price: 35, color: '#a53c00', initials: 'II' },
+  { title: 'Wireframe UI Starter', price: 19, color: '#ef4444', initials: 'WS' },
+  { title: 'Motion Graphics Bundle', price: 45, color: '#f59e0b', initials: 'MG' },
 ];
 
 const DOWNLOADS = [
@@ -54,9 +56,7 @@ function AnimatedNumber({ value, suffix = '', duration = 1200 }) {
   const startRef = useRef(null);
   const rafRef = useRef(null);
 
-  const easeOutCubic = useCallback((t) => {
-    return 1 - Math.pow(1 - t, 3);
-  }, []);
+  const easeOutCubic = useCallback((t) => 1 - Math.pow(1 - t, 3), []);
 
   useEffect(() => {
     if (value === display) return;
@@ -69,15 +69,10 @@ function AnimatedNumber({ value, suffix = '', duration = 1200 }) {
       const progress = Math.min(elapsed / duration, 1);
       const eased = easeOutCubic(progress);
       setDisplay(Math.round(startValue + (value - startValue) * eased));
-      if (progress < 1) {
-        rafRef.current = requestAnimationFrame(animate);
-      }
+      if (progress < 1) rafRef.current = requestAnimationFrame(animate);
     }
-
     rafRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [value, duration, easeOutCubic]);
 
   return <>{display}{suffix}</>;
@@ -103,6 +98,8 @@ const tabMeta = [
 
 export default function BuyerDashboard() {
   const { t, dir } = useLanguage();
+  const { user, role } = useAuth();
+  const navigate = useNavigate();
   const [activeMobileTab, setActiveMobileTab] = useState('overview');
   const tab = new URLSearchParams(window.location.search).get('tab') || 'overview';
 
@@ -110,6 +107,12 @@ export default function BuyerDashboard() {
 
   const totalSpent = RECENT_ORDERS.reduce((sum, o) => sum + o.amount, 0);
   const completedOrders = RECENT_ORDERS.filter((o) => o.status === 'completed').length;
+
+  useEffect(() => {
+    if (role !== 'buyer' && role !== 'seller' && user) {
+      navigate('/dashboard/buyer');
+    }
+  }, [role, user, navigate]);
 
   const renderOverview = () => (
     <>
@@ -347,10 +350,13 @@ export default function BuyerDashboard() {
       ) : (
         <div className="d-grid d-grid--sm">
           {FAVORITES.map((item, i) => (
-            <div key={i} className="d-fav-card">
-              <div className="d-fav-card__icon">{item.image}</div>
-              <h4>{item.title}</h4>
-              <span className="d-fav-card__price">${item.price}</span>
+            <div key={i} className="d-fav-card" style={{ position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, right: 0, width: 60, height: 60, background: `${item.color}10`, borderRadius: '0 0 0 999px' }} />
+              <div className="d-fav-card__icon" style={{ position: 'relative', zIndex: 1, width: 56, height: 56, borderRadius: 14, background: `${item.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', margin: '0 auto 12px' }}>
+                <span style={{ fontSize: '1.5rem' }}>❤️</span>
+              </div>
+              <h4 style={{ position: 'relative', zIndex: 1 }}>{item.title}</h4>
+              <span className="d-fav-card__price" style={{ position: 'relative', zIndex: 1 }}>${item.price}</span>
             </div>
           ))}
         </div>
@@ -415,7 +421,7 @@ export default function BuyerDashboard() {
                 fontWeight: 600,
                 textDecoration: 'none',
                 background: isActive ? 'var(--color-primary-container)' : 'var(--color-surface-container-low)',
-                color: isActive ? 'var(--color-primary-container)' : 'var(--color-on-surface-variant)',
+                color: isActive ? 'var(--color-on-primary-container)' : 'var(--color-on-surface-variant)',
                 transition: 'all 0.2s',
                 display: 'inline-flex',
                 alignItems: 'center',

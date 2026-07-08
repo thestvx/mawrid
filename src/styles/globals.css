@@ -281,6 +281,59 @@ ul, ol {
   }
 }
 
+.hero-divider {
+  width: 100%;
+  overflow: hidden;
+  margin-top: -1px;
+}
+
+.hero-divider img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+}
+
+@keyframes float-gentle-reverse {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(12px) rotate(-1deg); }
+}
+
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+.animate-float-gentle {
+  animation: float-gentle 8s ease-in-out infinite;
+}
+
+.animate-float-gentle-reverse {
+  animation: float-gentle-reverse 9s ease-in-out infinite 1s;
+}
+
+.shimmer-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer-sweep 3s ease-in-out infinite;
+}
+
+.animate-entrance {
+  opacity: 0;
+  animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-entrance-delayed {
+  opacity: 0;
+  animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,8 +15,21 @@ export default function Auth() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { t } = useLanguage();
-  const { login, signup } = useAuth();
+  const { login, signup, user, role: userRole } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect after login based on role
+  useEffect(() => {
+    if (user && mode === 'signin') {
+      if (userRole === 'seller') {
+        navigate('/dashboard/seller', { replace: true });
+      } else if (userRole === 'buyer') {
+        navigate('/dashboard/buyer', { replace: true });
+      } else if (userRole === 'admin') {
+        navigate('/owner', { replace: true });
+      }
+    }
+  }, [user, userRole, mode, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,14 +42,14 @@ export default function Auth() {
     try {
       if (mode === 'signin') {
         await login(email, password);
-        navigate('/dashboard/buyer');
+        // Redirect handled by useEffect above
       } else {
         const name = form.name.value;
         const phone = form.phone?.value || '';
         const storeName = form.store?.value || '';
         await signup({ email, password, name, role, phone, storeName });
-        if (role === 'seller') navigate('/dashboard/seller');
-        else navigate('/dashboard/buyer');
+        if (role === 'seller') navigate('/dashboard/seller', { replace: true });
+        else navigate('/dashboard/buyer', { replace: true });
       }
     } catch (err) {
       const code = err.code;
