@@ -1,6 +1,7 @@
 @import './fonts.css';
 
 :root {
+  --color-orange: #ff6201;
   --color-primary: #a53c00;
   --color-primary-container: #ff6201;
   --color-primary-fixed: #ffdbcd;
@@ -281,39 +282,21 @@ ul, ol {
   }
 }
 
+/* ── Hero line divider ── */
 .hero-divider {
-  width: 100%;
-  overflow: hidden;
-  margin-top: -1px;
-}
-
-.hero-divider img {
-  width: 100%;
-  height: auto;
   display: block;
-}
-
-@keyframes float-gentle {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(1deg); }
-}
-
-@keyframes float-gentle-reverse {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(12px) rotate(-1deg); }
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  object-position: center;
+  margin: -1px 0 0 0;
+  line-height: 0;
+  font-size: 0;
 }
 
 @keyframes shimmer-sweep {
   0% { transform: translateX(-100%) skewX(-15deg); }
   100% { transform: translateX(200%) skewX(-15deg); }
-}
-
-.animate-float-gentle {
-  animation: float-gentle 8s ease-in-out infinite;
-}
-
-.animate-float-gentle-reverse {
-  animation: float-gentle-reverse 9s ease-in-out infinite 1s;
 }
 
 .shimmer-sweep::after {

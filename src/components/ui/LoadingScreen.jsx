@@ -1,34 +1,26 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './LoadingScreen.css';
 
 export default function LoadingScreen({ onFinish }) {
   const [progress, setProgress] = useState(0);
-  const [stage, setStage] = useState('init');
-  const containerRef = useRef(null);
+  const [stage, setStage] = useState('enter');
+  const doneRef = useRef(false);
 
   useEffect(() => {
-    let frame;
     const start = performance.now();
-    const duration = 1800;
-
-    setStage('enter');
+    const duration = 2000;
+    let frame;
 
     const animate = (now) => {
       const elapsed = now - start;
       const t = Math.min(elapsed / duration, 1);
-
-      const eased = 1 - Math.pow(1 - t, 3);
-      const pct = Math.round(eased * 100);
+      const pct = Math.round(t * 100);
       setProgress(pct);
 
-      if (pct >= 45 && stage === 'enter') setStage('reveal');
-      if (pct >= 80 && stage === 'reveal') setStage('full');
-
-      if (t >= 1) {
-        setTimeout(() => {
-          setStage('exit');
-          setTimeout(() => onFinish?.(), 500);
-        }, 300);
+      if (t >= 1 && !doneRef.current) {
+        doneRef.current = true;
+        setStage('exit');
+        setTimeout(() => onFinish?.(), 500);
         return;
       }
       frame = requestAnimationFrame(animate);
@@ -36,10 +28,10 @@ export default function LoadingScreen({ onFinish }) {
 
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
-  }, [onFinish, stage]);
+  }, [onFinish]);
 
   return (
-    <div ref={containerRef} className={`loading-screen loading-screen--${stage}`}>
+    <div className={`loading-screen loading-screen--${stage}`}>
       <div className="loading-screen__ring-wrap">
         <div className="loading-screen__ring">
           <svg viewBox="0 0 100 100" className="loading-screen__svg">
@@ -49,7 +41,7 @@ export default function LoadingScreen({ onFinish }) {
                 <stop offset="100%" stopColor="#fbbf24" />
               </linearGradient>
             </defs>
-            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,98,1,0.08)" strokeWidth="3" />
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,98,1,0.1)" strokeWidth="3" />
             <circle
               cx="50" cy="50" r="42"
               fill="none"

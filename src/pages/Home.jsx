@@ -9,9 +9,12 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <div className="hero-divider" aria-hidden="true">
-        <img src="/images/backgrounds/line01.png" alt="" />
-      </div>
+      <img
+        src="/images/backgrounds/line01.png"
+        alt=""
+        className="hero-divider"
+        aria-hidden="true"
+      />
       <Features />
       <WhyMawrid />
       <Testimonials />
