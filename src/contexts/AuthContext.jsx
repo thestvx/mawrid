@@ -5,7 +5,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { ref, set, get } from 'firebase/database';
 import { auth, db } from '../lib/firebase';
 
 const AuthContext = createContext(null);
@@ -29,6 +29,24 @@ function clearCachedUser() {
   try { localStorage.removeItem('mawrid_user'); } catch {}
 }
 
+async function readUserRole(uid) {
+  try {
+    const snap = await get(ref(db, `users/${uid}`));
+    if (snap.exists()) return snap.val();
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeUserRole(uid, data) {
+  try {
+    await set(ref(db, `users/${uid}`), data);
+  } catch (err) {
+    console.warn('RTDB write skipped:', err.message);
+  }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,25 +63,14 @@ export function AuthProvider({ children }) {
         let name = firebaseUser.displayName || '';
         let extraData = {};
 
-        // Try Firestore first
-        try {
-          const docSnap = await getDoc(doc(db, 'users', firebaseUser.uid));
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            role = data.role || 'buyer';
-            name = data.name || name;
-            extraData = data;
-          } else {
-            // No Firestore doc — check localStorage
-            const cached = getCachedUser();
-            if (cached && cached.uid === firebaseUser.uid) {
-              role = cached.role || 'buyer';
-              name = cached.name || name;
-            }
-          }
-        } catch (err) {
-          // Firestore unavailable — use localStorage fallback
-          console.warn('Firestore unavailable, using localStorage:', err.message);
+        // Try Realtime Database first
+        const rtdbData = await readUserRole(firebaseUser.uid);
+        if (rtdbData) {
+          role = rtdbData.role || 'buyer';
+          name = rtdbData.name || name;
+          extraData = rtdbData;
+        } else {
+          // Fallback to localStorage
           const cached = getCachedUser();
           if (cached && cached.uid === firebaseUser.uid) {
             role = cached.role || 'buyer';
@@ -89,8 +96,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     handledRef.current = true;
     await signInWithEmailAndPassword(auth, email, password);
-    // handledRef will be reset after onAuthStateChanged processes
-    setTimeout(() => { handledRef.current = false; }, 100);
+    setTimeout(() => { handledRef.current = false; }, 200);
   }, []);
 
   const signup = useCallback(async ({ email, password, name, role, phone, storeName }) => {
@@ -98,18 +104,14 @@ export function AuthProvider({ children }) {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const userData = { name, email, role, phone: phone || '', storeName: storeName || '', createdAt: new Date().toISOString() };
 
-    // Always save to localStorage as backup
+    // Save to localStorage immediately
     saveUserRole(cred.user.uid, role, name, email);
 
-    // Try Firestore (may fail if DB not created)
-    try {
-      await setDoc(doc(db, 'users', cred.user.uid), userData);
-    } catch (err) {
-      console.warn('Firestore write skipped (DB may not exist):', err.message);
-    }
+    // Write to Realtime Database
+    await writeUserRole(cred.user.uid, userData);
 
     setUser({ uid: cred.user.uid, ...userData });
-    setTimeout(() => { handledRef.current = false; }, 100);
+    setTimeout(() => { handledRef.current = false; }, 200);
   }, []);
 
   const logout = useCallback(async () => {
@@ -120,13 +122,9 @@ export function AuthProvider({ children }) {
 
   const refreshUser = useCallback(async () => {
     if (auth.currentUser) {
-      try {
-        const docSnap = await getDoc(doc(db, 'users', auth.currentUser.uid));
-        if (docSnap.exists()) {
-          setUser(prev => ({ ...prev, ...docSnap.data() }));
-        }
-      } catch {
-        // Firestore unavailable
+      const data = await readUserRole(auth.currentUser.uid);
+      if (data) {
+        setUser(prev => ({ ...prev, ...data }));
       }
     }
   }, []);
