@@ -1,5 +1,6 @@
+import { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
-import AnimatedContent from '../ui/AnimatedContent';
 import './Features.css';
 
 const features = [
@@ -11,31 +12,61 @@ const features = [
   { icon: '🚀', key: 'features.growth.title', descKey: 'features.growth.desc', color: '#a53c00' },
 ];
 
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 50, filter: 'blur(6px)' },
+  visible: {
+    opacity: 1, y: 0, filter: 'blur(0px)',
+    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
+const headerVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1, y: 0,
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
 export default function Features() {
   const { t } = useLanguage();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-60px' });
 
   return (
-    <section className="features" id="features">
+    <section className="features" id="features" ref={ref}>
       <div className="container">
-        <AnimatedContent distance={60} delay={0}>
-          <div className="features__header">
-            <h2 className="features__title">{t('features.title')}</h2>
-            <p className="features__sub">{t('features.subtitle')}</p>
-          </div>
-        </AnimatedContent>
-        <div className="features__grid">
+        <motion.div
+          className="features__header"
+          variants={headerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          <h2 className="features__title">{t('features.title')}</h2>
+          <p className="features__sub">{t('features.subtitle')}</p>
+        </motion.div>
+
+        <motion.div
+          className="features__grid"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
           {features.map((f, i) => (
-            <AnimatedContent key={i} distance={50} delay={0.08 + i * 0.08}>
-              <div className="features__card">
-                <div className="features__icon-wrap" style={{ background: `${f.color}12`, color: f.color }}>
-                  <span className="features__icon">{f.icon}</span>
-                </div>
-                <h3 className="features__card-title">{t(f.key)}</h3>
-                <p className="features__card-desc">{t(f.descKey)}</p>
+            <motion.div key={i} className="features__card" variants={itemVariants} whileHover={{ y: -8, scale: 1.02 }}>
+              <div className="features__icon-wrap" style={{ background: `${f.color}12`, color: f.color }}>
+                <span className="features__icon">{f.icon}</span>
               </div>
-            </AnimatedContent>
+              <h3 className="features__card-title">{t(f.key)}</h3>
+              <p className="features__card-desc">{t(f.descKey)}</p>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

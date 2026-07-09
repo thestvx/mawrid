@@ -1,8 +1,5 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 
 export default function AnimatedContent({
   children,
@@ -10,7 +7,6 @@ export default function AnimatedContent({
   direction = 'vertical',
   reverse = false,
   duration = 0.8,
-  ease = 'power3.out',
   initialOpacity = 0,
   animateOpacity = true,
   scale = 1,
@@ -19,54 +15,34 @@ export default function AnimatedContent({
   className = '',
   style = {},
 }) {
-  const containerRef = useRef(null);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: `-${(1 - threshold) * 100}px` });
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const fromVars = {
-      opacity: initialOpacity,
-      scale: scale < 1 ? scale : 1,
-    };
-
-    if (direction === 'vertical') {
-      fromVars.y = reverse ? -distance : distance;
-    } else {
-      fromVars.x = reverse ? -distance : distance;
-    }
-
-    const toVars = {
-      opacity: 1,
-      y: 0,
-      x: 0,
-      scale: 1,
-      duration,
-      ease,
-      delay,
-    };
-
-    if (!animateOpacity) {
-      delete toVars.opacity;
-    }
-
-    const tween = gsap.fromTo(el, fromVars, {
-      ...toVars,
-      scrollTrigger: {
-        trigger: el,
-        start: `top ${100 - threshold * 100}%`,
-        toggleActions: 'play none none none',
-      },
-    });
-
-    return () => {
-      tween.kill();
-    };
-  }, [distance, direction, reverse, duration, ease, initialOpacity, animateOpacity, scale, threshold, delay]);
+  const dirMult = reverse ? -1 : 1;
+  const initial = {
+    opacity: initialOpacity,
+    scale: scale < 1 ? scale : 1,
+  };
+  if (direction === 'vertical') {
+    initial.y = dirMult * distance;
+  } else {
+    initial.x = dirMult * distance;
+  }
 
   return (
-    <div ref={containerRef} className={className} style={style}>
+    <motion.div
+      ref={ref}
+      className={className}
+      style={style}
+      initial={initial}
+      animate={isInView ? { opacity: animateOpacity ? 1 : initialOpacity, y: 0, x: 0, scale: 1 } : initial}
+      transition={{
+        duration,
+        ease: [0.16, 1, 0.3, 1],
+        delay,
+      }}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }

@@ -1,14 +1,17 @@
-.hero-divider-wrap {
+/* ── Hero Divider (Full Width) ── */
+.hero-divider-fullwidth {
   position: relative;
   z-index: 10;
-  width: 100%;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
   margin-top: -60px;
   line-height: 0;
   font-size: 0;
   pointer-events: none;
+  overflow: hidden;
 }
 
-.hero-divider-img {
+.hero-divider-fullwidth__img {
   display: block;
   width: 100%;
   height: auto;
