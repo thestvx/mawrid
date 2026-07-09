@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { motion, useInView, useInView as useMotionInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import './WhyMawrid.css';
