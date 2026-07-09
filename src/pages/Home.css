@@ -8,15 +8,14 @@
   line-height: 0;
   font-size: 0;
   pointer-events: none;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .hero-divider-fullwidth__img {
   display: block;
   width: 100%;
   height: auto;
-  min-height: 120px;
-  max-height: 220px;
+  aspect-ratio: 1920 / 635;
   object-fit: cover;
   object-position: center;
 }
