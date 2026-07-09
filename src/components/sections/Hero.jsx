@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import CountUp from 'react-countup';
+import { motion, useMotionValue, useSpring, useTransform, useInView as useFramerInView } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import './Hero.css';
 
@@ -11,8 +10,28 @@ const stats = [
   { end: 47000, suffix: '+', key: 'hero.stat.buyers' },
 ];
 
-function formatNumber(n) {
-  return n.toLocaleString('en-US');
+function AnimatedCounter({ end, suffix, isVisible }) {
+  const [display, setDisplay] = useState('0');
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    let start = 0;
+    const duration = 2000;
+    const startTime = performance.now();
+
+    function tick(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(eased * end);
+      setDisplay(current.toLocaleString('en-US'));
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }, [isVisible, end]);
+
+  return <>{display}{suffix}</>;
 }
 
 const containerVariants = {
@@ -261,10 +280,7 @@ export default function Hero() {
               animate={statsVisible ? 'visible' : 'hidden'}
             >
               <span className="hero__stat-number">
-                {statsVisible ? (
-                  <CountUp end={stat.end} duration={2.5} separator="," formattingFn={formatNumber} />
-                ) : '0'}
-                {stat.suffix}
+                <AnimatedCounter end={stat.end} suffix={stat.suffix} isVisible={statsVisible} />
               </span>
               <span className="hero__stat-desc">{t(stat.key)}</span>
             </motion.div>
