@@ -286,7 +286,7 @@ export default function SellerDashboard() {
               </div>
             </div>
 
-            <div className="d-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div className="d-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
               <div className="d-card" style={{ borderRadius: 20, marginBottom: 0 }}>
                 <div className="d-card__header">
                   <h3 className="d-card__title" style={{ marginBottom: 0 }}>{t('dashboard.topProducts')}</h3>

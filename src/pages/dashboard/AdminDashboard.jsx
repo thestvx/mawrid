@@ -402,7 +402,7 @@ export default function AdminDashboard() {
 
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '2fr 1fr',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
               gap: 24,
               marginBottom: 32,
             }}>
