@@ -9,6 +9,7 @@ import {
   useReducedMotion,
 } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
+import Countdown from '../ui/Countdown';
 import './Hero.css';
 
 const stats = [
@@ -46,19 +47,6 @@ function AnimatedCounter({ end, suffix, isVisible }) {
   return <>{display}{suffix}</>;
 }
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.35 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 36, filter: 'blur(6px)' },
-  visible: {
-    opacity: 1, y: 0, filter: 'blur(0px)',
-    transition: { duration: 0.8, ease: EASE },
-  },
-};
-
 const badgeVariants = {
   hidden: { opacity: 0, scale: 0.85, y: 16 },
   visible: {
@@ -69,7 +57,7 @@ const badgeVariants = {
 
 const titleContainerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.55 } },
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.35 } },
 };
 
 const titleLineVariants = {
@@ -77,19 +65,35 @@ const titleLineVariants = {
   visible: { y: '0%', transition: { duration: 0.9, ease: EASE } },
 };
 
-const imageVariants = {
-  hidden: { opacity: 0, scale: 0.9, x: 60 },
+const itemVariants = {
+  hidden: { opacity: 0, y: 36, filter: 'blur(6px)' },
   visible: {
-    opacity: 1, scale: 1, x: 0,
-    transition: { duration: 1, ease: EASE, delay: 0.4 },
+    opacity: 1, y: 0, filter: 'blur(0px)',
+    transition: { duration: 0.8, ease: EASE },
   },
+};
+
+const boardVariants = {
+  hidden: { opacity: 0, y: 44, scale: 0.92, rotate: 2 },
+  visible: {
+    opacity: 1, y: 0, scale: 1, rotate: 0,
+    transition: { duration: 0.9, ease: EASE, delay: 0.5 },
+  },
+};
+
+const chipVariants = {
+  hidden: { opacity: 0, scale: 0.8, y: 20 },
+  visible: (i) => ({
+    opacity: 1, scale: 1, y: 0,
+    transition: { duration: 0.7, ease: EASE, delay: 0.9 + i * 0.15 },
+  }),
 };
 
 const statVariants = {
   hidden: { opacity: 0, y: 26 },
   visible: (i) => ({
     opacity: 1, y: 0,
-    transition: { duration: 0.7, ease: EASE, delay: 0.8 + i * 0.15 },
+    transition: { duration: 0.7, ease: EASE, delay: 1.1 + i * 0.15 },
   }),
 };
 
@@ -138,26 +142,45 @@ function GlowCursor() {
   );
 }
 
-function FloatingCard({ children, className, delay = 0, duration = 6, strength = 15, parallaxX, parallaxY }) {
+function BillboardChip({ children, className, delay, parallaxX, parallaxY }) {
   const reduce = useReducedMotion();
 
   return (
     <motion.div
-      className={className}
+      className={`hero__chip ${className}`}
       style={{ x: parallaxX, y: parallaxY }}
-      initial={{ opacity: 0, y: 30, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.7, delay, ease: EASE }}
+      custom={delay}
+      variants={chipVariants}
+      initial="hidden"
+      animate="visible"
     >
       <motion.div
-        animate={reduce ? undefined : { y: [0, -strength, 0] }}
-        transition={reduce ? undefined : { duration, repeat: Infinity, ease: 'easeInOut' }}
+        animate={reduce ? undefined : { y: [0, -8, 0] }}
+        transition={reduce ? undefined : { duration: 6, repeat: Infinity, ease: 'easeInOut' }}
       >
-        <div className="hero__float-card-inner glass-card">
-          {children}
-        </div>
+        <div className="hero__chip-inner">{children}</div>
       </motion.div>
     </motion.div>
+  );
+}
+
+function AnnouncementTicker() {
+  const { t } = useLanguage();
+  const items = [1, 2, 3, 4, 5].map((i) => t(`hero.ticker.${i}`));
+
+  return (
+    <div className="hero__ticker" aria-hidden="true">
+      <div className="hero__ticker-track">
+        {[...items, ...items].map((item, i) => (
+          <span className="hero__ticker-item" key={i}>
+            <span className="hero__ticker-dot" />
+            {item}
+          </span>
+        ))}
+      </div>
+      <div className="hero__ticker-fade hero__ticker-fade--start" />
+      <div className="hero__ticker-fade hero__ticker-fade--end" />
+    </div>
   );
 }
 
@@ -173,13 +196,12 @@ export default function Hero() {
   const [statsVisible, setStatsVisible] = useState(false);
   const { t, dir } = useLanguage();
 
-  const { x: px1, y: py1, handleMouseMove } = useParallax(25);
-  const { x: px2, y: py2 } = useParallax(15);
-  const { x: px3, y: py3 } = useParallax(8);
+  const { x: px1, y: py1, handleMouseMove } = useParallax(22);
+  const { x: px2, y: py2 } = useParallax(12);
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
   const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '14%']);
-  const bgScale = useTransform(scrollYProgress, [0, 1], [1.05, 1.14]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1.05, 1.16]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -190,10 +212,6 @@ export default function Hero() {
     return () => observer.disconnect();
   }, []);
 
-  const bgImage = dir === 'rtl'
-    ? '/images/backgrounds/hero-background-ar.png'
-    : '/images/backgrounds/hero-background-en.png';
-
   return (
     <section
       className="hero"
@@ -202,29 +220,24 @@ export default function Hero() {
     >
       <GlowCursor />
 
-      <div className="hero__dot-grid" />
+      <div className="hero__pattern" />
 
       <div className="hero__bg">
         <motion.div className="hero__bg-scroll" style={{ y: bgY, scale: bgScale }}>
           <motion.img
-            src={bgImage}
+            src="/images/backgrounds/herobackground01.png"
             alt=""
             className="hero__bg-img"
             loading="eager"
-            style={{ x: px3, y: py3 }}
+            style={{ x: px2, y: py2 }}
           />
         </motion.div>
         <div className="hero__overlay" />
       </div>
 
       <div className="container hero__content">
-        <motion.div
-          className="hero__text"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.span className="hero__badge" variants={badgeVariants}>
+        <motion.div className="hero__text">
+          <motion.span className="hero__badge" variants={badgeVariants} initial="hidden" animate="visible">
             {t('hero.badge')}
           </motion.span>
 
@@ -243,11 +256,11 @@ export default function Hero() {
             ))}
           </motion.h1>
 
-          <motion.p className="hero__subtitle" variants={itemVariants}>
+          <motion.p className="hero__subtitle" variants={itemVariants} initial="hidden" animate="visible">
             {t('hero.subtitle')}
           </motion.p>
 
-          <motion.div className="hero__cta" variants={itemVariants}>
+          <motion.div className="hero__cta" variants={itemVariants} initial="hidden" animate="visible">
             <Link to="/marketplace" className="hero__btn hero__btn--primary">
               <span>{t('hero.cta.shop')}</span>
               <span className="hero__btn-arrow">
@@ -264,63 +277,98 @@ export default function Hero() {
         </motion.div>
 
         <motion.div
-          className="hero__visual"
-          variants={imageVariants}
+          className="hero__board-wrap"
+          variants={boardVariants}
           initial="hidden"
           animate="visible"
         >
-          <div className="hero__visual-glow" />
-          <div className="hero__visual-ring" />
+          <div className="hero__board-glow" />
 
-          <FloatingCard
-            className="hero__float-card hero__float-card--1"
-            delay={0.5}
-            duration={6}
-            strength={12}
+          <div className="hero__board">
+            <span className="hero__board-ribbon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l2.9 6.26L21.5 9.27l-4.75 4.63 1.12 6.53L12 17.77l-5.88 3.66 1.12-6.53L2.5 9.27l6.6-1.01z" />
+              </svg>
+              {t('hero.board.hot')}
+            </span>
+
+            <div className="hero__board-body">
+              <span className="hero__board-sticker">{t('hero.board.sticker')}</span>
+              <h3 className="hero__board-title">{t('hero.board.title')}</h3>
+              <p className="hero__board-desc">{t('hero.board.desc')}</p>
+
+              <div className="hero__board-price">
+                <span className="hero__board-price-old">
+                  {t('hero.board.priceOld')} {t('hero.board.currency')}
+                </span>
+                <span className="hero__board-price-cur">
+                  {t('hero.board.price')} <small>{t('hero.board.currency')}</small>
+                </span>
+                <span className="hero__board-price-per">{t('hero.board.per')}</span>
+              </div>
+
+              <div className="hero__board-countdown">
+                <span className="hero__board-countdown-label">{t('hero.board.endsIn')}</span>
+                <Countdown
+                  size="md"
+                  dark
+                  labels={{
+                    days: t('hero.board.days'),
+                    hours: t('hero.board.hours'),
+                    minutes: t('hero.board.mins'),
+                    seconds: t('hero.board.secs'),
+                  }}
+                />
+              </div>
+
+              <div className="hero__board-stock">
+                <div className="hero__board-stock-top">
+                  <span>{t('hero.board.stock')} 17/50</span>
+                  <span className="hero__board-rating">★★★★★ 4.9</span>
+                </div>
+                <div className="hero__board-progress">
+                  <span className="hero__board-progress-fill" />
+                </div>
+              </div>
+
+              <Link to="/marketplace" className="hero__board-cta">
+                <span>{t('hero.board.cta')}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={dir === 'rtl' ? { transform: 'scaleX(-1)' } : undefined}>
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+
+          <BillboardChip
+            className="hero__chip--rating"
+            delay={0}
             parallaxX={px1}
             parallaxY={py1}
           >
-            <div className="hero__float-icon">🛍️</div>
-            <div className="hero__float-text">
-              <span className="hero__float-title">{dir === 'rtl' ? 'منتجات رقمية' : 'Digital Products'}</span>
-              <span className="hero__float-sub">{dir === 'rtl' ? '1,200+ منتج' : '1,200+ items'}</span>
-            </div>
-          </FloatingCard>
+            <span className="hero__chip-icon">⭐</span>
+            <span className="hero__chip-text">
+              <strong>{t('hero.board.rating')}</strong>
+              <small>{`12,400 ${t('hero.board.sold')}`}</small>
+            </span>
+          </BillboardChip>
 
-          <FloatingCard
-            className="hero__float-card hero__float-card--2"
-            delay={0.75}
-            duration={7}
-            strength={10}
+          <BillboardChip
+            className="hero__chip--secure"
+            delay={1}
             parallaxX={px2}
             parallaxY={py2}
           >
-            <div className="hero__float-icon">⚡</div>
-            <div className="hero__float-text">
-              <span className="hero__float-title">{dir === 'rtl' ? 'تسليم فوري' : 'Instant Delivery'}</span>
-              <span className="hero__float-sub">{dir === 'rtl' ? '99.9%' : '99.9%'}</span>
-            </div>
-          </FloatingCard>
-
-          <FloatingCard
-            className="hero__float-card hero__float-card--3"
-            delay={1}
-            duration={8}
-            strength={8}
-            parallaxX={px1}
-            parallaxY={py1}
-          >
-            <div className="hero__float-icon">🛡️</div>
-            <div className="hero__float-text">
-              <span className="hero__float-title">{dir === 'rtl' ? 'آمن 100%' : '100% Secure'}</span>
-              <span className="hero__float-sub">{dir === 'rtl' ? 'حماية كاملة' : 'Full Protection'}</span>
-            </div>
-          </FloatingCard>
-
-          <div className="hero__visual-orb hero__visual-orb--1" />
-          <div className="hero__visual-orb hero__visual-orb--2" />
+            <span className="hero__chip-icon">🔐</span>
+            <span className="hero__chip-text">
+              <strong>{dir === 'rtl' ? 'ضمان استرجاع 30 يوم' : '30-day refund'}</strong>
+              <small>{t('hero.ticker.3')}</small>
+            </span>
+          </BillboardChip>
         </motion.div>
       </div>
+
+      <AnnouncementTicker />
 
       <div className="hero__stats" ref={statsRef}>
         <div className="container hero__stats-inner">

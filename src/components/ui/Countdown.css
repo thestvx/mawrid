@@ -1,0 +1,110 @@
+.countdown {
+  --cd-font-size: 1.25rem;
+  --cd-tile-pad: 0.35em 0.5em;
+  --cd-label-size: 0.6875rem;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* ── Sizes ── */
+.countdown--lg {
+  --cd-font-size: 1.6rem;
+  --cd-tile-pad: 0.55em 0.6em;
+  --cd-label-size: 0.6875rem;
+  gap: 12px;
+}
+
+.countdown--sm {
+  --cd-font-size: 1.05rem;
+  --cd-tile-pad: 0.25em 0.35em;
+  --cd-label-size: 0.625rem;
+  gap: 7px;
+}
+
+.countdown__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.countdown__digits {
+  display: inline-flex;
+  gap: 2px;
+  padding: var(--cd-tile-pad);
+  border-radius: 12px;
+  font-size: var(--cd-font-size);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+/* ── Dark tiles (hero / billboard) ── */
+.countdown--dark .countdown__digits {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 8px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.countdown--dark .countdown__label {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ── Light tiles ── */
+.countdown--light .countdown__digits {
+  background: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  color: var(--color-on-surface);
+}
+
+.countdown--light .countdown__label {
+  color: var(--color-secondary);
+}
+
+.countdown__label {
+  font-size: var(--cd-label-size);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+/* ── Odometer roll ── */
+.roll-digit {
+  display: inline-block;
+}
+
+.roll-digit__mask {
+  display: inline-block;
+  width: 0.72em;
+  height: 1em;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.roll-digit__strip {
+  display: inline-block;
+  will-change: transform;
+}
+
+.roll-digit__char {
+  display: block;
+  height: 1em;
+  line-height: 1;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roll-digit__strip {
+    transition: none !important;
+  }
+}
