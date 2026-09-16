@@ -29,11 +29,14 @@
   position: fixed;
   top: 80px;
   bottom: 0;
+  left: 0;
   z-index: 100;
   overflow-y: auto;
 }
 
 [dir="rtl"] .dashboard__sidebar {
+  left: auto;
+  right: 0;
   border-left: none;
   border-right: 1px solid var(--color-outline-variant);
 }
@@ -141,14 +144,14 @@
 
 .dashboard__main {
   flex: 1;
-  margin-right: 260px;
+  margin-left: 260px;
   padding: 32px;
   min-height: calc(100vh - 80px);
 }
 
 [dir="rtl"] .dashboard__main {
-  margin-right: 0;
-  margin-left: 260px;
+  margin-left: 0;
+  margin-right: 260px;
 }
 
 .dashboard--admin .dashboard__main {
