@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import DashIcon from '../../components/dashboard/DashIcon';
 
 const USERS = [
   { name: 'Ahmed Ali', email: 'ahmed@example.com', role: 'seller', status: 'verified', joined: '2026-01-15' },
@@ -114,11 +115,10 @@ function StatCard({ label, value, suffix, prefix, trend, trendLabel, trendColor,
           borderRadius: 12,
           background: iconBg || 'rgba(255, 98, 1, 0.08)',
           color: 'var(--color-primary)',
-          fontSize: '1.5rem',
           lineHeight: 1,
           transition: 'transform 0.3s ease',
         }} className="stat-icon">
-          {icon}
+          <DashIcon name={icon} size={24} />
         </div>
       </div>
       {trend && trendLabel ? (
@@ -372,7 +372,7 @@ export default function AdminDashboard() {
                 trend="↑ 12.5%"
                 trendLabel={dir === 'rtl' ? 'مقارنة بالشهر الماضي' : 'vs last month'}
                 trendColor="#166534"
-                icon="📈"
+                icon="analytics"
                 iconBg="rgba(255, 98, 1, 0.08)"
                 glowColor="rgba(255, 98, 1, 0.15)"
                 delay={200}
@@ -383,7 +383,7 @@ export default function AdminDashboard() {
                 trend="↑ 4.2%"
                 trendLabel={dir === 'rtl' ? 'مقارنة بالشهر الماضي' : 'vs last month'}
                 trendColor="#166534"
-                icon="🏪"
+                icon="stores"
                 iconBg="rgba(133, 137, 255, 0.08)"
                 glowColor="rgba(133, 137, 255, 0.15)"
                 delay={300}
@@ -393,7 +393,7 @@ export default function AdminDashboard() {
                 value={28}
                 trend={dir === 'rtl' ? 'يتطلب انتباهاً' : 'Requires attention'}
                 trendColor="#991b1b"
-                icon="⏳"
+                icon="clock"
                 iconBg="rgba(186, 26, 26, 0.08)"
                 glowColor="rgba(186, 26, 26, 0.15)"
                 delay={400}
@@ -481,7 +481,7 @@ export default function AdminDashboard() {
                 opacity: 0,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-                  <span style={{ color: 'var(--color-error)', fontSize: '1.25rem' }}>⚠️</span>
+                  <span style={{ color: 'var(--color-error)', display: 'inline-flex' }}><DashIcon name="warn" size={20} /></span>
                   <h3 className="d-card__title" style={{ marginBottom: 0 }}>{dir === 'rtl' ? 'تنبيهات حرجة' : 'Critical Alerts'}</h3>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -540,19 +540,19 @@ export default function AdminDashboard() {
 
             <div className="d-grid">
               <a href="/owner?tab=users" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/owner?tab=users'; }}>
-                <span className="d-quick-card__icon">👥</span>
+                <span className="d-quick-card__icon"><DashIcon name="users" size={20} /></span>
                 <span>{t('dashboard.userManagement')}</span>
               </a>
               <a href="/owner?tab=sellers" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/owner?tab=sellers'; }}>
-                <span className="d-quick-card__icon">🏪</span>
+                <span className="d-quick-card__icon"><DashIcon name="stores" size={20} /></span>
                 <span>{t('dashboard.sellerManagement')}</span>
               </a>
               <a href="/owner?tab=products" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/owner?tab=products'; }}>
-                <span className="d-quick-card__icon">📦</span>
+                <span className="d-quick-card__icon"><DashIcon name="products" size={20} /></span>
                 <span>{t('dashboard.productModeration')}</span>
               </a>
               <a href="/owner?tab=reports" className="d-quick-card" onClick={(e) => { e.preventDefault(); window.location.href = '/owner?tab=reports'; }}>
-                <span className="d-quick-card__icon">📄</span>
+                <span className="d-quick-card__icon"><DashIcon name="reports" size={20} /></span>
                 <span>{t('dashboard.reports')}</span>
               </a>
             </div>

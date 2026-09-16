@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
+import DashIcon from '../../components/dashboard/DashIcon';
 import './Dashboard.css';
 
 const PRODUCTS = [
@@ -333,8 +334,8 @@ export default function SellerDashboard() {
                       background: a.type === 'warning' ? 'rgba(186,26,26,0.06)' : 'var(--color-surface-container-low)',
                       border: a.type === 'warning' ? '1px solid rgba(186,26,26,0.12)' : '1px solid var(--color-outline-variant)',
                     }}>
-                      <div style={{ fontSize: 20, color: a.type === 'warning' ? 'var(--color-error)' : 'var(--color-secondary)', marginTop: 1 }}>
-                        {a.type === 'warning' ? '⚠' : '💬'}
+                      <div style={{ display: 'inline-flex', color: a.type === 'warning' ? 'var(--color-error)' : 'var(--color-secondary)', marginTop: 1 }}>
+                        {a.type === 'warning' ? <DashIcon name="warn" size={20} /> : <DashIcon name="message" size={20} />}
                       </div>
                       <div>
                         <h4 style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-on-surface)', margin: 0 }}>{a.titleKey}</h4>

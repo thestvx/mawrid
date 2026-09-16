@@ -1,32 +1,33 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
+import DashIcon from '../../components/dashboard/DashIcon';
 import './Dashboard.css';
 
 const SELLER_SIDEBAR = [
-  { key: 'dashboard.overview', path: '/dashboard/seller', icon: '📊' },
-  { key: 'dashboard.products', path: '/dashboard/seller?tab=products', icon: '📦' },
-  { key: 'dashboard.orders', path: '/dashboard/seller?tab=orders', icon: '📋' },
-  { key: 'dashboard.analytics', path: '/dashboard/seller?tab=analytics', icon: '📈' },
-  { key: 'dashboard.payouts', path: '/dashboard/seller?tab=payouts', icon: '💰' },
-  { key: 'dashboard.settings', path: '/dashboard/seller?tab=settings', icon: '⚙️' },
+  { key: 'dashboard.overview', path: '/dashboard/seller', icon: 'overview' },
+  { key: 'dashboard.products', path: '/dashboard/seller?tab=products', icon: 'products' },
+  { key: 'dashboard.orders', path: '/dashboard/seller?tab=orders', icon: 'orders' },
+  { key: 'dashboard.analytics', path: '/dashboard/seller?tab=analytics', icon: 'analytics' },
+  { key: 'dashboard.payouts', path: '/dashboard/seller?tab=payouts', icon: 'payouts' },
+  { key: 'dashboard.settings', path: '/dashboard/seller?tab=settings', icon: 'settings' },
 ];
 
 const BUYER_SIDEBAR = [
-  { key: 'dashboard.overview', path: '/dashboard/buyer', icon: '📊' },
-  { key: 'dashboard.orders', path: '/dashboard/buyer?tab=orders', icon: '📋' },
-  { key: 'dashboard.downloads', path: '/dashboard/buyer?tab=downloads', icon: '⬇️' },
-  { key: 'dashboard.favorites', path: '/dashboard/buyer?tab=favorites', icon: '❤️' },
-  { key: 'dashboard.settings', path: '/dashboard/buyer?tab=settings', icon: '⚙️' },
+  { key: 'dashboard.overview', path: '/dashboard/buyer', icon: 'overview' },
+  { key: 'dashboard.orders', path: '/dashboard/buyer?tab=orders', icon: 'orders' },
+  { key: 'dashboard.downloads', path: '/dashboard/buyer?tab=downloads', icon: 'downloads' },
+  { key: 'dashboard.favorites', path: '/dashboard/buyer?tab=favorites', icon: 'favorites' },
+  { key: 'dashboard.settings', path: '/dashboard/buyer?tab=settings', icon: 'settings' },
 ];
 
 const ADMIN_SIDEBAR = [
-  { key: 'dashboard.overview', path: '/owner', icon: '📊' },
-  { key: 'dashboard.userManagement', path: '/owner?tab=users', icon: '👥' },
-  { key: 'dashboard.sellerManagement', path: '/owner?tab=sellers', icon: '🏪' },
-  { key: 'dashboard.productModeration', path: '/owner?tab=products', icon: '📦' },
-  { key: 'dashboard.reports', path: '/owner?tab=reports', icon: '📄' },
-  { key: 'dashboard.platformSettings', path: '/owner?tab=settings', icon: '⚙️' },
+  { key: 'dashboard.overview', path: '/owner', icon: 'overview' },
+  { key: 'dashboard.userManagement', path: '/owner?tab=users', icon: 'users' },
+  { key: 'dashboard.sellerManagement', path: '/owner?tab=sellers', icon: 'stores' },
+  { key: 'dashboard.productModeration', path: '/owner?tab=products', icon: 'products' },
+  { key: 'dashboard.reports', path: '/owner?tab=reports', icon: 'reports' },
+  { key: 'dashboard.platformSettings', path: '/owner?tab=settings', icon: 'settings' },
 ];
 
 export default function DashboardLayout() {
@@ -69,7 +70,7 @@ export default function DashboardLayout() {
                 className={`dashboard__nav-link ${location.pathname + location.search === item.path || (location.pathname === item.path && !location.search) ? 'dashboard__nav-link--active' : ''}`}
                 onClick={() => setMobileOpen(false)}
               >
-                <span className="dashboard__nav-icon">{item.icon}</span>
+                <span className="dashboard__nav-icon"><DashIcon name={item.icon} size={18} /></span>
                 <span>{t(item.key)}</span>
               </Link>
             ))}

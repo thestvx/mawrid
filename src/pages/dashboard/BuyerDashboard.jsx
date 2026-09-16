@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
+import DashIcon from '../../components/dashboard/DashIcon';
 import './Dashboard.css';
 
 const RECENT_ORDERS = [
@@ -31,9 +32,9 @@ const DOWNLOADS = [
 ];
 
 const LEARNING_COURSES = [
-  { title: 'Advanced Figma Systems', category: 'UI/UX', progress: 65, completed: 12, total: 18, color: '#494bd6', icon: '🎯' },
-  { title: 'React Component Patterns', category: 'Dev', progress: 20, completed: 3, total: 15, color: '#a53c00', icon: '⚛️' },
-  { title: 'Design System Architecture', category: 'UI/UX', progress: 42, completed: 8, total: 19, color: '#2f2ebe', icon: '🏛️' },
+  { title: 'Advanced Figma Systems', category: 'UI/UX', progress: 65, completed: 12, total: 18, color: '#494bd6', icon: 'target' },
+  { title: 'React Component Patterns', category: 'Dev', progress: 20, completed: 3, total: 15, color: '#a53c00', icon: 'atom' },
+  { title: 'Design System Architecture', category: 'UI/UX', progress: 42, completed: 8, total: 19, color: '#2f2ebe', icon: 'layers' },
 ];
 
 const LIBRARY_ITEMS = [
@@ -44,11 +45,11 @@ const LIBRARY_ITEMS = [
 ];
 
 const ACTIVITY_ITEMS = [
-  { type: 'purchase', title: 'Purchased SaaS Admin Pro Kit', detail: 'Order #ORD-8923 \u2022 $49.00', time: 'Today, 10:42 AM', action: 'View Receipt', icon: '🛍️', color: '#ff6201' },
-  { type: 'lesson', title: 'Completed lesson Variables Deep Dive', detail: 'in Advanced Figma Systems', time: 'Yesterday, 3:15 PM', action: 'Continue Course', icon: '▶️', color: '#494bd6' },
-  { type: 'update', title: 'Asset update available for Nova Line Icons V2', detail: 'Version 2.1 introduces 50 new icons.', time: 'Oct 12, 2023', action: 'Download Update', icon: '🔄', color: '#5f5e5e' },
-  { type: 'purchase', title: 'Purchased Pitch Deck Master', detail: 'Order #ORD-8604 \u2022 $39.00', time: 'Jun 28, 2026', action: 'View Receipt', icon: '🛍️', color: '#ff6201' },
-  { type: 'lesson', title: 'Started module Component Architecture', detail: 'in React Component Patterns', time: 'Jun 25, 2026', action: 'Resume', icon: '▶️', color: '#494bd6' },
+  { type: 'purchase', title: 'Purchased SaaS Admin Pro Kit', detail: 'Order #ORD-8923 \u2022 $49.00', time: 'Today, 10:42 AM', action: 'View Receipt', icon: 'bag', color: '#ff6201' },
+  { type: 'lesson', title: 'Completed lesson Variables Deep Dive', detail: 'in Advanced Figma Systems', time: 'Yesterday, 3:15 PM', action: 'Continue Course', icon: 'play', color: '#494bd6' },
+  { type: 'update', title: 'Asset update available for Nova Line Icons V2', detail: 'Version 2.1 introduces 50 new icons.', time: 'Oct 12, 2023', action: 'Download Update', icon: 'refresh', color: '#5f5e5e' },
+  { type: 'purchase', title: 'Purchased Pitch Deck Master', detail: 'Order #ORD-8604 \u2022 $39.00', time: 'Jun 28, 2026', action: 'View Receipt', icon: 'bag', color: '#ff6201' },
+  { type: 'lesson', title: 'Started module Component Architecture', detail: 'in React Component Patterns', time: 'Jun 25, 2026', action: 'Resume', icon: 'play', color: '#494bd6' },
 ];
 
 function AnimatedNumber({ value, suffix = '', duration = 1200 }) {
@@ -89,11 +90,11 @@ function ProgressBar({ progress, color }) {
 }
 
 const tabMeta = [
-  { key: 'overview', labelKey: 'dashboard.overview', icon: '📊' },
-  { key: 'orders', labelKey: 'dashboard.orders', icon: '📋' },
-  { key: 'downloads', labelKey: 'dashboard.downloads', icon: '⬇️' },
-  { key: 'favorites', labelKey: 'dashboard.favorites', icon: '❤️' },
-  { key: 'settings', labelKey: 'dashboard.settings', icon: '⚙️' },
+  { key: 'overview', labelKey: 'dashboard.overview', icon: 'overview' },
+  { key: 'orders', labelKey: 'dashboard.orders', icon: 'orders' },
+  { key: 'downloads', labelKey: 'dashboard.downloads', icon: 'downloads' },
+  { key: 'favorites', labelKey: 'dashboard.favorites', icon: 'favorites' },
+  { key: 'settings', labelKey: 'dashboard.settings', icon: 'settings' },
 ];
 
 export default function BuyerDashboard() {
@@ -158,7 +159,7 @@ export default function BuyerDashboard() {
       <div className="d-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
         {tabMeta.filter((m) => m.key !== 'overview').map((meta) => (
           <Link key={meta.key} to={`/dashboard/buyer?tab=${meta.key}`} className="d-quick-card">
-            <span className="d-quick-card__icon">{meta.icon}</span>
+            <span className="d-quick-card__icon"><DashIcon name={meta.icon} size={20} /></span>
             <span>{t(meta.labelKey)}</span>
           </Link>
         ))}
@@ -175,8 +176,8 @@ export default function BuyerDashboard() {
             <div key={i} className="d-card" style={{ position: 'relative', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'default' }}>
               <div style={{ position: 'absolute', top: 0, right: 0, width: 96, height: 96, background: `${course.color}10`, borderRadius: '0 0 0 999px', transition: 'transform 0.5s' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, position: 'relative', zIndex: 1 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 10, background: `${course.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }}>
-                  {course.icon}
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: `${course.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', color: course.color }}>
+                  <DashIcon name={course.icon} size={22} />
                 </div>
                 <span style={{ background: 'var(--color-surface-container-high)', color: 'var(--color-on-surface-variant)', fontSize: '0.6875rem', fontWeight: 700, padding: '2px 10px', borderRadius: 9999 }}>
                   {course.category}
@@ -229,8 +230,8 @@ export default function BuyerDashboard() {
                 <div style={{ width: 56, height: 56, borderRadius: 14, background: `${item.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 700, color: item.color }}>
                   {item.initials}
                 </div>
-                <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.3s', cursor: 'pointer' }}>
-                  ⬇️
+                <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.3s', cursor: 'pointer', color: 'var(--color-on-surface)' }}>
+                  <DashIcon name="downloads" size={15} />
                 </div>
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 12px 8px', background: 'linear-gradient(transparent, rgba(0,0,0,0.5))', opacity: 0, transition: 'opacity 0.3s' }}>
                   <span style={{ color: '#fff', fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{item.category}</span>
@@ -262,8 +263,8 @@ export default function BuyerDashboard() {
         <div>
           {ACTIVITY_ITEMS.map((item, i) => (
             <div key={i} style={{ padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 14, borderBottom: i < ACTIVITY_ITEMS.length - 1 ? '1px solid var(--color-outline-variant)' : 'none', transition: 'background 0.2s', cursor: 'pointer' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: `${item.color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1rem' }}>
-                {item.icon}
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: `${item.color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color }}>
+                <DashIcon name={item.icon} size={17} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: '0.875rem', color: 'var(--color-on-surface)', fontWeight: 500, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -329,7 +330,7 @@ export default function BuyerDashboard() {
         <div className="d-list">
           {DOWNLOADS.map((item, i) => (
             <div key={i} className="d-list__item">
-              <div className="d-list__icon">📦</div>
+              <div className="d-list__icon"><DashIcon name="products" size={20} /></div>
               <div className="d-list__info">
                 <strong>{item.title}</strong>
                 <span>{item.version} &middot; {item.date} &middot; {item.size}</span>
@@ -352,8 +353,8 @@ export default function BuyerDashboard() {
           {FAVORITES.map((item, i) => (
             <div key={i} className="d-fav-card" style={{ position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, right: 0, width: 60, height: 60, background: `${item.color}10`, borderRadius: '0 0 0 999px' }} />
-              <div className="d-fav-card__icon" style={{ position: 'relative', zIndex: 1, width: 56, height: 56, borderRadius: 14, background: `${item.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', margin: '0 auto 12px' }}>
-                <span style={{ fontSize: '1.5rem' }}>❤️</span>
+              <div className="d-fav-card__icon" style={{ position: 'relative', zIndex: 1, width: 56, height: 56, borderRadius: 14, background: `${item.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#f43f5e' }}>
+                <DashIcon name="favorites" size={26} />
               </div>
               <h4 style={{ position: 'relative', zIndex: 1 }}>{item.title}</h4>
               <span className="d-fav-card__price" style={{ position: 'relative', zIndex: 1 }}>${item.price}</span>
@@ -428,7 +429,7 @@ export default function BuyerDashboard() {
                 gap: 6,
               }}
             >
-              <span>{meta.icon}</span>
+              <span style={{ display: 'inline-flex' }}><DashIcon name={meta.icon} size={15} /></span>
               <span>{t(meta.labelKey)}</span>
             </Link>
           );

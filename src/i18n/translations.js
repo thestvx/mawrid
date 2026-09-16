@@ -8,7 +8,7 @@ export const ar = {
   'nav.langSwitch': 'English',
   'nav.dashboard': 'لوحة التحكم',
 
-  'hero.badge': '🛒 سوق رقمي متكامل',
+  'hero.badge': 'سوق رقمي متكامل',
   'hero.title.mawrid': 'مَورد',
   'hero.title.line1': 'سوق المبدعين',
   'hero.title.line2': 'والمنتجات الرقمية',
@@ -204,6 +204,7 @@ export const ar = {
 
   'testimonials.title': 'ماذا يقول مستخدمونا',
   'testimonials.subtitle': 'آراء من مجتمع المبدعين والمشترين في مَورد',
+  'testimonials.aggregate': 'من 12,400+ تقييم موثق',
   'testimonials.q1': 'منصة رائعة! بعت أول منتج رقمي لي خلال أول أسبوع من التسجيل. واجهات الاستخدام سلسة جداً.',
   'testimonials.n1': 'سارة الأحمدي',
   'testimonials.r1': 'مصممة واجهات',
@@ -285,7 +286,7 @@ export const en = {
   'nav.langSwitch': 'العربية',
   'nav.dashboard': 'Dashboard',
 
-  'hero.badge': '🛒 Premium Digital Marketplace',
+  'hero.badge': 'Premium Digital Marketplace',
   'hero.title.mawrid': 'Mawrid',
   'hero.title.line1': 'The Marketplace',
   'hero.title.line2': 'for Creators & Digital Products',
@@ -484,6 +485,7 @@ export const en = {
 
   'testimonials.title': 'What Our Users Say',
   'testimonials.subtitle': 'Reviews from the Mawrid creator and buyer community',
+  'testimonials.aggregate': 'from 12,400+ verified reviews',
   'testimonials.q1': 'Amazing platform! I sold my first digital product within the first week. The UI is incredibly smooth.',
   'testimonials.n1': 'Sarah Al-Ahmadi',
   'testimonials.r1': 'UI Designer',
