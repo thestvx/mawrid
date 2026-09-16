@@ -99,8 +99,24 @@ export function AuthProvider({ children }) {
     return unsub;
   }, []);
 
-  const login = useCallback(async (email, password) => {
+  const login = useCallback(async (identifier, password) => {
     handledRef.current = true;
+    let email = identifier;
+    if (!identifier.includes('@')) {
+      // Username login: resolve the email from the users table, then sign in.
+      if (supabase) {
+        try {
+          const { data } = await supabase
+            .from('users')
+            .select('email')
+            .eq('name', identifier.toLowerCase())
+            .limit(1);
+          if (data && data[0]) email = data[0].email;
+        } catch (err) {
+          console.warn('Username lookup failed:', err.message);
+        }
+      }
+    }
     await signInWithEmailAndPassword(auth, email, password);
     setTimeout(() => { handledRef.current = false; }, 200);
   }, []);

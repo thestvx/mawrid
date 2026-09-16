@@ -25,6 +25,7 @@ function getAvatarColor(name) {
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
@@ -33,7 +34,11 @@ export default function Navbar() {
   const { user, isAuthenticated, role, logout } = useAuth();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 20);
+      setHidden(window.scrollY <= 44);
+    };
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -54,7 +59,7 @@ export default function Navbar() {
   }, []);
 
   const getDashboardLink = () => {
-    if (role === 'admin') return '/owner';
+    if (role === 'admin') return '/admin';
     if (role === 'seller') return '/dashboard/seller';
     return '/dashboard/buyer';
   };
@@ -69,7 +74,7 @@ export default function Navbar() {
   const avatarColor = getAvatarColor(userName);
 
   return (
-    <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
+    <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''} ${hidden ? 'navbar--hidden' : ''}`}>
       <div className="container navbar__inner">
         <Link to="/" className="navbar__logo">
           <img

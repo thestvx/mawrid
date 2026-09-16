@@ -22,12 +22,14 @@ const BUYER_SIDEBAR = [
 ];
 
 const ADMIN_SIDEBAR = [
-  { key: 'dashboard.overview', path: '/owner', icon: 'overview' },
-  { key: 'dashboard.userManagement', path: '/owner?tab=users', icon: 'users' },
-  { key: 'dashboard.sellerManagement', path: '/owner?tab=sellers', icon: 'stores' },
-  { key: 'dashboard.productModeration', path: '/owner?tab=products', icon: 'products' },
-  { key: 'dashboard.reports', path: '/owner?tab=reports', icon: 'reports' },
-  { key: 'dashboard.platformSettings', path: '/owner?tab=settings', icon: 'settings' },
+  { key: 'dashboard.overview', path: '/admin', icon: 'overview' },
+  { key: 'dashboard.userManagement', path: '/admin?tab=users', icon: 'users' },
+  { key: 'dashboard.sellerManagement', path: '/admin?tab=sellers', icon: 'stores' },
+  { key: 'dashboard.productModeration', path: '/admin?tab=products', icon: 'products' },
+  { key: 'dashboard.orders', path: '/admin?tab=orders', icon: 'orders' },
+  { key: 'dashboard.payouts', path: '/admin?tab=payouts', icon: 'payouts' },
+  { key: 'dashboard.reports', path: '/admin?tab=reports', icon: 'reports' },
+  { key: 'dashboard.platformSettings', path: '/admin?tab=settings', icon: 'settings' },
 ];
 
 export default function DashboardLayout() {
