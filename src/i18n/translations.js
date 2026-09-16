@@ -28,6 +28,7 @@ export const ar = {
   'hero.stat.products': 'منتج رقمي',
   'hero.stat.sellers': 'بائع نشط',
   'hero.stat.buyers': 'مشتري سعيد',
+  'showcase.caption': 'مَورد — سوق المبدعين الرقمي',
 
   'trending.title': 'منتجات رائجة',
   'trending.viewAll': 'عرض الكل',
@@ -304,6 +305,7 @@ export const en = {
   'hero.stat.products': 'Digital Products',
   'hero.stat.sellers': 'Active Sellers',
   'hero.stat.buyers': 'Happy Buyers',
+  'showcase.caption': 'Mawrid — Digital Creators Marketplace',
 
   'trending.title': 'Trending Products',
   'trending.viewAll': 'View All',
