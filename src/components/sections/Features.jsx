@@ -18,7 +18,7 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 50, filter: 'blur(6px)' },
+  hidden: { opacity: 0, y: 36, filter: 'blur(4px)' },
   visible: {
     opacity: 1, y: 0, filter: 'blur(0px)',
     transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
@@ -26,7 +26,7 @@ const itemVariants = {
 };
 
 const headerVariants = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0, y: 28 },
   visible: {
     opacity: 1, y: 0,
     transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
@@ -59,7 +59,8 @@ export default function Features() {
         >
           {features.map((f, i) => (
             <motion.div key={i} className="features__card" variants={itemVariants} whileHover={{ y: -8, scale: 1.02 }}>
-              <div className="features__icon-wrap" style={{ background: `${f.color}12`, color: f.color }}>
+              <span className="features__card-accent" style={{ background: `linear-gradient(90deg, ${f.color}, transparent)` }} />
+              <div className="features__icon-wrap" style={{ background: `${f.color}12`, color: f.color }} whileHover={{ rotate: [0, -8, 6, 0], scale: 1.12 }} transition={{ duration: 0.5 }}>
                 <span className="features__icon">{f.icon}</span>
               </div>
               <h3 className="features__card-title">{t(f.key)}</h3>

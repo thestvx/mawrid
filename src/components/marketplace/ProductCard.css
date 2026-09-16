@@ -1,18 +1,25 @@
+.product-card-wrap {
+  height: 100%;
+  will-change: transform;
+}
+
 .product-card {
   display: flex;
   flex-direction: column;
+  height: 100%;
   border-radius: 16px;
   overflow: hidden;
   background: var(--color-surface-container-lowest);
   border: 1px solid var(--color-outline-variant);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
+  transition: transform var(--duration-ui) var(--ease-expo), box-shadow var(--duration-slow) var(--ease-expo), border-color var(--duration-ui) var(--ease-expo);
 }
 
-.product-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.04);
-  border-color: var(--color-primary-fixed-dim);
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.04);
+    border-color: var(--color-primary-fixed-dim);
+  }
 }
 
 .product-card--featured {
@@ -30,11 +37,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--duration-slow) var(--ease-expo);
 }
 
-.product-card:hover .product-card__img {
-  transform: scale(1.08);
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover .product-card__img {
+    transform: scale(1.08);
+  }
 }
 
 .product-card__image-overlay {
@@ -42,12 +51,14 @@
   inset: 0;
   background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.3) 100%);
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity var(--duration-ui) var(--ease-expo);
   z-index: 1;
 }
 
-.product-card:hover .product-card__image-overlay {
-  opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover .product-card__image-overlay {
+    opacity: 1;
+  }
 }
 
 .product-card__badge {
@@ -82,7 +93,7 @@
   z-index: 2;
   opacity: 0;
   transform: translateY(8px);
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity var(--duration-ui) var(--ease-expo), transform var(--duration-ui) var(--ease-expo);
 }
 
 [dir="rtl"] .product-card__actions {
@@ -90,9 +101,11 @@
   left: 12px;
 }
 
-.product-card:hover .product-card__actions {
-  opacity: 1;
-  transform: translateY(0);
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover .product-card__actions {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .product-card__action-btn {
@@ -104,12 +117,14 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   color: var(--color-on-surface);
-  transition: all 0.25s ease;
+  transition: transform var(--duration-fast) var(--ease-expo), color var(--duration-fast) var(--ease-expo), background-color var(--duration-fast) var(--ease-expo), box-shadow var(--duration-fast) var(--ease-expo);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
-.product-card__action-btn:hover {
-  transform: scale(1.1);
+@media (hover: hover) and (pointer: fine) {
+  .product-card__action-btn:hover {
+    transform: scale(1.1);
+  }
 }
 
 .product-card__action-btn--fav:hover {

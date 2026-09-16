@@ -26,7 +26,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  transition: gap 0.2s;
+  transition: gap var(--duration-ui) var(--ease-expo), color var(--duration-ui) var(--ease-expo);
 }
 
 .trending__view-all:hover {
@@ -35,6 +35,18 @@
 
 .trending__arrow {
   font-size: 1rem;
+  transition: transform var(--duration-ui) var(--ease-expo);
+  display: inline-flex;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .trending__view-all:hover .trending__arrow {
+    transform: translateX(3px);
+  }
+}
+
+[dir="rtl"] .trending__view-all:hover .trending__arrow {
+  transform: translateX(-3px);
 }
 
 .trending__grid {

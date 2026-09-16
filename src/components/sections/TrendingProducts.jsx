@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, useInView } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import ProductCard from '../marketplace/ProductCard';
 import './TrendingProducts.css';
@@ -44,35 +45,47 @@ const PRODUCTS = [
   },
 ];
 
-export default function TrendingProducts() {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef(null);
-  const { t, dir } = useLanguage();
+const headerVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1, y: 0,
+    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+  },
+};
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.1 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
+const gridVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
+};
+
+export default function TrendingProducts() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-60px' });
+  const { t, dir } = useLanguage();
 
   return (
     <section ref={ref}>
-      <div className="trending__header">
+      <motion.div
+        className="trending__header"
+        variants={headerVariants}
+        initial="hidden"
+        animate={isInView ? 'visible' : 'hidden'}
+      >
         <h2 className="trending__title">{t('trending.title')}</h2>
         <Link to="/marketplace" className="trending__view-all">
           {t('trending.viewAll')} <span className="trending__arrow">{dir === 'rtl' ? '←' : '→'}</span>
         </Link>
-      </div>
-      <div className="trending__grid">
+      </motion.div>
+      <motion.div
+        className="trending__grid"
+        variants={gridVariants}
+        initial="hidden"
+        animate={isInView ? 'visible' : 'hidden'}
+      >
         {PRODUCTS.map((product, i) => (
-          <div key={product.id} className={visible ? `animate-slide-up stagger-${i + 1}` : ''}>
-            <ProductCard product={product} />
-          </div>
+          <ProductCard key={product.id} product={product} index={i} />
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }

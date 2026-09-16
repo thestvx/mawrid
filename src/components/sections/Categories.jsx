@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import './Categories.css';
 
@@ -18,6 +19,7 @@ export default function Categories() {
   const [visible, setVisible] = useState(false);
   const ref = useRef(null);
   const { dir } = useLanguage();
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -28,18 +30,35 @@ export default function Categories() {
     return () => observer.disconnect();
   }, []);
 
+  const spring = reduce
+    ? { duration: 0 }
+    : { type: 'spring', stiffness: 420, damping: 34 };
+
   return (
     <section ref={ref} className="categories">
-      <div className="categories__scroll">
-        {CATEGORIES.map((cat, i) => (
-          <button
-            key={i}
-            className={`categories__pill ${active === i ? 'categories__pill--active' : ''} ${visible ? `animate-slide-up stagger-${i + 1}` : ''}`}
-            onClick={() => setActive(i)}
-          >
-            {dir === 'rtl' ? cat.label_ar : cat.label_en}
-          </button>
-        ))}
+      <div className="categories__scroll" role="group" aria-label="Categories">
+        {CATEGORIES.map((cat, i) => {
+          const isActive = active === i;
+          return (
+            <button
+              key={i}
+              aria-pressed={isActive}
+              className={`categories__pill ${isActive ? 'categories__pill--active' : ''} ${visible ? `animate-slide-up stagger-${i + 1}` : ''}`}
+              onClick={() => setActive(i)}
+            >
+              {!reduce && isActive && (
+                <motion.span
+                  layoutId="categories-active-pill"
+                  className="categories__pill-bg"
+                  transition={spring}
+                />
+              )}
+              <span className="categories__pill-label">
+                {dir === 'rtl' ? cat.label_ar : cat.label_en}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );

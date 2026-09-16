@@ -68,6 +68,15 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius-full: 9999px;
+
+  /* Motion tokens */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 160ms;
+  --duration-ui: 260ms;
+  --duration-slow: 480ms;
+  --duration-marketing: 800ms;
 }
 
 *,
@@ -114,7 +123,7 @@ img {
 a {
   color: inherit;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color var(--duration-ui) var(--ease-expo), opacity var(--duration-ui) var(--ease-expo), transform var(--duration-ui) var(--ease-expo), box-shadow var(--duration-ui) var(--ease-expo);
 }
 
 button {
@@ -123,11 +132,16 @@ button {
   background: none;
   font-family: inherit;
   -webkit-tap-highlight-color: transparent;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color var(--duration-ui) var(--ease-expo), background-color var(--duration-ui) var(--ease-expo), transform var(--duration-fast) var(--ease-expo), border-color var(--duration-ui) var(--ease-expo), box-shadow var(--duration-ui) var(--ease-expo);
 }
 
 button:active {
   transform: scale(0.97);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary-container);
+  outline-offset: 2px;
 }
 
 input, textarea, select {
@@ -279,6 +293,11 @@ ul, ol {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html {
+    scroll-behavior: auto;
   }
 }
 

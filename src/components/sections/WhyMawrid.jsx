@@ -1,14 +1,14 @@
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import './WhyMawrid.css';
 
 const items = [
-  { value: '3,200+', key: 'whymawrid.stat1', icon: '📦', color: '#ff6201' },
-  { value: '840+', key: 'whymawrid.stat2', icon: '🏪', color: '#494bd6' },
-  { value: '47,000+', key: 'whymawrid.stat3', icon: '👥', color: '#10b981' },
-  { value: '99.9%', key: 'whymawrid.stat4', icon: '⚡', color: '#f59e0b' },
+  { value: 3200, suffix: '+', decimals: 0, key: 'whymawrid.stat1', icon: '📦', color: '#ff6201' },
+  { value: 840, suffix: '+', decimals: 0, key: 'whymawrid.stat2', icon: '🏪', color: '#494bd6' },
+  { value: 47000, suffix: '+', decimals: 0, key: 'whymawrid.stat3', icon: '👥', color: '#10b981' },
+  { value: 99.9, suffix: '%', decimals: 1, key: 'whymawrid.stat4', icon: '⚡', color: '#f59e0b' },
 ];
 
 const steps = [
@@ -23,7 +23,7 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 50, filter: 'blur(6px)' },
+  hidden: { opacity: 0, y: 36, filter: 'blur(4px)' },
   visible: {
     opacity: 1, y: 0, filter: 'blur(0px)',
     transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
@@ -31,17 +31,80 @@ const itemVariants = {
 };
 
 const headerVariants = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0, y: 28 },
   visible: {
     opacity: 1, y: 0,
     transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
   },
 };
 
+function CountUp({ value, decimals, suffix, isVisible }) {
+  const [display, setDisplay] = useState('0');
+  const reduce = useReducedMotion();
+
+  useEffect(() => {
+    if (!isVisible) return;
+    if (reduce) {
+      setDisplay(value.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }));
+      return;
+    }
+    const duration = 1600;
+    const startTime = performance.now();
+
+    function tick(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = value * eased;
+      setDisplay(current.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: decimals }));
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }, [value, decimals, isVisible, reduce]);
+
+  return <>{display}{suffix}</>;
+}
+
+function StatCard({ item, isVisible, delay, label }) {
+  return (
+    <motion.div
+      className="whymawrid__stat"
+      variants={itemVariants}
+      custom={delay}
+      whileHover={{ y: -6, scale: 1.03 }}
+    >
+      <div className="whymawrid__stat-glow" style={{ background: `${item.color}15` }} />
+      <motion.span
+        className="whymawrid__stat-icon"
+        style={{ color: item.color }}
+        whileHover={{ scale: 1.18, rotate: [0, -6, 6, 0] }}
+        transition={{ duration: 0.45 }}
+      >
+        {item.icon}
+      </motion.span>
+      <span className="whymawrid__stat-value">
+        <CountUp value={item.value} decimals={item.decimals} suffix={item.suffix} isVisible={isVisible} />
+      </span>
+      <span className="whymawrid__stat-label">{label}</span>
+    </motion.div>
+  );
+}
+
 export default function WhyMawrid() {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-60px' });
+  const statsRef = useRef(null);
+  const [statsVisible, setStatsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStatsVisible(true); observer.disconnect(); } },
+      { threshold: 0.25 }
+    );
+    if (statsRef.current) observer.observe(statsRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section className="whymawrid" ref={ref}>
@@ -59,22 +122,13 @@ export default function WhyMawrid() {
 
         <motion.div
           className="whymawrid__stats"
+          ref={statsRef}
           variants={containerVariants}
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
         >
           {items.map((item, i) => (
-            <motion.div
-              key={i}
-              className="whymawrid__stat"
-              variants={itemVariants}
-              whileHover={{ y: -6, scale: 1.03 }}
-            >
-              <div className="whymawrid__stat-glow" style={{ background: `${item.color}15` }} />
-              <span className="whymawrid__stat-icon" style={{ color: item.color }}>{item.icon}</span>
-              <span className="whymawrid__stat-value">{item.value}</span>
-              <span className="whymawrid__stat-label">{t(item.key)}</span>
-            </motion.div>
+            <StatCard key={i} item={item} isVisible={statsVisible} delay={i} label={t(item.key)} />
           ))}
         </motion.div>
 
@@ -94,6 +148,13 @@ export default function WhyMawrid() {
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
         >
+          <motion.span
+            className="whymawrid__steps-track"
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
+            transition={{ duration: 1.2, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            style={{ transformOrigin: dir === 'rtl' ? 'right' : 'left' }}
+          />
           {steps.map((step, i) => (
             <motion.div
               key={i}
@@ -101,10 +162,14 @@ export default function WhyMawrid() {
               variants={itemVariants}
               whileHover={{ y: -8, scale: 1.02 }}
             >
-              <div className="whymawrid__step-connector" />
-              <div className="whymawrid__step-num" style={{ background: `linear-gradient(135deg, ${step.color}, ${step.color}cc)` }}>
+              <motion.div
+                className="whymawrid__step-num"
+                style={{ background: `linear-gradient(135deg, ${step.color}, ${step.color}cc)` }}
+                whileHover={{ scale: 1.12, boxShadow: `0 8px 24px ${step.color}55` }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
                 {step.icon}
-              </div>
+              </motion.div>
               <h4 className="whymawrid__step-title">{t(step.key)}</h4>
               <p className="whymawrid__step-desc">{t(step.descKey)}</p>
             </motion.div>
@@ -113,8 +178,8 @@ export default function WhyMawrid() {
 
         <motion.div
           className="whymawrid__cta"
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
         >
           <Link to="/auth?mode=signup" className="btn btn--primary btn--lg">

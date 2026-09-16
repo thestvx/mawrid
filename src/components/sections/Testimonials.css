@@ -35,13 +35,16 @@
   border: 1px solid var(--color-outline-variant);
   border-radius: 20px;
   padding: 32px 28px;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+  transition: transform var(--duration-ui) var(--ease-expo), box-shadow var(--duration-slow) var(--ease-expo), border-color var(--duration-ui) var(--ease-expo);
 }
 
-.testimonials__card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.06);
-  border-color: transparent;
+@media (hover: hover) and (pointer: fine) {
+  .testimonials__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.06);
+    border-color: transparent;
+  }
 }
 
 .testimonials__stars {

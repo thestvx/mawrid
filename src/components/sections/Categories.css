@@ -16,6 +16,7 @@
 }
 
 .categories__pill {
+  position: relative;
   flex-shrink: 0;
   padding: 10px 24px;
   border-radius: var(--radius-full);
@@ -23,12 +24,31 @@
   font-weight: 500;
   background: var(--color-surface-container-low);
   color: var(--color-on-surface);
-  transition: all 0.25s ease;
+  transition: color var(--duration-ui) var(--ease-expo), background-color var(--duration-ui) var(--ease-expo), box-shadow var(--duration-ui) var(--ease-expo);
   white-space: nowrap;
+  isolation: isolate;
 }
 
-.categories__pill:hover {
-  background: var(--color-surface-container-high);
+.categories__pill-label {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.categories__pill-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-container);
+  box-shadow: 0 2px 8px rgba(255, 98, 1, 0.25);
+  z-index: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .categories__pill:hover {
+    background: var(--color-surface-container-high);
+  }
 }
 
 .categories__pill--active {

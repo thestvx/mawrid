@@ -79,16 +79,19 @@
   border-radius: 20px;
   background: var(--color-surface-container-lowest);
   border: 1px solid var(--color-outline-variant);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+  transition: transform var(--duration-ui) var(--ease-expo), box-shadow var(--duration-slow) var(--ease-expo), border-color var(--duration-ui) var(--ease-expo);
   position: relative;
   overflow: hidden;
   cursor: default;
 }
 
-.whymawrid__stat:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
-  border-color: transparent;
+@media (hover: hover) and (pointer: fine) {
+  .whymawrid__stat:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+    border-color: transparent;
+  }
 }
 
 .whymawrid__stat-glow {
@@ -100,7 +103,7 @@
   border-radius: 50%;
   filter: blur(20px);
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity var(--duration-ui) var(--ease-expo);
   pointer-events: none;
 }
 
@@ -112,11 +115,7 @@
   font-size: 2.25rem;
   display: block;
   margin-bottom: 14px;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.whymawrid__stat:hover .whymawrid__stat-icon {
-  transform: scale(1.15);
+  will-change: transform;
 }
 
 .whymawrid__stat-value {
@@ -152,24 +151,35 @@
   z-index: 1;
 }
 
+.whymawrid__steps-track {
+  position: absolute;
+  top: 60px;
+  left: 16%;
+  right: 16%;
+  height: 2px;
+  border-top: 2px dashed rgba(25, 28, 29, 0.12);
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
 .whymawrid__step {
   text-align: center;
   padding: 36px 28px;
   border-radius: 20px;
   background: var(--color-surface-container-lowest);
   border: 1px solid var(--color-outline-variant);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+  transition: transform var(--duration-ui) var(--ease-expo), box-shadow var(--duration-slow) var(--ease-expo), border-color var(--duration-ui) var(--ease-expo);
   position: relative;
 }
 
-.whymawrid__step:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
-  border-color: var(--color-primary-container);
-}
-
-.whymawrid__step-connector {
-  display: none;
+@media (hover: hover) and (pointer: fine) {
+  .whymawrid__step:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+    border-color: var(--color-primary-container);
+  }
 }
 
 .whymawrid__step-num {
@@ -183,12 +193,8 @@
   font-size: 1.125rem;
   font-weight: 800;
   margin: 0 auto 18px;
-  transition: transform 0.3s ease;
+  will-change: transform;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-.whymawrid__step:hover .whymawrid__step-num {
-  transform: scale(1.1);
 }
 
 .whymawrid__step-title {
@@ -244,6 +250,10 @@
     grid-template-columns: 1fr;
     gap: 16px;
     margin-bottom: 40px;
+  }
+
+  .whymawrid__steps-track {
+    display: none;
   }
 
   .whymawrid__step {
