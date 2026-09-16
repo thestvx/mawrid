@@ -1,6 +1,4 @@
 import { Link } from 'react-router-dom';
-import { useLanguage } from '../contexts/LanguageContext';
-import Countdown from '../components/ui/Countdown';
 import './Details.css';
 
 const RELATED = [
@@ -11,8 +9,7 @@ const RELATED = [
 ];
 
 export default function Details() {
-  const { t, dir } = useLanguage();
-  const isRtl = dir === 'rtl';
+  const isRtl = document.documentElement.dir === 'rtl';
 
   return (
     <div className="details" style={{ paddingTop: '100px' }}>
@@ -70,23 +67,6 @@ export default function Details() {
               <div className="details__price">
                 <span className="details__price-current">$129.00</span>
                 <span className="details__price-old">$199.00</span>
-              </div>
-
-              <div className="details__limited">
-                <div className="details__limited-row">
-                  <span className="details__limited-tag">⏳ {t('details.limited')}</span>
-                  <span className="details__limited-ends">{t('details.endsIn')}</span>
-                </div>
-                <Countdown
-                  size="sm"
-                  dark={false}
-                  labels={{
-                    days: t('hero.board.days'),
-                    hours: t('hero.board.hours'),
-                    minutes: t('hero.board.mins'),
-                    seconds: t('hero.board.secs'),
-                  }}
-                />
               </div>
 
               <div className="details__license">

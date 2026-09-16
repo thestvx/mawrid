@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useLanguage } from '../contexts/LanguageContext';
 import ProductCard from '../components/marketplace/ProductCard';
-import Countdown from '../components/ui/Countdown';
 import './Marketplace.css';
 
 const PRODUCTS = Array.from({ length: 12 }, (_, i) => ({
@@ -30,7 +28,6 @@ const CATEGORIES = ['Sport', 'Music', 'Gaming', 'Fashion', 'Art', 'Crypto'];
 export default function Marketplace() {
   const [visible, setVisible] = useState(false);
   const ref = useRef(null);
-  const { t, dir } = useLanguage();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -44,37 +41,6 @@ export default function Marketplace() {
   return (
     <div className="marketplace" style={{ paddingTop: '100px' }}>
       <div className="container">
-        <header className="mp-band">
-          <div className="mp-band__bg" />
-          <div className="mp-band__content">
-            <span className="mp-band__offer">{t('mp.banner.offer')}</span>
-            <h1 className="mp-band__title">{t('mp.title')}</h1>
-            <p className="mp-band__subtitle">{t('mp.subtitle')}</p>
-          </div>
-          <div className="mp-band__deals">
-            <span className="mp-band__deal-title">{t('mp.banner.title')}</span>
-            <span className="mp-band__deal-desc">{t('mp.banner.desc')}</span>
-            <div className="mp-band__deal-foot">
-              <Countdown
-                size="sm"
-                dark
-                labels={{
-                  days: t('hero.board.days'),
-                  hours: t('hero.board.hours'),
-                  minutes: t('hero.board.mins'),
-                  seconds: t('hero.board.secs'),
-                }}
-              />
-              <Link to="/marketplace" className="mp-band__cta">
-                {t('mp.banner.cta')}
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={dir === 'rtl' ? { transform: 'scaleX(-1)' } : undefined}>
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-        </header>
-
         <div className="marketplace__layout">
           <aside className="marketplace__sidebar">
             <div className="marketplace__sidebar-header">

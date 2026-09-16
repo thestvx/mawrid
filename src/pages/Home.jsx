@@ -1,7 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import Hero from '../components/sections/Hero';
-import AnnouncementBoard from '../components/sections/AnnouncementBoard';
 import Features from '../components/sections/Features';
 import WhyMawrid from '../components/sections/WhyMawrid';
 import Testimonials from '../components/sections/Testimonials';
@@ -39,7 +38,20 @@ export default function Home() {
     <>
       <Hero />
 
-      <AnnouncementBoard />
+      <motion.div
+        className="hero-divider-fullwidth"
+        initial={{ opacity: 0, scaleX: 0.8 }}
+        whileInView={{ opacity: 1, scaleX: 1 }}
+        viewport={{ once: true, margin: '-40px' }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <img
+          src="/images/backgrounds/line01.png"
+          alt=""
+          className="hero-divider-fullwidth__img"
+          aria-hidden="true"
+        />
+      </motion.div>
 
       <SectionReveal>
         <Features />
