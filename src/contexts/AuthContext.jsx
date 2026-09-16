@@ -104,17 +104,35 @@ export function AuthProvider({ children }) {
     let email = identifier;
     if (!identifier.includes('@')) {
       // Username login: resolve the email from the users table, then sign in.
-      if (supabase) {
-        try {
-          const { data } = await supabase
-            .from('users')
-            .select('email')
-            .eq('name', identifier.toLowerCase())
-            .limit(1);
-          if (data && data[0]) email = data[0].email;
-        } catch (err) {
-          console.warn('Username lookup failed:', err.message);
-        }
+      if (!supabase || !isSupabaseConfigured) {
+        const err = new Error(
+          'Supabase is not configured on this client. VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be present at build time.'
+        );
+        err.code = 'ERR_SUPABASE_NOT_CONFIGURED';
+        throw err;
+      }
+      const { data, error } = await supabase
+        .from('users')
+        .select('email')
+        .eq('name', identifier.toLowerCase())
+        .limit(1);
+      if (error) {
+        console.warn('Username lookup failed:', error.code, error.message);
+        const err = new Error(
+          `Username lookup failed (${error.code || 'unknown'}: ${error.message})`
+        );
+        err.code = 'ERR_USERNAME_LOOKUP';
+        err.cause = error;
+        throw err;
+      }
+      if (data && data[0] && data[0].email) {
+        email = data[0].email;
+      } else {
+        const err = new Error(
+          `No account found for the username "${identifier}".`
+        );
+        err.code = 'ERR_USERNAME_NOT_FOUND';
+        throw err;
       }
     }
 

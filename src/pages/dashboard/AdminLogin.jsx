@@ -28,10 +28,20 @@ export default function AdminLogin() {
       }
     } catch (err) {
       const code = err?.code || '';
-      if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+      if (code === 'ERR_SUPABASE_NOT_CONFIGURED') {
+        setError(dir === 'rtl'
+          ? 'لم يتم تهيئة قاعدة البيانات على هذا المتصفح (تأكد من متغيرات البيئة عند البناء)'
+          : 'Supabase is not configured on this client (check build-time env vars)');
+      } else if (code === 'ERR_USERNAME_LOOKUP') {
+        setError(dir === 'rtl'
+          ? 'تعذر البحث عن اسم المستخدم في قاعدة البيانات، حاول مجدداً'
+          : 'Could not look up the username in the database, try again');
+      } else if (code === 'ERR_USERNAME_NOT_FOUND') {
+        setError(dir === 'rtl' ? 'اسم المستخدم غير موجود' : 'Username not found');
+      } else if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
         setError(dir === 'rtl' ? 'اسم المستخدم أو كلمة المرور غير صحيحة' : 'Invalid username or password');
       } else if (code === 'auth/invalid-email') {
-        setError(dir === 'rtl' ? 'اسم المستخدم غير موجود' : 'Username not found');
+        setError(dir === 'rtl' ? 'صيغة البريد غير صالحة' : 'Invalid email format');
       } else if (code === 'auth/too-many-requests') {
         setError(dir === 'rtl' ? 'محاولات كثيرة، حاول لاحقاً' : 'Too many attempts, try again later');
       } else {
