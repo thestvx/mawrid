@@ -6,13 +6,13 @@ import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
 import Storefront from './components/storefront/Storefront';
-import AdminDashboardStitch from './components/storefront/AdminDashboardStitch';
 import Details from './pages/Details';
 import Auth from './pages/Auth';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import SellerDashboard from './pages/dashboard/SellerDashboard';
 import BuyerDashboard from './pages/dashboard/BuyerDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
+import AdminGate from './pages/dashboard/AdminGate';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -21,7 +21,9 @@ function ScrollToTop() {
 }
 
 export default function App() {
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const isProtected = location.pathname === '/admin' || location.pathname === '/owner';
+  const [loading, setLoading] = useState(() => !isProtected);
 
   return (
     <>
@@ -38,12 +40,17 @@ export default function App() {
               <Route index element={<BuyerDashboard />} />
               <Route path="buyer" element={<BuyerDashboard />} />
               <Route path="seller" element={<SellerDashboard />} />
-              <Route path="admin" element={<AdminDashboard />} />
             </Route>
-            <Route path="/admin" element={<DashboardLayout />}>
+          </Route>
+          <Route path="/admin" element={<AdminGate />}>
+            <Route element={<DashboardLayout />}>
               <Route index element={<AdminDashboard />} />
             </Route>
-            <Route path="/owner" element={<AdminDashboardStitch />} />
+          </Route>
+          <Route path="/owner" element={<AdminGate />}>
+            <Route element={<DashboardLayout />}>
+              <Route index element={<AdminDashboard />} />
+            </Route>
           </Route>
           <Route path="/auth" element={<Auth />} />
         </Routes>

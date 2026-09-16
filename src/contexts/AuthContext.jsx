@@ -117,8 +117,31 @@ export function AuthProvider({ children }) {
         }
       }
     }
-    await signInWithEmailAndPassword(auth, email, password);
+
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+
+    // Resolve profile + role right away (don't wait for onAuthStateChanged).
+    let role = 'buyer';
+    let name = cred.user.displayName || '';
+    let extra = {};
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await getUserProfile(cred.user.uid);
+        if (!error && data) {
+          role = data.role || 'buyer';
+          name = data.name || name;
+          extra = { ...extra, ...data };
+        }
+      } catch (err) {
+        console.warn('Supabase profile read failed:', err.message);
+      }
+    }
+
+    const profile = { uid: cred.user.uid, email: cred.user.email, name, role, ...extra };
+    saveUserLocal(cred.user.uid, profile);
+    setUser(profile);
     setTimeout(() => { handledRef.current = false; }, 200);
+    return profile;
   }, []);
 
   const signup = useCallback(async ({ email, password, name, role, phone, storeName }) => {

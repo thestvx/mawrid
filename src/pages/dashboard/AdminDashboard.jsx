@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import DashIcon from '../../components/dashboard/DashIcon';
 
@@ -182,16 +183,12 @@ function StatCard({ label, value, suffix, prefix, trend, trendLabel, trendColor,
 
 export default function AdminDashboard() {
   const { dir } = useLanguage();
-  const [tab, setTab] = useState(() => new URLSearchParams(window.location.search).get('tab') || 'overview');
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const current = params.get('tab') || 'overview';
-    if (current !== tab) {
-      params.set('tab', tab);
-      window.history.replaceState({}, '', `?${params.toString()}`);
-    }
-  }, [tab]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get('tab') || 'overview';
+  const setTab = useCallback((next) => {
+    if (next === 'overview') setSearchParams({}, { replace: true });
+    else setSearchParams({ tab: next }, { replace: true });
+  }, [setSearchParams]);
 
   const [users, setUsers] = useState(INITIAL_USERS);
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
