@@ -62,7 +62,7 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="dashboard" style={{ paddingTop: isAdminArea ? 0 : '80px' }}>
+    <div className={`dashboard ${isAdminArea ? 'dashboard--admin' : ''}`} style={{ paddingTop: isAdminArea ? 0 : '80px' }}>
       {mobileOpen && (
         <div className="dashboard__mobile-overlay" onClick={() => setMobileOpen(false)} />
       )}

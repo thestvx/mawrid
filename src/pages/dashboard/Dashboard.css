@@ -3,6 +3,18 @@
   background: var(--color-surface);
 }
 
+.dashboard--admin .dashboard__layout {
+  min-height: 100vh;
+}
+
+.dashboard--admin .dashboard__sidebar {
+  top: 0;
+}
+
+.dashboard--admin .dashboard__main {
+  min-height: 100vh;
+}
+
 .dashboard__layout {
   display: flex;
   min-height: calc(100vh - 80px);
@@ -137,6 +149,10 @@
 [dir="rtl"] .dashboard__main {
   margin-right: 0;
   margin-left: 260px;
+}
+
+.dashboard--admin .dashboard__main {
+  padding: 28px 32px 40px;
 }
 
 /* Content Styles */
