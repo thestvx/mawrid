@@ -35,3 +35,9 @@ opencode.json
 .claude/
 agent/
 skills-lock.json
+
+# Python artifacts
+__pycache__/
+*.pyc
+.coverage
+

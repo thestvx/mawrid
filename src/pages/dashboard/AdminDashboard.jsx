@@ -107,69 +107,57 @@ function StatusPill({ status, dir }) {
   return <span className={`d-badge d-badge--${getStatusClass(status)}`}>{getStatusLabel(status, dir)}</span>;
 }
 
-function StatCard({ label, value, suffix, prefix, trend, trendLabel, trendColor, icon, iconBg, glowColor, delay }) {
+function useSparklineId() {
+  const id = useMemo(() => 'spark-' + Math.random().toString(36).slice(2, 8), []);
+  return id;
+}
+
+function Sparkline({ data = [], color = '#22C55E', width = 96, height = 32 }) {
+  const gid = useSparklineId();
+  if (!data || data.length < 2) return null;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const step = width / (data.length - 1);
+  const pts = data.map((v, i) => {
+    const x = (i * step).toFixed(1);
+    const y = (height - 4 - ((v - min) / range) * (height - 8)).toFixed(1);
+    return `${x},${y}`;
+  });
+  const area = `0,${height} ${pts.join(' ')} ${width},${height}`;
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} fill="none" aria-hidden="true" className="d-stat__spark">
+      <polygon points={area} fill={`url(#${gid})`} />
+      <polyline points={pts.join(' ')} stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+function StatCard({ label, value, suffix, prefix, trend, trendLabel, trendColor, spark, sparkColor = '#22C55E', icon, iconBg, glowColor, delay }) {
   const displayValue = useAnimatedNumber(value, 2500, prefix || '', suffix || '');
   return (
-    <div className="d-stat" style={{
-      position: 'relative',
-      overflow: 'hidden',
-      background: 'rgba(255, 255, 255, 0.7)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      border: '1px solid rgba(255, 255, 255, 0.4)',
-      transition: 'all 0.3s ease',
-      animation: `fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-      animationDelay: `${delay}ms`,
-      opacity: 0,
-    }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.08)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
-      <div style={{
-        position: 'absolute',
-        right: -16,
-        top: -16,
-        width: 96,
-        height: 96,
-        borderRadius: '50%',
-        background: glowColor || 'rgba(255, 98, 1, 0.08)',
-        filter: 'blur(24px)',
-        pointerEvents: 'none',
-        transition: 'all 0.5s ease',
-      }} className="stat-glow" />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, position: 'relative', zIndex: 1 }}>
+    <div className="d-stat" style={{ animation: `dStatIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms both` }}>
+      <div className="stat-glow" style={{ background: glowColor || 'rgba(255, 98, 1, 0.14)' }} />
+      <div className="d-stat__top">
         <div>
-          <span className="d-stat__label" style={{ display: 'block', marginBottom: 4 }}>{label}</span>
-          <span className="d-stat__value" style={{ fontSize: '1.75rem' }}>{displayValue}</span>
+          <span className="d-stat__label">{label}</span>
+          <span className="d-stat__value">{displayValue}</span>
         </div>
-        <div style={{
-          padding: 12,
-          borderRadius: 12,
-          background: iconBg || 'rgba(255, 98, 1, 0.08)',
-          color: 'var(--color-primary)',
-          lineHeight: 1,
-          transition: 'transform 0.3s ease',
-        }} className="stat-icon">
-          <DashIcon name={icon} size={24} />
+        <div className="d-stat__icon" style={{ background: iconBg || 'rgba(255, 98, 1, 0.12)', color: trendColor || 'var(--color-primary)' }}>
+          <DashIcon name={icon} size={22} />
         </div>
       </div>
-      {trend && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative', zIndex: 1 }}>
-          <span style={{
-            color: trendColor || '#166534',
-            background: trendColor ? `${trendColor}15` : '#dcfce7',
-            padding: '2px 10px',
-            borderRadius: 9999,
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-          }}>
-            {trend}
-          </span>
-          {trendLabel && <span style={{ fontSize: '0.75rem', color: 'var(--color-secondary)' }}>{trendLabel}</span>}
-        </div>
-      )}
+      <div className="d-stat__foot">
+        {spark ? <Sparkline data={spark} color={sparkColor} /> : null}
+        {trend ? <span className="d-stat__trend" style={trendColor ? { color: trendColor, borderColor: trendColor } : undefined}>{trend}</span> : null}
+        {trendLabel ? <span className="d-stat__trend-label">{trendLabel}</span> : null}
+      </div>
     </div>
   );
 }
@@ -440,20 +428,28 @@ export default function AdminDashboard() {
 
   const renderOverview = () => {
     const totalSales = products.reduce((s, p) => s + (Number(p.sales) || 0), 0);
+    const salesSeries = products.map(p => Number(p.sales) || 0).slice(0, 12);
+    const cumSales = [];
+    let acc = 0;
+    salesSeries.forEach(v => { acc += v; cumSales.push(acc); });
+    const activeSeries = activeProducts.map(p => Number(p.sales) || 0).slice(0, 12);
+    const userSeries = users.map((_, i) => i + 1);
+    const sellerSeries = sellers.map((_, i) => i + 1);
+    const catSeries = categories.map((_, i) => i + 1);
     return (
       <>
-        <div className="d-welcome" style={{ animation: 'fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
+        <div className="d-welcome">
           <h2 className="d-welcome__title">{dir === 'rtl' ? 'نظرة عامة على المنصة' : 'Platform Overview'}</h2>
-          <p className="d-welcome__sub">{dir === 'rtl' ? 'التحكم الكامل في منصة مَورد' : 'Full control of the Mawrid platform'}</p>
+          <p className="d-welcome__sub">{dir === 'rtl' ? 'التحكم الكامل في منصة مَورد — كل شيء يعمل بالبيانات الحية' : 'Full control of the Mawrid platform — all powered by live data'}</p>
         </div>
 
         <div className="d-stats">
-          <StatCard label={dir === 'rtl' ? 'المنتجات' : 'Products'} value={products.length} icon="products" iconBg="rgba(255, 98, 1, 0.08)" glowColor="rgba(255, 98, 1, 0.15)" delay={100} />
-          <StatCard label={dir === 'rtl' ? 'المنتجات النشطة' : 'Active Products'} value={activeProducts.length} icon="bag" iconBg="rgba(16, 185, 129, 0.08)" glowColor="rgba(16, 185, 129, 0.15)" delay={200} />
-          <StatCard label={dir === 'rtl' ? 'التصنيفات' : 'Categories'} value={categories.filter(c => c.enabled).length} icon="layers" iconBg="rgba(139, 92, 246, 0.08)" glowColor="rgba(139, 92, 246, 0.15)" delay={300} />
-          <StatCard label={dir === 'rtl' ? 'المستخدمون' : 'Users'} value={users.length} icon="users" iconBg="rgba(73, 75, 214, 0.08)" glowColor="rgba(73, 75, 214, 0.15)" delay={400} />
-          <StatCard label={dir === 'rtl' ? 'البائعون' : 'Sellers'} value={sellers.length} icon="stores" iconBg="rgba(133, 137, 255, 0.08)" glowColor="rgba(133, 137, 255, 0.15)" delay={500} />
-          <StatCard label={dir === 'rtl' ? 'إجمالي المبيعات' : 'Total Sales'} value={totalSales} icon="analytics" iconBg="rgba(245, 158, 11, 0.08)" glowColor="rgba(245, 158, 11, 0.15)" delay={600} />
+          <StatCard label={dir === 'rtl' ? 'المنتجات' : 'Products'} value={products.length} spark={salesSeries} sparkColor="#FF8A45" icon="products" iconBg="rgba(255, 98, 1, 0.14)" glowColor="rgba(255, 98, 1, 0.18)" trend={pendingProducts.length > 0 ? `${pendingProducts.length} ${dir === 'rtl' ? 'بانتظار المراجعة' : 'pending'}` : null} trendColor="#FBBF24" delay={100} />
+          <StatCard label={dir === 'rtl' ? 'المنتجات النشطة' : 'Active Products'} value={activeProducts.length} spark={activeSeries} sparkColor="#34D399" icon="bag" iconBg="rgba(16, 185, 129, 0.14)" glowColor="rgba(16, 185, 129, 0.18)" trend={activeProducts.length ? `${Math.min(100, Math.round((activeProducts.length / (products.length || 1)) * 100))}% ${dir === 'rtl' ? 'من الإجمالي' : 'of total'}` : null} trendColor="#6EE7B7" delay={200} />
+          <StatCard label={dir === 'rtl' ? 'التصنيفات' : 'Categories'} value={categories.filter(c => c.enabled).length} spark={catSeries} sparkColor="#A78BFA" icon="layers" iconBg="rgba(139, 92, 246, 0.14)" glowColor="rgba(139, 92, 246, 0.2)" trend={dir === 'rtl' ? 'مفعّلة' : 'Enabled'} delay={300} />
+          <StatCard label={dir === 'rtl' ? 'المستخدمون' : 'Users'} value={users.length} spark={userSeries} sparkColor="#5B7CFA" icon="users" iconBg="rgba(73, 75, 214, 0.16)" glowColor="rgba(73, 75, 214, 0.2)" trend={users.length ? `${sellers.length} ${dir === 'rtl' ? 'بائعين' : 'sellers'}` : null} trendColor="#94A3B8" delay={400} />
+          <StatCard label={dir === 'rtl' ? 'البائعون' : 'Sellers'} value={sellers.length} spark={sellerSeries} sparkColor="#B6B9FF" icon="stores" iconBg="rgba(133, 137, 255, 0.16)" glowColor="rgba(133, 137, 255, 0.2)" trend={dir === 'rtl' ? 'نشط' : 'Active'} delay={500} />
+          <StatCard label={dir === 'rtl' ? 'إجمالي المبيعات' : 'Total Sales'} value={totalSales} spark={cumSales} sparkColor="#FBBF24" icon="analytics" iconBg="rgba(245, 158, 11, 0.14)" glowColor="rgba(245, 158, 11, 0.2)" trend={dir === 'rtl' ? 'تراكمي' : 'Cumulative'} delay={600} />
         </div>
 
         <div className="d-grid">
@@ -1001,6 +997,52 @@ export default function AdminDashboard() {
     </div>
   );
 
+  const renderTopbar = () => {
+    const titles = {
+      overview: dir === 'rtl' ? 'نظرة عامة' : 'Overview',
+      users: dir === 'rtl' ? 'إدارة المستخدمين' : 'User Management',
+      sellers: dir === 'rtl' ? 'إدارة البائعين' : 'Seller Management',
+      products: dir === 'rtl' ? 'مراجعة المنتجات' : 'Product Moderation',
+      orders: dir === 'rtl' ? 'إدارة الطلبات' : 'Order Management',
+      payouts: dir === 'rtl' ? 'التسويات والارباح' : 'Payouts & Earnings',
+      categories: dir === 'rtl' ? 'التصنيفات' : 'Categories',
+      reviews: dir === 'rtl' ? 'التقييمات' : 'Reviews',
+      reports: dir === 'rtl' ? 'التقارير' : 'Reports',
+      settings: dir === 'rtl' ? 'إعدادات المنصة' : 'Platform Settings',
+    };
+    const subs = {
+      overview: dir === 'rtl' ? 'متابعة أداء المنصة لحظياً' : 'Monitor platform performance in real time',
+      users: dir === 'rtl' ? 'إدارة حسابات المشترين والبائعين' : 'Manage buyer & seller accounts',
+      sellers: dir === 'rtl' ? 'مراقبة أداء البائعين وأعمالهم' : 'Track seller activity and stores',
+      products: dir === 'rtl' ? 'اعتماد المنتجات ومراجعة الجودة' : 'Approve and review products',
+      orders: dir === 'rtl' ? 'تتبع الطلبات وحالاتها' : 'Track orders and their status',
+      payouts: dir === 'rtl' ? 'تسوية الأرباح والمدفوعات' : 'Settle earnings and payouts',
+      categories: dir === 'rtl' ? 'تنظيم تصنيفات المتجر' : 'Organize store categories',
+      reviews: dir === 'rtl' ? 'إدارة تقييمات العملاء' : 'Manage customer reviews',
+      reports: dir === 'rtl' ? 'تحليلات وأداء متقدم' : 'Advanced analytics & performance',
+      settings: dir === 'rtl' ? 'ضبط إعدادات المنصة العامة' : 'Configure platform-wide settings',
+    };
+    const roleName = dir === 'rtl' ? 'مدير المنصة' : 'Platform Admin';
+    return (
+      <div className="d-topbar">
+        <div>
+          <h2 className="d-topbar__title">{titles[tab] || titles.overview}</h2>
+          <p className="d-topbar__sub">{subs[tab] || subs.overview}</p>
+        </div>
+        <div className="d-topbar__right">
+          <span className="d-live-badge">LIVE · {dir === 'rtl' ? 'بيانات حية' : 'Live data'}</span>
+          <div className="d-user-chip">
+            <InitialsAvatar name={user?.email || user?.username || 'A'} bg="linear-gradient(135deg, #FF6201, #B24300)" size={32} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span className="d-user-chip__name">{user?.username || user?.email?.split('@')[0] || 'Admin'}</span>
+              <span className="d-user-chip__role">{roleName}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderContent = () => {
     switch (tab) {
       case 'users': return renderUsers();
@@ -1019,18 +1061,16 @@ export default function AdminDashboard() {
   return (
     <>
       <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .d-stat:hover .stat-icon { transform: scale(1.1); }
-        .d-stat:hover .stat-glow { transform: scale(1.2); }
+        .d-stat:hover .stat-icon, .d-stat:hover .d-stat__icon { transform: scale(1.1); }
+        .d-stat:hover .stat-glow { transform: scale(1.25); }
+        .d-stat .stat-icon, .d-stat .d-stat__icon, .d-stat .stat-glow { transition: transform 0.35s ease; }
         .d-quick-card__icon { display: inline-flex; }
       `}</style>
       <div className="d-content">
+        {!loading && !dbError && renderTopbar()}
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
-            <span style={{ color: 'var(--color-secondary)', fontSize: '0.9375rem' }}>{dir === 'rtl' ? 'جارٍ التحميل...' : 'Loading...'}</span>
+            <span style={{ color: '#94A3B8', fontSize: '0.9375rem' }}>{dir === 'rtl' ? 'جارٍ التحميل...' : 'Loading...'}</span>
           </div>
         ) : dbError ? (
           <div className="d-card">
