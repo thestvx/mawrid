@@ -1,11 +1,9 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   motion,
-  useMotionValue,
   useSpring,
-  useTransform,
-  useScroll,
+  useMotionValue,
   useReducedMotion,
 } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -58,7 +56,7 @@ const statVariants = {
   hidden: { opacity: 0, y: 26 },
   visible: (i) => ({
     opacity: 1, y: 0,
-    transition: { duration: 0.7, ease: EASE, delay: 0.5 + i * 0.15 },
+    transition: { duration: 0.7, ease: EASE, delay: 0.4 + i * 0.15 },
   }),
 };
 
@@ -94,25 +92,6 @@ export default function Hero() {
   const [statsVisible, setStatsVisible] = useState(false);
   const { t, dir } = useLanguage();
 
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springX = useSpring(mouseX, { stiffness: 50, damping: 30, mass: 1 });
-  const springY = useSpring(mouseY, { stiffness: 50, damping: 30, mass: 1 });
-  const reduce = useReducedMotion();
-  const bgX = useTransform(springX, [-1, 1], [reduce ? 0 : -8, reduce ? 0 : 8]);
-  const bgY = useTransform(springY, [-1, 1], [reduce ? 0 : -8, reduce ? 0 : 8]);
-
-  const handleMouseMove = useCallback((e) => {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    mouseX.set((e.clientX / w - 0.5) * 2);
-    mouseY.set((e.clientY / h - 0.5) * 2);
-  }, [mouseX, mouseY]);
-
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
-  const scrollBgY = useTransform(scrollYProgress, [0, 1], ['0%', '14%']);
-  const bgScale = useTransform(scrollYProgress, [0, 1], [1.05, 1.14]);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setStatsVisible(true); },
@@ -123,43 +102,36 @@ export default function Hero() {
   }, []);
 
   return (
-    <section
-      className="hero"
-      ref={sectionRef}
-      onMouseMove={handleMouseMove}
-    >
+    <section className="hero" ref={sectionRef}>
       <GlowCursor />
 
       <div className="hero__dot-grid" />
 
-      <div className="hero__bg">
-        <motion.div className="hero__bg-scroll" style={{ y: scrollBgY, scale: bgScale }}>
-          <motion.img
-            src="/images/backgrounds/herobackground01.png"
-            alt=""
-            className="hero__bg-img"
-            loading="eager"
-            style={{ x: bgX, y: bgY }}
-          />
-        </motion.div>
+      <div className="hero__media">
+        <img
+          src="/images/backgrounds/herobackground01.png"
+          alt=""
+          className="hero__img"
+          loading="eager"
+        />
         <div className="hero__overlay" />
-      </div>
 
-      <div className="container hero__content">
-        <motion.div className="hero__cta" variants={ctaVariants} initial="hidden" animate="visible">
-          <Link to="/marketplace" className="hero__btn hero__btn--primary">
-            <span>{t('hero.cta.shop')}</span>
-            <span className="hero__btn-arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={dir === 'rtl' ? { transform: 'scaleX(-1)' } : undefined}>
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </span>
-            <span className="hero__btn-shine" />
-          </Link>
-          <Link to="/auth?mode=signup&role=seller" className="hero__btn hero__btn--secondary">
-            {t('hero.cta.store')}
-          </Link>
-        </motion.div>
+        <div className="container hero__content">
+          <motion.div className="hero__cta" variants={ctaVariants} initial="hidden" animate="visible">
+            <Link to="/marketplace" className="hero__btn hero__btn--primary">
+              <span>{t('hero.cta.shop')}</span>
+              <span className="hero__btn-arrow">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={dir === 'rtl' ? { transform: 'scaleX(-1)' } : undefined}>
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </span>
+              <span className="hero__btn-shine" />
+            </Link>
+            <Link to="/auth?mode=signup&role=seller" className="hero__btn hero__btn--secondary">
+              {t('hero.cta.store')}
+            </Link>
+          </motion.div>
+        </div>
       </div>
 
       <div className="hero__stats" ref={statsRef}>

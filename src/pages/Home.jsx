@@ -1,7 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import Hero from '../components/sections/Hero';
-import ShowcaseFrame from '../components/sections/ShowcaseFrame';
 import Features from '../components/sections/Features';
 import WhyMawrid from '../components/sections/WhyMawrid';
 import Testimonials from '../components/sections/Testimonials';
@@ -53,10 +52,6 @@ export default function Home() {
           aria-hidden="true"
         />
       </motion.div>
-
-      <SectionReveal>
-        <ShowcaseFrame />
-      </SectionReveal>
 
       <SectionReveal>
         <Features />

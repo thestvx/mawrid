@@ -28,7 +28,6 @@ export const ar = {
   'hero.stat.products': 'منتج رقمي',
   'hero.stat.sellers': 'بائع نشط',
   'hero.stat.buyers': 'مشتري سعيد',
-  'showcase.caption': 'مَورد — سوق المبدعين الرقمي',
 
   'trending.title': 'منتجات رائجة',
   'trending.viewAll': 'عرض الكل',
@@ -204,7 +203,6 @@ export const ar = {
 
   'testimonials.title': 'ماذا يقول مستخدمونا',
   'testimonials.subtitle': 'آراء من مجتمع المبدعين والمشترين في مَورد',
-  'testimonials.aggregate': 'من 12,400+ تقييم موثق',
   'testimonials.q1': 'منصة رائعة! بعت أول منتج رقمي لي خلال أول أسبوع من التسجيل. واجهات الاستخدام سلسة جداً.',
   'testimonials.n1': 'سارة الأحمدي',
   'testimonials.r1': 'مصممة واجهات',
@@ -306,7 +304,6 @@ export const en = {
   'hero.stat.products': 'Digital Products',
   'hero.stat.sellers': 'Active Sellers',
   'hero.stat.buyers': 'Happy Buyers',
-  'showcase.caption': 'Mawrid — Digital Creators Marketplace',
 
   'trending.title': 'Trending Products',
   'trending.viewAll': 'View All',
@@ -485,7 +482,6 @@ export const en = {
 
   'testimonials.title': 'What Our Users Say',
   'testimonials.subtitle': 'Reviews from the Mawrid creator and buyer community',
-  'testimonials.aggregate': 'from 12,400+ verified reviews',
   'testimonials.q1': 'Amazing platform! I sold my first digital product within the first week. The UI is incredibly smooth.',
   'testimonials.n1': 'Sarah Al-Ahmadi',
   'testimonials.r1': 'UI Designer',

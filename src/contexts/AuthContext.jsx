@@ -5,14 +5,14 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { ref, set, get } from 'firebase/database';
-import { auth, db } from '../lib/firebase';
+import { auth } from '../lib/firebase';
+import { supabase, isSupabaseConfigured, getUserProfile } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
-function saveUserRole(uid, role, name, email) {
+function saveUserLocal(uid, data) {
   try {
-    localStorage.setItem('mawrid_user', JSON.stringify({ uid, role, name, email }));
+    localStorage.setItem('mawrid_user', JSON.stringify({ uid, ...data }));
   } catch {}
 }
 
@@ -29,21 +29,21 @@ function clearCachedUser() {
   try { localStorage.removeItem('mawrid_user'); } catch {}
 }
 
-async function readUserRole(uid) {
+async function upsertUserProfile(cred, data) {
+  if (!supabase) return;
   try {
-    const snap = await get(ref(db, `users/${uid}`));
-    if (snap.exists()) return snap.val();
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-async function writeUserRole(uid, data) {
-  try {
-    await set(ref(db, `users/${uid}`), data);
+    const row = {
+      firebase_uid: cred.user.uid,
+      email: cred.user.email,
+      name: data.name || cred.user.displayName || '',
+      role: data.role || 'buyer',
+      phone: data.phone || '',
+      store_name: data.storeName || '',
+      created_at: data.createdAt || new Date().toISOString(),
+    };
+    await supabase.from('users').upsert(row, { onConflict: 'firebase_uid' });
   } catch (err) {
-    console.warn('RTDB write skipped:', err.message);
+    console.warn('Supabase profile write skipped:', err.message);
   }
 }
 
@@ -63,19 +63,25 @@ export function AuthProvider({ children }) {
         let name = firebaseUser.displayName || '';
         let extraData = {};
 
-        // Try Realtime Database first
-        const rtdbData = await readUserRole(firebaseUser.uid);
-        if (rtdbData) {
-          role = rtdbData.role || 'buyer';
-          name = rtdbData.name || name;
-          extraData = rtdbData;
-        } else {
-          // Fallback to localStorage
-          const cached = getCachedUser();
-          if (cached && cached.uid === firebaseUser.uid) {
-            role = cached.role || 'buyer';
-            name = cached.name || name;
+        // Database first (Supabase, then localStorage cache fallback)
+        if (isSupabaseConfigured) {
+          try {
+            const { data, error } = await getUserProfile(firebaseUser.uid);
+            if (!error && data) {
+              role = data.role || 'buyer';
+              name = data.name || name;
+              extraData = { ...data };
+            }
+          } catch (err) {
+            console.warn('Supabase profile read failed:', err.message);
           }
+        }
+
+        const cached = getCachedUser();
+        if (cached && cached.uid === firebaseUser.uid) {
+          if (!extraData.role) role = cached.role || 'buyer';
+          if (!extraData.name) name = cached.name || name;
+          extraData = { ...cached, ...extraData };
         }
 
         setUser({
@@ -102,13 +108,20 @@ export function AuthProvider({ children }) {
   const signup = useCallback(async ({ email, password, name, role, phone, storeName }) => {
     handledRef.current = true;
     const cred = await createUserWithEmailAndPassword(auth, email, password);
-    const userData = { name, email, role, phone: phone || '', storeName: storeName || '', createdAt: new Date().toISOString() };
+    const userData = {
+      name,
+      email,
+      role,
+      phone: phone || '',
+      storeName: storeName || '',
+      createdAt: new Date().toISOString(),
+    };
 
-    // Save to localStorage immediately
-    saveUserRole(cred.user.uid, role, name, email);
+    // Keep local cache for instant reads
+    saveUserLocal(cred.user.uid, userData);
 
-    // Write to Realtime Database
-    await writeUserRole(cred.user.uid, userData);
+    // Save to Supabase (if configured)
+    await upsertUserProfile(cred, userData);
 
     setUser({ uid: cred.user.uid, ...userData });
     setTimeout(() => { handledRef.current = false; }, 200);
@@ -121,10 +134,16 @@ export function AuthProvider({ children }) {
   }, []);
 
   const refreshUser = useCallback(async () => {
-    if (auth.currentUser) {
-      const data = await readUserRole(auth.currentUser.uid);
-      if (data) {
-        setUser(prev => ({ ...prev, ...data }));
+    if (!auth.currentUser) return;
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await getUserProfile(auth.currentUser.uid);
+        if (!error && data) {
+          setUser(prev => ({ ...prev, ...data }));
+          saveUserLocal(auth.currentUser.uid, data);
+        }
+      } catch (err) {
+        console.warn('Supabase profile refresh failed:', err.message);
       }
     }
   }, []);

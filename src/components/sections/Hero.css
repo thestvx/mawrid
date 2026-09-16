@@ -1,6 +1,5 @@
 .hero {
   position: relative;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -32,63 +31,64 @@
   pointer-events: none;
 }
 
-/* ── Background ── */
-.hero__bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.hero__bg-scroll {
-  position: absolute;
-  inset: -4%;
-  will-change: transform;
-}
-
-.hero__bg-img {
+/* ── Media (full-dimension background) ── */
+.hero__media {
+  position: relative;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  line-height: 0;
+}
+
+.hero__img {
+  width: 100%;
+  height: auto;
   display: block;
-  will-change: transform;
+  object-fit: fill;
 }
 
 .hero__overlay {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.02) 30%,
-      rgba(255, 255, 255, 0.35) 60%,
-      rgba(255, 255, 255, 0.78) 82%,
-      rgba(255, 255, 255, 1) 100%
-    );
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.02) 40%,
+    rgba(255, 255, 255, 0.35) 68%,
+    rgba(255, 255, 255, 0.84) 88%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
   pointer-events: none;
 }
 
-/* ── Content ── */
+/* ── Content (buttons on the side) ── */
 .hero__content {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 2;
-  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding-top: 160px;
-  padding-bottom: 80px;
+  justify-content: flex-start;
+  padding-top: 0;
+  pointer-events: none;
 }
 
-/* ── CTA Buttons ── */
 .hero__cta {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  justify-content: center;
+  pointer-events: auto;
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
+/* ── CTA Buttons ── */
 .hero__btn {
   position: relative;
   display: inline-flex;
@@ -154,7 +154,7 @@
 }
 
 .hero__btn--secondary {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   color: var(--color-text);
   border: 1px solid var(--color-border);
   backdrop-filter: blur(12px);
@@ -194,10 +194,8 @@
 .hero__stats {
   position: relative;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  background: #fff;
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.03);
 }
 
@@ -231,17 +229,7 @@
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .hero__content {
-    padding-top: 120px;
-    padding-bottom: 40px;
-  }
-
-  .hero__stats-inner {
-    gap: 32px;
-    padding: 24px 0;
-  }
-
-  .hero__stat-number {
-    font-size: 1.375rem;
+    align-items: center;
   }
 
   .hero__cta {
@@ -252,6 +240,15 @@
 
   .hero__btn {
     justify-content: center;
+  }
+
+  .hero__stats-inner {
+    gap: 32px;
+    padding: 24px 0;
+  }
+
+  .hero__stat-number {
+    font-size: 1.375rem;
   }
 
   .hero__glow-cursor {
