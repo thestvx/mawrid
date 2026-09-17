@@ -82,32 +82,42 @@
   align-items: center;
   gap: 14px;
   text-decoration: none;
-  animation: sub-icon-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: sub-icon-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sub-icon:hover {
-  transform: translateY(-6px) scale(1.04);
+  transform: translateY(-8px) scale(1.15);
 }
 
 .sub-icon__img {
-  width: 110px;
-  height: 110px;
+  width: 132px;
+  height: 132px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sub-icon:hover .sub-icon__img {
+  transform: scale(1.08);
 }
 
 .sub-icon__img img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.10));
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
+  transition: filter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sub-icon:hover .sub-icon__img img {
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.2));
 }
 
 .sub-icon__name {
-  font-size: 1rem;
+  font-size: 1.0625rem;
   font-weight: 700;
   color: var(--color-on-surface);
   line-height: 1.5;
@@ -215,6 +225,10 @@
 @media (max-width: 640px) {
   .sub-page__icons {
     gap: 28px 32px;
+  }
+  .sub-icon__img {
+    width: 104px;
+    height: 104px;
   }
   .sub-page__mini {
     flex-direction: column;

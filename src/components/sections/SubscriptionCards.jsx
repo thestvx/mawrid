@@ -23,6 +23,10 @@ export default function SubscriptionCards() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <div>
+            <span className="sub-cards__eyebrow">
+              <span className="sub-cards__eyebrow-dot" aria-hidden="true" />
+              {isRtl ? 'منصات عالمية موثوقة' : 'Trusted global platforms'}
+            </span>
             <h2 className="sub-cards__title">{isRtl ? 'أقسام الاشتراكات' : 'Subscription Categories'}</h2>
             <p className="sub-cards__sub">
               {isRtl ? 'تصفح اشتراكات أشهر المنصات العالمية في مكان واحد' : 'Browse subscriptions for the world’s most popular platforms in one place'}
