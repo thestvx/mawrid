@@ -19,3 +19,20 @@
   object-fit: cover;
   object-position: center;
 }
+
+/* ── Why Mawrid full-width banner (fade in on scroll) ── */
+.why-banner {
+  position: relative;
+  z-index: 10;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  line-height: 0;
+  font-size: 0;
+  overflow: hidden;
+}
+
+.why-banner__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}

@@ -1,90 +1,80 @@
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import SplitText from '../ui/SplitText';
-import AnimatedContent from '../ui/AnimatedContent';
+import Stepper, { Step } from '../ui/Stepper';
 import './WhyMawrid.css';
 
-const steps = [
-  { key: 'whymawrid.step1', descKey: 'whymawrid.step1desc', num: '1', color: '#ff6201', icon: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></> },
-  { key: 'whymawrid.step2', descKey: 'whymawrid.step2desc', num: '2', color: '#494bd6', icon: <><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></> },
-  { key: 'whymawrid.step3', descKey: 'whymawrid.step3desc', num: '3', color: '#10b981', icon: <><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></> },
+const stepContent = [
+  {
+    key: 'whymawrid.step1',
+    descKey: 'whymawrid.step1desc',
+    icon: <><circle cx="12" cy="8" r="4" /><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" /></>,
+  },
+  {
+    key: 'whymawrid.step2',
+    descKey: 'whymawrid.step2desc',
+    icon: <><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></>,
+  },
+  {
+    key: 'whymawrid.step3',
+    descKey: 'whymawrid.step3desc',
+    icon: <><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></>,
+  },
 ];
 
 export default function WhyMawrid() {
-  const { t, dir } = useLanguage();
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-60px' });
+  const { t, lang } = useLanguage();
+  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+  const completedContent = (
+    <div className="stepper__completed-inner">
+      <span className="stepper__completed-icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 13l4 4L19 7" />
+        </svg>
+      </span>
+      <h3 className="stepper__completed-title">{t('whymawrid.done')}</h3>
+      <p className="stepper__completed-desc">{t('whymawrid.doneDesc')}</p>
+      <Link to="/auth?mode=signup" className="stepper__completed-cta">
+        {t('whymawrid.cta')}
+      </Link>
+    </div>
+  );
 
   return (
-    <section className="whymawrid" ref={ref}>
+    <section className="whymawrid" id="howitworks">
       <div className="container">
         <SplitText
           text={t('whymawrid.howTitle')}
-          tag="h3"
-          className="whymawrid__steps-title"
+          tag="h2"
+          className="whymawrid__title"
           textAlign="center"
-          delay={24}
+          delay={26}
           duration={1}
           threshold={0.15}
           from={{ opacity: 0, y: 30 }}
         />
 
-        <div className="whymawrid__steps-grid">
-          <motion.span
-            className="whymawrid__steps-track"
-            initial={{ scaleX: 0, opacity: 0 }}
-            animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
-            transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            style={{ transformOrigin: dir === 'rtl' ? 'right' : 'left' }}
-          />
-          {steps.map((step, i) => (
-            <AnimatedContent
-              key={i}
-              className="whymawrid__step"
-              distance={48}
-              direction="vertical"
-              duration={0.8}
-              threshold={0.12}
-              delay={i * 0.12}
-            >
-              <div className="whymawrid__step-num-ring" style={{ borderColor: `${step.color}30` }}>
-                <div
-                  className="whymawrid__step-num"
-                  style={{ background: `linear-gradient(135deg, ${step.color}, ${step.color}cc)` }}
-                >
-                  {step.num}
-                </div>
-              </div>
-              <div className="whymawrid__step-icon-wrap" style={{ color: step.color }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  {step.icon}
-                </svg>
-              </div>
-              <h4 className="whymawrid__step-title">{t(step.key)}</h4>
-              <p className="whymawrid__step-desc">{t(step.descKey)}</p>
-              {i < steps.length - 1 && (
-                <div className="whymawrid__step-arrow" aria-hidden="true">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                  </svg>
-                </div>
-              )}
-            </AnimatedContent>
-          ))}
-        </div>
-
-        <motion.div
-          className="whymawrid__cta"
-          initial={{ opacity: 0, y: 24 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
+        <Stepper
+          initialStep={1}
+          dir={dir}
+          backButtonText={t('whymawrid.back')}
+          nextButtonText={t('whymawrid.next')}
+          completeButtonText={t('whymawrid.finish')}
+          completedContent={completedContent}
         >
-          <Link to="/auth?mode=signup" className="btn btn--primary btn--lg">
-            {t('whymawrid.cta')}
-          </Link>
-        </motion.div>
+          {stepContent.map((s) => (
+            <Step key={s.key}>
+              <span className="stepper__step-icon" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {s.icon}
+                </svg>
+              </span>
+              <h4 className="stepper__step-title">{t(s.key)}</h4>
+              <p className="stepper__step-desc">{t(s.descKey)}</p>
+            </Step>
+          ))}
+        </Stepper>
       </div>
     </section>
   );

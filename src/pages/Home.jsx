@@ -2,7 +2,6 @@ import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import Hero from '../components/sections/Hero';
 import SubscriptionCards from '../components/sections/SubscriptionCards';
-import Features from '../components/sections/Features';
 import WhyMawrid from '../components/sections/WhyMawrid';
 import Testimonials from '../components/sections/Testimonials';
 import TrendingProducts from '../components/sections/TrendingProducts';
@@ -59,12 +58,23 @@ export default function Home() {
       </SectionReveal>
 
       <SectionReveal>
-        <Features />
-      </SectionReveal>
-
-      <SectionReveal>
         <WhyMawrid />
       </SectionReveal>
+
+      <motion.div
+        className="why-banner"
+        initial={{ opacity: 0, y: 48 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <img
+          src="/images/backgrounds/whymawrid.png"
+          alt="لماذا مَورد؟ — Why Mawrid?"
+          className="why-banner__img"
+          loading="lazy"
+        />
+      </motion.div>
 
       <SectionReveal>
         <Testimonials />

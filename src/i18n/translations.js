@@ -202,6 +202,11 @@ export const ar = {
   'whymawrid.step3': 'شراء أو بيع',
   'whymawrid.step3desc': 'استمتع بتجربة شراء أو بيع سريعة وآمنة',
   'whymawrid.cta': 'ابدأ الآن',
+  'whymawrid.back': 'السابق',
+  'whymawrid.next': 'التالي',
+  'whymawrid.finish': 'ابدأ الآن',
+  'whymawrid.done': 'تمت جميع الخطوات!',
+  'whymawrid.doneDesc': 'أنت جاهز الآن للانطلاق في مَورد — سجّل حسابك وابدأ رحلتك.',
 
   'testimonials.title': 'ماذا يقول مستخدمونا',
   'testimonials.subtitle': 'آراء من عملاء جربوا مَورد فعلاً',
@@ -503,6 +508,11 @@ export const en = {
   'whymawrid.step3': 'Buy or Sell',
   'whymawrid.step3desc': 'Enjoy a fast and secure buying or selling experience',
   'whymawrid.cta': 'Get Started',
+  'whymawrid.back': 'Previous',
+  'whymawrid.next': 'Next',
+  'whymawrid.finish': 'Get Started',
+  'whymawrid.done': 'All steps completed!',
+  'whymawrid.doneDesc': 'You are ready to dive into Mawrid — create your account and start your journey.',
 
   'testimonials.title': 'What Our Users Say',
   'testimonials.subtitle': 'Reviews from customers who actually tried Mawrid',
