@@ -8,6 +8,10 @@ import './SubscriptionCards.css';
 
 const groups = subscriptionGroups;
 
+const allIcons = groups.flatMap((g) => g.subs);
+const mid = Math.ceil(allIcons.length / 2);
+const iconRows = [allIcons.slice(0, mid), allIcons.slice(mid)];
+
 export default function SubscriptionCards() {
   const ref = useRef(null);
   const trackRef = useRef(null);
@@ -46,9 +50,7 @@ export default function SubscriptionCards() {
       offset += speed * dt;
       if (groupW > 0) {
         const position = offset % groupW;
-        const rtl = document.documentElement.dir === 'rtl';
-        const x = rtl ? position : -groupW + position;
-        track.style.transform = `translate3d(${x}px, 0, 0)`;
+        track.style.transform = `translate3d(${-position}px, 0, 0)`;
       }
       raf = requestAnimationFrame(tick);
     };
@@ -59,6 +61,57 @@ export default function SubscriptionCards() {
       groupW = ensureCopies();
     });
     ro.observe(scroller);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const section = ref.current;
+    if (!section) return;
+
+    const states = Array.from(section.querySelectorAll('.sub-icons__row')).map((row) => {
+      const track = row.querySelector('.sub-icons__track');
+      const base = track?.querySelector('.sub-icons__group');
+      if (!track || !base) return null;
+
+      const ensureCopies = () => {
+        const viewportW = row.clientWidth;
+        while (track.scrollWidth - viewportW < base.offsetWidth) {
+          const clone = base.cloneNode(true);
+          clone.setAttribute('aria-hidden', 'true');
+          track.appendChild(clone);
+        }
+        return base.offsetWidth;
+      };
+
+      return { track, groupW: ensureCopies(), offset: 0, ensureCopies, row };
+    }).filter(Boolean);
+
+    let raf = null;
+    let last = null;
+
+    const tick = (now) => {
+      if (last == null) last = now;
+      const dt = Math.min((now - last) / 1000, 0.1);
+      last = now;
+      for (const s of states) {
+        s.offset += 32 * dt;
+        if (s.groupW > 0) {
+          s.track.style.transform = `translate3d(${-(s.offset % s.groupW)}px, 0, 0)`;
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+
+    const ro = new ResizeObserver(() => {
+      for (const s of states) s.groupW = s.ensureCopies();
+    });
+    for (const s of states) ro.observe(s.row);
 
     return () => {
       cancelAnimationFrame(raf);
@@ -110,6 +163,29 @@ export default function SubscriptionCards() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="sub-icons" aria-label={isRtl ? 'أيقونات الأقسام الفرعية' : 'Subcategory icons'}>
+        {iconRows.map((row, ri) => (
+          <div className="sub-icons__row" key={ri}>
+            <div className="sub-icons__track">
+              {[0, 1].map((half) => (
+                <div className="sub-icons__group" key={half} aria-hidden={half === 1}>
+                  {row.map((sub) => (
+                    <Link
+                      to={`/category/${sub.categorySlug}`}
+                      className="sub-icon"
+                      key={`${ri}-${half}-${sub.key}`}
+                    >
+                      <img src={sub.icon} alt={sub.title_ar} className="sub-icon__img" loading="lazy" />
+                      <span>{isRtl ? sub.title_ar : sub.title_en}</span>
+                    </Link>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );

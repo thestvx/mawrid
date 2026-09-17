@@ -37,7 +37,7 @@ function useAnimatedNumber(target, duration = 2500, prefix = '', suffix = '') {
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       const current = start + eased * diff;
-      const formatted = Number.isInteger(target) ? Math.floor(current).toLocaleString() : current.toFixed(2);
+      const formatted = Number.isInteger(target) ? Math.floor(current).toLocaleString('en-US') : current.toFixed(2);
       setDisplay(prefix + formatted + suffix);
       if (progress < 1) requestAnimationFrame(step);
     };
@@ -417,7 +417,7 @@ export default function AdminDashboard() {
   const formatMoney = (v) => {
     const n = parseFloat(v);
     if (isNaN(n)) return '$0';
-    return '$' + n.toLocaleString(undefined, { minimumFractionDigits: n % 1 ? 2 : 0 });
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0 });
   };
 
   const fmtDate = (iso) => {

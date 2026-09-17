@@ -79,7 +79,7 @@ export default function ProductCard({ product, index = 0 }) {
             <div className="product-card__meta">
               <span className="product-card__seller">{isRtl ? product.seller_name : product.seller_name}</span>
               {Number(product.sales) > 0 && (
-                <span className="product-card__sales">{Number(product.sales).toLocaleString()}</span>
+                <span className="product-card__sales">{Number(product.sales).toLocaleString('en-US')}</span>
               )}
             </div>
           )}

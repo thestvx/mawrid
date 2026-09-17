@@ -60,7 +60,7 @@ function AnimatedCounter({ end, duration = 1500, suffix = '' }) {
     return () => cancelAnimationFrame(frameRef.current);
   }, [end, duration]);
 
-  return <>{value.toLocaleString()}{suffix}</>;
+  return <>{value.toLocaleString('en-US')}{suffix}</>;
 }
 
 const avatarStyle = (color, initials, size = 40) => ({
@@ -121,7 +121,7 @@ export default function SellerDashboard() {
                       </td>
                       <td>${p.price}</td>
                       <td>{p.sales}</td>
-                      <td>${p.revenue.toLocaleString()}</td>
+                      <td>${p.revenue.toLocaleString('en-US')}</td>
                       <td><span className={`d-badge d-badge--${p.status}`}>{t(`dashboard.status${p.status.charAt(0).toUpperCase() + p.status.slice(1)}`)}</span></td>
                       <td>
                         <div className="d-actions">
@@ -206,7 +206,7 @@ export default function SellerDashboard() {
                   {PAYOUTS.map((p, i) => (
                     <tr key={i}>
                       <td>{p.date}</td>
-                      <td>${p.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td>${p.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                       <td><span className="d-badge d-badge--completed">{dir === 'rtl' ? 'مكتمل' : 'Completed'}</span></td>
                     </tr>
                   ))}
@@ -313,7 +313,7 @@ export default function SellerDashboard() {
                             </div>
                           </td>
                           <td>{p.sales}</td>
-                          <td style={{ fontWeight: 700, color: 'var(--color-primary-container)' }}>${p.revenue.toLocaleString()}</td>
+                          <td style={{ fontWeight: 700, color: 'var(--color-primary-container)' }}>${p.revenue.toLocaleString('en-US')}</td>
                           <td><span className={`d-badge d-badge--${p.status}`}>{t(`dashboard.status${p.status.charAt(0).toUpperCase() + p.status.slice(1)}`)}</span></td>
                         </tr>
                       ))}
