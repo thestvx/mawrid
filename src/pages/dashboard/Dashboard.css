@@ -1447,3 +1447,205 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
     display: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ── MAWRID ADMIN — DARK SIDEBAR + BRIGHT CARDS REDESIGN (v2) ──
+   Scoped to .dashboard--admin so it can never leak into seller/buyer UIs.
+   Appended last so these overrides always win at equal specificity.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Dark warm sidebar shell ── */
+.dashboard--admin .dashboard__sidebar {
+  top: 0;
+  width: 268px;
+  background:
+    radial-gradient(560px 380px at 18% -12%, rgba(255, 134, 66, 0.28), transparent 58%),
+    radial-gradient(420px 300px at 112% 108%, rgba(255, 98, 1, 0.18), transparent 62%),
+    linear-gradient(180deg, #2a1510 0%, #381a0d 46%, #25110b 100%);
+  border-left: none;
+  border-right: 1px solid rgba(255, 140, 82, 0.22);
+  box-shadow: 8px 0 34px rgba(0, 0, 0, 0.28);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: rgba(255, 236, 226, 0.92);
+}
+
+[dir="rtl"] .dashboard--admin .dashboard__sidebar {
+  right: 0;
+  left: auto;
+  border-right: none;
+  border-left: 1px solid rgba(255, 140, 82, 0.22);
+  box-shadow: -8px 0 34px rgba(0, 0, 0, 0.28);
+}
+
+/* dot accent texture (light dots on dark) */
+.dashboard--admin .dashboard__sidebar::before {
+  background-image: radial-gradient(rgba(255, 190, 140, 0.22) 1px, transparent 1px);
+  opacity: 0.55;
+  background-size: 17px 17px;
+}
+
+/* ── Sidebar header ── */
+.dashboard--admin .dashboard__sidebar-header {
+  padding: 24px 18px 18px;
+  border-bottom: 1px solid rgba(255, 140, 82, 0.18);
+}
+
+.dashboard--admin .dashboard__sidebar-header::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 150, 84, 0.65), transparent);
+}
+
+.dashboard--admin .dashboard__logo {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+
+.dashboard--admin .dashboard__role-badge {
+  background: rgba(255, 148, 88, 0.16);
+  color: #ffc09a;
+  border: 1px solid rgba(255, 148, 88, 0.3);
+  backdrop-filter: none;
+}
+
+/* ── Nav links on dark ── */
+.dashboard--admin .dashboard__nav {
+  padding: 18px 12px;
+  gap: 5px;
+}
+
+.dashboard--admin .dashboard__nav-link {
+  color: rgba(255, 236, 226, 0.78);
+  border: 1px solid transparent;
+  border-inline-start: 3px solid transparent;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.22s ease;
+}
+
+.dashboard--admin .dashboard__nav-link:hover {
+  background: rgba(255, 148, 88, 0.12);
+  color: #fff3ec;
+  border-color: rgba(255, 148, 88, 0.2);
+  border-inline-start-color: rgba(255, 148, 88, 0.6);
+  transform: none;
+}
+
+.dashboard--admin .dashboard__nav-link--active {
+  background: linear-gradient(135deg, rgba(255, 122, 34, 0.95), rgba(255, 90, 0, 0.88));
+  color: #ffffff;
+  font-weight: 700;
+  border-color: rgba(255, 190, 130, 0.35);
+  border-inline-start-color: #ffd9b3;
+  box-shadow: 0 10px 26px rgba(255, 98, 1, 0.42);
+}
+
+.dashboard--admin .dashboard__nav-link--active .dashboard__nav-icon {
+  color: #ffd9b3;
+}
+
+/* ── Sidebar footer (back / logout) on dark ── */
+.dashboard--admin .dashboard__sidebar-footer {
+  border-top: 1px solid rgba(255, 140, 82, 0.18);
+}
+
+.dashboard--admin .dashboard__back-btn {
+  color: rgba(255, 236, 226, 0.7);
+}
+
+.dashboard--admin .dashboard__back-btn:hover {
+  color: #ffc09a;
+}
+
+.dashboard--admin .dashboard__logout-btn {
+  color: #ff9d9d;
+  border-color: rgba(255, 122, 122, 0.22);
+}
+
+.dashboard--admin .dashboard__logout-btn:hover {
+  background: rgba(255, 90, 90, 0.14);
+  border-color: rgba(255, 122, 122, 0.45);
+  color: #ffb3b3;
+}
+
+/* ── Mobile toggle FAB on brand orange ── */
+.dashboard--admin .dashboard__mobile-toggle {
+  background: linear-gradient(135deg, #ff7a22, #ff6201);
+  color: #fff;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(255, 98, 1, 0.45);
+  z-index: 1001;
+}
+
+.dashboard--admin .dashboard__mobile-toggle:hover {
+  transform: scale(1.06);
+  box-shadow: 0 14px 34px rgba(255, 98, 1, 0.55);
+}
+
+/* ── Main content area: keep bright, let cards pop ── */
+.dashboard--admin .dashboard__main {
+  background: rgba(255, 250, 247, 0.2);
+}
+
+/* ── Admin topbar pill ── */
+.dashboard--admin .d-topbar {
+  border: 1px solid rgba(227, 191, 177, 0.5);
+  box-shadow: 0 10px 36px rgba(255, 98, 1, 0.07);
+}
+
+.dashboard--admin .d-live-badge {
+  background: #e7f8ee;
+  border: 1px solid #c8efd8;
+  color: #0f7244;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  animation: dPulse 2.4s infinite;
+}
+
+/* ── Cards: crisp white with soft brand-tinted edge ── */
+.dashboard--admin .d-card {
+  background: #ffffff;
+  border: 1px solid rgba(227, 191, 177, 0.55);
+  border-radius: 20px;
+  box-shadow: 0 8px 28px rgba(120, 60, 20, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.dashboard--admin .d-card:hover {
+  border-color: rgba(255, 98, 1, 0.45);
+  box-shadow: 0 18px 46px rgba(255, 98, 1, 0.13);
+}
+
+/* ── Quick cards (bento tiles) ── */
+.dashboard--admin .d-quick-card {
+  background: #ffffff;
+  border: 1px solid rgba(227, 191, 177, 0.55);
+}
+
+.dashboard--admin .d-quick-card:hover {
+  background: #fff6f1;
+}
+
+/* ── Table polish ── */
+.dashboard--admin .d-table thead th {
+  background: rgba(255, 219, 200, 0.24);
+}
+
+.dashboard--admin .d-table tbody tr:hover {
+  background: rgba(255, 240, 229, 0.6);
+}
+
+.dashboard--admin .d-table tbody tr td:first-child {
+  border-start-start-radius: 14px;
+  border-end-start-radius: 14px;
+}
+
+/* ── Stat cards could not be empty; keep subtle hover rise ── */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard--admin *,
+  .dashboard--admin *::before,
+  .dashboard--admin *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
