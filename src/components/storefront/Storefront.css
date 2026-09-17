@@ -1,6 +1,6 @@
 .storefront {
   min-height: 100vh;
-  background: linear-gradient(-45deg, #f8f9fa, #edeeef, #ffdbcd, #f8f9fa);
+  background: linear-gradient(-45deg, rgba(248, 249, 250, 0.7), rgba(237, 238, 239, 0.7), rgba(255, 219, 205, 0.55), rgba(248, 249, 250, 0.7));
   background-size: 400% 400%;
   animation: gradientBG 15s ease infinite;
 }

@@ -1,6 +1,6 @@
 .features {
   padding: 96px 0 80px;
-  background: var(--color-surface);
+  background: transparent;
 }
 
 .features__header {

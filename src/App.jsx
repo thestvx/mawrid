@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import LoadingScreen from './components/ui/LoadingScreen';
 import ClickSpark from './components/ui/ClickSpark';
+import DotField from './components/ui/DotField';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
@@ -32,32 +33,50 @@ export default function App() {
       {loading && <LoadingScreen onFinish={() => setLoading(false)} />}
       <ClickSpark sparkColor="#F97316" sparkSize={16} sparkRadius={22} sparkCount={12} duration={400}>
         <ScrollToTop />
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/storefront" element={<Storefront />} />
-            <Route path="/product/:id" element={<Details />} />
-            <Route path="/category/:groupKey" element={<SubscriptionGroupPage />} />
-            <Route path="/subscription/:subKey" element={<SubscriptionPage />} />
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<BuyerDashboard />} />
-              <Route path="buyer" element={<BuyerDashboard />} />
-              <Route path="seller" element={<SellerDashboard />} />
+        <div className="site-dotfield" aria-hidden="true">
+          <DotField
+            dotRadius={1.5}
+            dotSpacing={14}
+            bulgeStrength={67}
+            glowRadius={160}
+            sparkle={false}
+            waveAmplitude={0}
+            cursorRadius={500}
+            cursorForce={0.1}
+            bulgeOnly
+            gradientFrom="rgba(255, 98, 1, 0.16)"
+            gradientTo="rgba(255, 189, 154, 0.10)"
+            glowColor="#ffb597"
+          />
+        </div>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/storefront" element={<Storefront />} />
+              <Route path="/product/:id" element={<Details />} />
+              <Route path="/category/:groupKey" element={<SubscriptionGroupPage />} />
+              <Route path="/subscription/:subKey" element={<SubscriptionPage />} />
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<BuyerDashboard />} />
+                <Route path="buyer" element={<BuyerDashboard />} />
+                <Route path="seller" element={<SellerDashboard />} />
+              </Route>
             </Route>
-          </Route>
-          <Route path="/admin" element={<AdminGate />}>
-            <Route element={<DashboardLayout />}>
-              <Route index element={<AdminDashboard />} />
+            <Route path="/admin" element={<AdminGate />}>
+              <Route element={<DashboardLayout />}>
+                <Route index element={<AdminDashboard />} />
+              </Route>
             </Route>
-          </Route>
-          <Route path="/owner" element={<AdminGate />}>
-            <Route element={<DashboardLayout />}>
-              <Route index element={<AdminDashboard />} />
+            <Route path="/owner" element={<AdminGate />}>
+              <Route element={<DashboardLayout />}>
+                <Route index element={<AdminDashboard />} />
+              </Route>
             </Route>
-          </Route>
-          <Route path="/auth" element={<Auth />} />
-        </Routes>
+            <Route path="/auth" element={<Auth />} />
+          </Routes>
+        </div>
       </ClickSpark>
     </>
   );
