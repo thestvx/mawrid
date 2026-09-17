@@ -7,13 +7,8 @@ import {
   useReducedMotion,
 } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { fetchStoreStats } from '../../lib/supabase';
 import './Hero.css';
-
-const stats = [
-  { end: 3200, suffix: '+', key: 'hero.stat.products' },
-  { end: 840, suffix: '+', key: 'hero.stat.sellers' },
-  { end: 47000, suffix: '+', key: 'hero.stat.buyers' },
-];
 
 const EASE = [0.16, 1, 0.3, 1];
 
@@ -90,7 +85,25 @@ export default function Hero() {
   const sectionRef = useRef(null);
   const statsRef = useRef(null);
   const [statsVisible, setStatsVisible] = useState(false);
+  const [stats, setStats] = useState([
+    { end: 0, suffix: '+', key: 'hero.stat.products' },
+    { end: 0, suffix: '+', key: 'hero.stat.sellers' },
+    { end: 0, suffix: '+', key: 'hero.stat.buyers' },
+  ]);
   const { t, dir } = useLanguage();
+
+  useEffect(() => {
+    let active = true;
+    fetchStoreStats().then((counts) => {
+      if (!active) return;
+      setStats([
+        { end: counts.products, suffix: '+', key: 'hero.stat.products' },
+        { end: counts.sellers, suffix: '+', key: 'hero.stat.sellers' },
+        { end: counts.users, suffix: '+', key: 'hero.stat.buyers' },
+      ]);
+    });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

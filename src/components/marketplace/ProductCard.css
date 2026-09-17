@@ -84,6 +84,30 @@
   background: var(--color-tertiary);
 }
 
+.product-card__badge--discount {
+  right: 12px;
+  left: auto;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+[dir="rtl"] .product-card__badge--discount {
+  right: auto;
+  left: 12px;
+}
+
+.product-card__img--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-on-surface-variant);
+  background: var(--color-surface-container-high);
+}
+
+.product-card__img--placeholder .material-symbols-outlined {
+  font-size: 2.25rem;
+}
+
 .product-card__actions {
   position: absolute;
   bottom: 12px;
