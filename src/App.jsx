@@ -11,6 +11,8 @@ import Details from './pages/Details';
 import SubscriptionGroupPage from './pages/SubscriptionGroupPage';
 import SubscriptionPage from './pages/SubscriptionPage';
 import Auth from './pages/Auth';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import SellerDashboard from './pages/dashboard/SellerDashboard';
 import BuyerDashboard from './pages/dashboard/BuyerDashboard';
@@ -69,6 +71,8 @@ export default function App() {
               <Route path="/product/:id" element={<Details />} />
               <Route path="/category/:groupKey" element={<SubscriptionGroupPage />} />
               <Route path="/subscription/:subKey" element={<SubscriptionPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<BuyerDashboard />} />
                 <Route path="buyer" element={<BuyerDashboard />} />

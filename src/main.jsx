@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
 import Lenis from 'lenis';
 import './styles/globals.css';
 import App from './App.jsx';
@@ -41,7 +42,9 @@ createRoot(document.getElementById('root')).render(
       <SmoothScroll>
         <LanguageProvider>
           <AuthProvider>
-            <App />
+            <CartProvider>
+              <App />
+            </CartProvider>
           </AuthProvider>
         </LanguageProvider>
       </SmoothScroll>

@@ -1449,6 +1449,304 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   ── MAWRID ADMIN — DARK WARM SIDEBAR + CRISP CARDS REDESIGN (v2) ──
+   Appended last so these overrides win over the earlier light-glass rules.
+   Scoped under .dashboard--admin so buyer/seller surfaces are untouched.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Dark warm cocoa sidebar (deep espresso w/ orange radial glows) ── */
+.dashboard--admin .dashboard__sidebar,
+.dashboard--admin.dashboard__sidebar {
+  top: 0;
+  width: 272px;
+  background:
+    radial-gradient(560px 380px at 12% -10%, rgba(255, 140, 82, 0.22), transparent 60%),
+    radial-gradient(420px 300px at 95% 108%, rgba(255, 98, 1, 0.12), transparent 62%),
+    linear-gradient(180deg, #2b1510 0%, #3a2014 46%, #24110a 100%);
+  color: #ffe9df;
+  border-right-color: rgba(255, 140, 82, 0.18);
+  box-shadow: 8px 0 30px rgba(255, 98, 1, 0.10);
+  border: 0;
+  width: 272px;
+}
+
+[dir="rtl"] .dashboard--admin .dashboard__sidebar {
+  box-shadow: -8px 0 30px rgba(255, 98, 1, 0.10);
+}
+
+/* dotted warm texture over the dark sidebar */
+.dashboard--admin .dashboard__sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 190, 150, 0.13) 1px, transparent 1px);
+  background-size: 16px 12px;
+  pointer-events: none;
+}
+
+/* ── Sidebar header: logo on dark + orange rule ── */
+.dashboard--admin .dashboard__sidebar-header {
+  padding: 22px 18px 16px;
+  border-bottom: 1px solid transparent;
+}
+
+.dashboard--admin .dashboard__sidebar-header::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 120px;
+  background: radial-gradient(260px 100px at 50% 0%, rgba(255, 140, 82, 0.32), transparent 70%);
+  transform: translateY(18px);
+  opacity: 0.5;
+  border-radius: 50%;
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+.dashboard--admin .dashboard__logo {
+  filter: drop-shadow(0 30px 24px rgba(0, 0, 0, 0.5)); /* hmm - keep subtle */
+}
+
+.dashboard--admin .dashboard__role-badge {
+  background: rgba(255, 140, 82, 0.14);
+  border: 1px solid rgba(255, 140, 82, 0.3);
+  color: #ffc9a6;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+/* ── Nav links on dark ── */
+.dashboard--admin .dashboard__nav {
+  padding: 16px 12px;
+  gap: 4px;
+}
+
+.dashboard--admin .dashboard__nav-link {
+  color: rgba(255, 233, 223, 0.72);
+  font-weight: 600;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  transition: all 0.24s ease;
+}
+
+.dashboard--admin .dashboard__nav-link:hover {
+  background: rgba(255, 152, 86, 0.12);
+  color: #fff3ec;
+  border-color: rgba(255, 162, 100, 0.18);
+  transform: translateX(-3px);
+}
+
+[dir="rtl"] .dashboard--admin .dashboard__nav-link:hover {
+  transform: translateX(3px);
+}
+
+.dashboard--admin .dashboard__nav-link--active {
+  background: linear-gradient(135deg, #ff8f2e, #ff6201);
+  color: #fff;
+  border: 1px solid rgba(255, 190, 130, 0.4);
+  box-shadow: 0 10px 28px rgba(255, 122, 20, 0.4);
+  font-weight: 700;
+}
+
+.dashboard--admin .dashboard__nav-link--active .dashboard__nav-icon {
+  color: #ffe3cc;
+}
+
+.dashboard--admin .dashboard__nav-icon {
+  opacity: 0.9;
+}
+
+/* ── Sidebar footer on dark ── */
+.dashboard--admin .dashboard__sidebar-footer {
+  border-top-color: rgba(255, 160, 100, 0.15);
+}
+
+.dashboard--admin .dashboard__back-btn {
+  color: rgba(255, 233, 223, 0.6);
+}
+
+.dashboard--admin .dashboard__back-btn:hover {
+  color: #ffc9a6;
+}
+
+.dashboard--admin .dashboard__logout-btn {
+  color: #ff9d9d;
+  border-color: rgba(255, 120, 120, 0.2);
+}
+
+.dashboard--admin .dashboard__logout-btn:hover {
+  background: rgba(255, 84, 84, 0.1);
+  border-color: rgba(255, 120, 120, 0.5);
+  color: #ffb3b3;
+}
+
+/* ── Topbar stays bright so cards pop against dark shell ── */
+.dashboard--admin .dashboard__topbar {
+  border-color: rgba(227, 191, 177, 0.55);
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+/* ── Cards: crisp white with soft rose edges, hover lift + orange glow ── */
+.dashboard--admin .d-card {
+  background: #ffffff;
+  border: 1px solid rgba(227, 191, 177, 0.72);
+  border-radius: 22px;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  position: relative;
+}
+
+.dashboard--admin .d-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 200, 160, 0.9), transparent);
+}
+
+.dashboard--admin .d-stat {
+  background: #ffffff;
+  border: 1px solid rgba(227, 191, 177, 0.72);
+  border-radius: 20px;
+  box-shadow: 0 6px 26px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.26s ease, box-shadow 0.26s ease;
+}
+
+.dashboard--admin .d-stat:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 44px rgba(255, 98, 1, 0.16);
+  border-color: rgba(255, 130, 45, 0.4);
+}
+
+.dashboard--admin .d-stat__value {
+  color: var(--color-primary);
+  font-weight: 900;
+}
+
+.dashboard--admin .d-quick-card {
+  background: #ffffff;
+  border: 1px solid rgba(227, 191, 177, 0.72);
+  border-radius: 20px;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+}
+
+.dashboard--admin .d-quick-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 130, 45, 0.45);
+  box-shadow: 0 16px 38px rgba(255, 98, 1, 0.15);
+}
+
+/* ── Tables: soft on-surface header + hover rows ── */
+.dashboard--admin .d-table thead th {
+  background: rgba(255, 231, 213, 0.55);
+  color: var(--color-on-surface-variant);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border-bottom: 2px solid rgba(227, 191, 177, 0.6);
+}
+
+.dashboard--admin .d-table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.dashboard--admin .d-table tbody tr:hover {
+  background: rgba(255, 240, 228, 0.6);
+}
+
+.dashboard--admin .d-table tbody tr td:first-child {
+  border-start-start-radius: 12px;
+  border-end-start-radius: 12px;
+}
+
+/* ── Badges keep light tints (consistent w/ storefront) ── */
+.dashboard--admin .d-badge--admin {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.dashboard--admin .d-actions__btn {
+  background: #fff7f3;
+  color: var(--color-on-surface);
+  border: 1px solid rgba(227, 191, 177, 0.7);
+  font-weight: 600;
+}
+
+.dashboard--admin .d-actions__btn:hover {
+  background: #ffe4d6;
+  border-color: #ffb087;
+  color: var(--color-primary);
+}
+
+.dashboard--admin .d-actions__btn--approve {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.dashboard--admin .d-actions__btn--danger {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+/* ── Mobile toggle FAB (orange on dark shell) ── */
+.dashboard--admin .dashboard__mobile-toggle {
+  background: linear-gradient(135deg, #ff7f22, #ff6201);
+  color: #fff;
+  border: none;
+  box-shadow: 0 10px 30px rgba(255, 122, 20, 0.5);
+}
+
+.dashboard--admin .dashboard__mobile-toggle:hover {
+  box-shadow: 0 16px 40px rgba(255, 122, 20, 0.6);
+}
+
+/* ── Motion: content fade-in-up on mount ── */
+@keyframes dAdminFadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard--admin .dashboard__main > .d-welcome,
+.dashboard--admin .dashboard__main > .d-stats,
+.dashboard--admin .dashboard__main > .d-grid {
+  animation: dAdminFadeInUp 0.4s ease both;
+}
+
+.dashboard--admin .dashboard__main > .d-card {
+  animation: dAdminFadeInUp 0.5s ease both;
+}
+
+/* stagger quick cards */
+.dashboard--admin .d-grid .d-quick-card:nth-child(2) { animation-delay: 0.04s; }
+.dashboard--admin .d-grid .d-quick-card:nth-child(3) { animation-delay: 0.08s; }
+.dashboard--admin .d-grid .d-quick-card:nth-child(4) { animation-delay: 0.12s; }
+.dashboard--admin .d-grid .d-quick-card:nth-child(5) { animation-delay: 0.16s; }
+.dashboard--admin .d-grid .d-quick-card:nth-child(6) { animation-delay: 0.2s; }
+
+/* ── Reduced motion: calm everything ── */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard--admin *,
+  .dashboard--admin *::before,
+  .dashboard--admin *::after {
+    animation: none !important;
+    transition-duration: 0.001ms !important;
+    transform: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    ── MAWRID ADMIN — DARK SIDEBAR + BRIGHT CARDS REDESIGN (v2) ──
    Scoped to .dashboard--admin so it can never leak into seller/buyer UIs.
    Appended last so these overrides always win at equal specificity.
