@@ -140,6 +140,7 @@ const GooeyNav = ({
     if (activeLi) {
       updateEffectPosition(activeLi);
       textRef.current?.classList.add('active');
+      filterRef.current?.classList.add('active');
     }
 
     const resizeObserver = new ResizeObserver(() => {
@@ -163,6 +164,7 @@ const GooeyNav = ({
       if (li) {
         updateEffectPosition(li);
         textRef.current?.classList.add('active');
+        filterRef.current?.classList.add('active');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

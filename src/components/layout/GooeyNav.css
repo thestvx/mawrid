@@ -287,7 +287,15 @@
   overflow: visible;
 }
 
-/* Logo reuses .pill-logo styles from PillNav.css */
+/* Logo reuses .pill-logo styles from PillNav.css.
+   Black-logo.png is a square canvas with the wordmark in its middle band,
+   so we crop it (object-fit) to the wordmark's natural 3.3:1 proportions. */
+.gooey-navbar .pill-logo__img {
+  height: 28px;
+  width: 92px;
+  object-fit: cover;
+  object-position: center;
+}
 
 @media (max-width: 900px) {
   .gooey-navbar__track {

@@ -54,7 +54,7 @@
   --color-background: #f8f9fa;
   --color-on-background: #191c1d;
 
-  --font-arabic: 'GE SS', 'Tajawal', 'Noto Naskh Arabic', 'Segoe UI', 'Tahoma', sans-serif;
+  --font-arabic: 'GE SS', 'SF Pro Display', 'Tajawal', 'Noto Naskh Arabic', 'Segoe UI', 'Tahoma', sans-serif;
   --font-english: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   --spacing-unit: 8px;

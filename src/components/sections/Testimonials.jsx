@@ -1,37 +1,34 @@
+import { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Carousel from '../ui/Carousel';
 import SplitText from '../ui/SplitText';
 import './Testimonials.css';
 
-const testimonials = [
-  {
-    quote: 'testimonials.q1',
-    name: 'testimonials.n1',
-    role: 'testimonials.r1',
-    avatar: 'testimonials.a1',
-    rating: 5,
-    color: '#ff6201',
-  },
-  {
-    quote: 'testimonials.q2',
-    name: 'testimonials.n2',
-    role: 'testimonials.r2',
-    avatar: 'testimonials.a2',
-    rating: 5,
-    color: '#494bd6',
-  },
-  {
-    quote: 'testimonials.q3',
-    name: 'testimonials.n3',
-    role: 'testimonials.r3',
-    avatar: 'testimonials.a3',
-    rating: 5,
-    color: '#10b981',
-  },
+const TESTIMONIAL_POOL = [
+  { quote: 'testimonials.q1', name: 'testimonials.n1', role: 'testimonials.r1', avatar: 'testimonials.a1', rating: 5, color: '#ff6201' },
+  { quote: 'testimonials.q2', name: 'testimonials.n2', role: 'testimonials.r2', avatar: 'testimonials.a2', rating: 5, color: '#494bd6' },
+  { quote: 'testimonials.q3', name: 'testimonials.n3', role: 'testimonials.r3', avatar: 'testimonials.a3', rating: 5, color: '#10b981' },
+  { quote: 'testimonials.q4', name: 'testimonials.n4', role: 'testimonials.r4', avatar: 'testimonials.a4', rating: 5, color: '#8b5cf6' },
+  { quote: 'testimonials.q5', name: 'testimonials.n5', role: 'testimonials.r5', avatar: 'testimonials.a5', rating: 5, color: '#f59e0b' },
+  { quote: 'testimonials.q6', name: 'testimonials.n6', role: 'testimonials.r6', avatar: 'testimonials.a6', rating: 5, color: '#ec4899' },
+  { quote: 'testimonials.q7', name: 'testimonials.n7', role: 'testimonials.r7', avatar: 'testimonials.a7', rating: 5, color: '#06b6d4' },
+  { quote: 'testimonials.q8', name: 'testimonials.n8', role: 'testimonials.r8', avatar: 'testimonials.a8', rating: 5, color: '#22c55e' },
 ];
+
+const REVIEW_COUNT = 6;
+
+const shuffleAndPick = () => {
+  const copy = [...TESTIMONIAL_POOL];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, REVIEW_COUNT);
+};
 
 export default function Testimonials() {
   const { t } = useLanguage();
+  const [testimonials] = useState(() => shuffleAndPick());
   const items = testimonials.map((t_, i) => ({ ...t_, id: i + 1 }));
 
   const initials = (nameKey) => {
