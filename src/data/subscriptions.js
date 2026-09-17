@@ -13,10 +13,6 @@
       { key: 'gemini', title_ar: 'اشتراك جيميني', title_en: 'Gemini', icon: '/images/icons/ai/gemini.png', categorySlug: 'google-gemini', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
       { key: 'claude', title_ar: 'اشتراك كلود', title_en: 'Claude', icon: '/images/icons/ai/claude.png', categorySlug: 'claude', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
       { key: 'perplexity', title_ar: 'اشتراك بربلكسيتي', title_en: 'Perplexity', icon: '/images/icons/ai/preplexity.png', categorySlug: 'perplexity', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
-      { key: 'chatgpt-shared', title_ar: 'شات جي بي تي بلس (حساب مشترك)', title_en: 'ChatGPT Plus (Shared)', icon: '/images/icons/ai/chatgpt.png', categorySlug: 'chatgpt-shared', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
-      { key: 'chatgpt-personal', title_ar: 'شات جي بي تي بلس (شخصي)', title_en: 'ChatGPT Plus (Personal)', icon: '/images/icons/ai/chatgptplus.png', categorySlug: 'chatgpt-personal', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
-      { key: 'gemini-pro', title_ar: 'اشتراك جيميني برو', title_en: 'Gemini Pro', icon: '/images/icons/ai/gemini.png', categorySlug: 'geminipro', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
-      { key: 'gemini-ultra', title_ar: 'اشتراك جيميني الترا', title_en: 'Gemini Ultra', icon: '/images/icons/ai/gemini.png', categorySlug: 'geminiultra', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
     ],
   },
   {
