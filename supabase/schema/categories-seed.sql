@@ -25,7 +25,18 @@ values
   ('التجارة الإلكترونية', 'E-Commerce Services', 'ecommerce', 'shopping_bag', true, 170),
   ('الدورات والتعليم', 'Courses & Education', 'courses', 'school', true, 180),
   ('الأعمال والمحاسبة', 'Business & Accounting', 'business', 'account_balance', true, 190),
-  ('الأكثر مبيعاً', 'Best Sellers', 'best-sellers', 'local_fire_department', true, 200)
+  ('الأكثر مبيعاً', 'Best Sellers', 'best-sellers', 'local_fire_department', true, 200),
+  ('كلود', 'Claude', 'claude', 'spa', true, 210),
+  ('دولينقو', 'Duolingo', 'duolingo', 'translate', true, 220),
+  ('كورسيرا', 'Coursera', 'coursera', 'school', true, 230),
+  ('لينكد إن', 'LinkedIn', 'linkedin', 'work', true, 240),
+  ('ميكروسوفت', 'Microsoft', 'microsoft', 'widgets', true, 250),
+  ('أوفيس 360', 'Office 365', 'office-365', 'description', true, 260),
+  ('بلايستيشن', 'PlayStation', 'playstation', 'sports_esports', true, 270),
+  ('إيبك جيمز', 'Epic Games', 'epic-games', 'rocket_launch', true, 280),
+  ('إي إيه بلاي', 'EA Play', 'ea-play', 'stadia_controller', true, 290),
+  ('ببجي موبايل', 'PUBG Mobile', 'pubg-mobile', 'sports_esports', true, 300),
+  ('فري فاير', 'Free Fire', 'free-fire', 'local_fire_department', true, 310)
 on conflict (slug) do update set
   name = excluded.name,
   name_en = excluded.name_en,

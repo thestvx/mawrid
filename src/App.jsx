@@ -7,6 +7,8 @@ import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
 import Storefront from './components/storefront/Storefront';
 import Details from './pages/Details';
+import SubscriptionGroupPage from './pages/SubscriptionGroupPage';
+import SubscriptionPage from './pages/SubscriptionPage';
 import Auth from './pages/Auth';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import SellerDashboard from './pages/dashboard/SellerDashboard';
@@ -36,6 +38,8 @@ export default function App() {
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/storefront" element={<Storefront />} />
             <Route path="/product/:id" element={<Details />} />
+            <Route path="/category/:groupKey" element={<SubscriptionGroupPage />} />
+            <Route path="/subscription/:subKey" element={<SubscriptionPage />} />
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<BuyerDashboard />} />
               <Route path="buyer" element={<BuyerDashboard />} />

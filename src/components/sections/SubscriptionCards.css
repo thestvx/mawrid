@@ -1,0 +1,211 @@
+.sub-cards-section {
+  padding: 8px 0 40px;
+  overflow: hidden;
+}
+
+.sub-cards__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.sub-cards__title {
+  font-size: clamp(1.375rem, 3vw, 2rem);
+  font-weight: 800;
+  color: var(--color-on-surface);
+  letter-spacing: -0.02em;
+}
+
+.sub-cards__sub {
+  margin-top: 6px;
+  font-size: 0.9375rem;
+  color: var(--color-secondary);
+}
+
+.sub-cards__view-all {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--color-primary-container);
+  transition: color var(--duration-ui) var(--ease-expo), gap var(--duration-ui) var(--ease-expo);
+}
+
+.sub-cards__view-all:hover {
+  color: var(--color-primary);
+  gap: 12px;
+}
+
+.sub-cards__arrow {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.sub-cards {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 12px 0;
+}
+
+.sub-cards::before,
+.sub-cards::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 90px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.sub-cards::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--color-surface, #f8f9fa), transparent);
+}
+
+.sub-cards::after {
+  right: 0;
+  background: linear-gradient(-90deg, var(--color-surface, #f8f9fa), transparent);
+}
+
+.sub-cards__track {
+  display: flex;
+  width: max-content;
+  animation: sub-marquee 42s linear infinite;
+  will-change: transform;
+}
+
+.sub-cards:hover .sub-cards__track,
+.sub-cards:focus-within .sub-cards__track {
+  animation-play-state: paused;
+}
+
+.sub-cards__group {
+  display: flex;
+  gap: 20px;
+  padding-right: 20px;
+}
+
+.sub-card {
+  position: relative;
+  display: block;
+  width: clamp(270px, 26vw, 360px);
+  height: 200px;
+  border-radius: 22px;
+  overflow: hidden;
+  flex-shrink: 0;
+  isolation: isolate;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sub-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 24px 50px -12px rgba(255, 98, 1, 0.25), 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.sub-card__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sub-card:hover .sub-card__bg {
+  transform: scale(1.08);
+}
+
+.sub-card__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(10, 10, 14, 0.05) 0%, rgba(10, 10, 14, 0.72) 72%, rgba(10, 10, 14, 0.92) 100%);
+  transition: opacity 0.4s;
+}
+
+.sub-card__badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  color: var(--color-primary-container);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sub-card__content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sub-card__title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.35;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
+}
+
+.sub-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0.85;
+  transition: opacity 0.3s, gap 0.3s;
+}
+
+.sub-card:hover .sub-card__cta {
+  opacity: 1;
+  gap: 10px;
+  color: #ffb27d;
+}
+
+@keyframes sub-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sub-cards__track {
+    animation: none;
+  }
+  .sub-cards {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+}
+
+@media (max-width: 640px) {
+  .sub-cards__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .sub-card {
+    width: 270px;
+    height: 180px;
+  }
+}
