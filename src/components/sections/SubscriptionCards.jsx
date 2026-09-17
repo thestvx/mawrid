@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -9,9 +9,61 @@ const groups = subscriptionGroups;
 
 export default function SubscriptionCards() {
   const ref = useRef(null);
+  const trackRef = useRef(null);
+  const scrollerRef = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-60px' });
   const { dir } = useLanguage();
   const isRtl = dir === 'rtl';
+
+  useEffect(() => {
+    const track = trackRef.current;
+    const scroller = scrollerRef.current;
+    if (!track || !scroller) return;
+
+    const ensureCopies = () => {
+      const base = track.querySelector('.sub-cards__group');
+      if (!base) return 0;
+      const viewportW = scroller.clientWidth;
+      while (track.scrollWidth - viewportW < base.offsetWidth) {
+        const clone = base.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        track.appendChild(clone);
+      }
+      return base.offsetWidth;
+    };
+
+    let groupW = ensureCopies();
+    let raf = null;
+    let last = null;
+    let offset = 0;
+    const speed = 40;
+
+    const tick = (now) => {
+      if (last == null) last = now;
+      const dt = Math.min((now - last) / 1000, 0.1);
+      last = now;
+      offset += speed * dt;
+      if (groupW > 0) {
+        const position = offset % groupW;
+        const rtl = document.documentElement.dir === 'rtl';
+        const x = rtl ? position : -groupW + position;
+        track.style.transform = `translate3d(${x}px, 0, 0)`;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+
+    const ro = new ResizeObserver(() => {
+      groupW = ensureCopies();
+    });
+    ro.observe(scroller);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, []);
 
   return (
     <section className="sub-cards-section" ref={ref}>
@@ -39,8 +91,8 @@ export default function SubscriptionCards() {
         </motion.div>
       </div>
 
-      <div className="sub-cards" aria-label={isRtl ? 'أقسام الاشتراكات' : 'Subscription categories'}>
-        <div className="sub-cards__track">
+      <div className="sub-cards" ref={scrollerRef} aria-label={isRtl ? 'أقسام الاشتراكات' : 'Subscription categories'}>
+        <div className="sub-cards__track" ref={trackRef}>
           {[0, 1].map((half) => (
             <div className="sub-cards__group" key={half} aria-hidden={half === 1}>
               {groups.map((g) => (

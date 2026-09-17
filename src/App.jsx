@@ -35,17 +35,17 @@ export default function App() {
         <ScrollToTop />
         <div className="site-dotfield" aria-hidden="true">
           <DotField
-            dotRadius={1.5}
+            dotRadius={2}
             dotSpacing={14}
-            bulgeStrength={67}
-            glowRadius={160}
+            bulgeStrength={72}
+            glowRadius={180}
             sparkle={false}
             waveAmplitude={0}
             cursorRadius={500}
             cursorForce={0.1}
             bulgeOnly
-            gradientFrom="rgba(255, 98, 1, 0.16)"
-            gradientTo="rgba(255, 189, 154, 0.10)"
+            gradientFrom="rgba(255, 98, 1, 0.30)"
+            gradientTo="rgba(255, 189, 154, 0.18)"
             glowColor="#ffb597"
           />
         </div>
