@@ -4,6 +4,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import DashIcon from '../../components/dashboard/DashIcon';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { subscriptionGroups } from '../../data/subscriptions';
 
 const EMPTY_PRODUCT = {
   name: '',
@@ -211,6 +212,112 @@ export default function AdminDashboard() {
     setToast(msg);
     setTimeout(() => setToast(null), 2600);
   }, []);
+
+  // ── Subscription sections & branches state ──
+  const [openBranches, setOpenBranches] = useState(() => new Set());
+  const [priceDraft, setPriceDraft] = useState({});
+  const [syncing, setSyncing] = useState(false);
+
+  const categoriesBySlug = useMemo(() => {
+    const m = {};
+    categories.forEach(c => { if (!m[c.slug]) m[c.slug] = c; });
+    return m;
+  }, [categories]);
+
+  const sectionsData = useMemo(() => {
+    return subscriptionGroups.map(group => ({
+      ...group,
+      branches: group.subs.map(sub => {
+        const category = categoriesBySlug[sub.categorySlug] || null;
+        const branchProducts = category
+          ? products.filter(p => p.category_id === category.id)
+          : [];
+        return { ...sub, category, products: branchProducts };
+      }),
+    }));
+  }, [categoriesBySlug, products]);
+
+  const subscriptionCatIds = useMemo(() => {
+    const ids = new Set();
+    sectionsData.forEach(g => g.branches.forEach(b => { if (b.category) ids.add(b.category.id); }));
+    return ids;
+  }, [sectionsData]);
+  const subProducts = useMemo(
+    () => products.filter(p => subscriptionCatIds.has(p.category_id)),
+    [products, subscriptionCatIds]
+  );
+  const totalBranches = sectionsData.reduce((s, g) => s + g.branches.length, 0);
+
+  const toggleBranch = (key) => {
+    setOpenBranches(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const setDraftPrice = (id, field, value) => {
+    setPriceDraft(d => ({ ...d, [id]: { ...(d[id] || {}), [field]: value } }));
+  };
+
+  const saveQuickPrice = async (p) => {
+    const d = priceDraft[p.id] || {};
+    const price = d.price !== undefined && d.price !== '' ? parseFloat(d.price) : (Number(p.price) || 0);
+    const hasSale = d.sale_price !== undefined;
+    const sale = hasSale && d.sale_price !== '' ? parseFloat(d.sale_price) : null;
+    const res = await supabase.from('products').update({ price, sale_price: sale }).eq('id', p.id);
+    if (res.error) { notify(dir === 'rtl' ? 'فشل حفظ السعر' : 'Failed to save price'); return; }
+    const next = { ...priceDraft };
+    delete next[p.id];
+    setPriceDraft(next);
+    notify(dir === 'rtl' ? 'تم تحديث السعر' : 'Price updated');
+    loadAll();
+  };
+
+  const ensureBranchCategory = useCallback(async () => {
+    const rows = [];
+    subscriptionGroups.forEach((g, gi) => {
+      rows.push({ name: g.title_ar, name_en: g.title_en, slug: g.categorySlug, icon: 'category', enabled: true, sort_order: gi * 100 + 1 });
+      g.subs.forEach((s, si) => {
+        rows.push({ name: s.title_ar, name_en: s.title_en, slug: s.categorySlug, icon: 'subscriptions', enabled: true, sort_order: gi * 100 + si + 2 });
+      });
+    });
+    const missing = rows.filter(r => !categoriesBySlug[r.slug]);
+    if (missing.length === 0) {
+      notify(dir === 'rtl' ? 'جميع الأقسام والفروع مرتبطة مسبقاً' : 'All sections & branches are already synced');
+      return;
+    }
+    setSyncing(true);
+    let ok = 0;
+    for (const row of missing) {
+      const res = await supabase.from('categories').insert(row);
+      if (res.error) { notify(dir === 'rtl' ? 'فشل المزامنة: ' + res.error.message : 'Sync failed: ' + res.error.message); break; }
+      ok += 1;
+    }
+    setSyncing(false);
+    notify(dir === 'rtl' ? `تمت مزامنة ${ok} تصنيف` : `Synced ${ok} categories`);
+    loadAll();
+    // loadAll is defined below and is stable ([] deps); keep it out of deps to avoid TDZ
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoriesBySlug, dir, notify]);
+
+  const openAddForBranch = (sub, group) => {
+    const category = categoriesBySlug[sub.categorySlug] || null;
+    setEditing(null);
+    setForm({
+      ...EMPTY_PRODUCT,
+      name: sub.title_ar,
+      name_en: sub.title_en,
+      description: group ? `اشتراك ${sub.title_ar} — ${group.title_ar}` : '',
+      category_id: category ? category.id : '',
+      seller_name: 'مَورد',
+      store_name: 'مَورد',
+      stock: 999,
+      status: 'active',
+    });
+    setShowForm(true);
+  };
 
   useEffect(() => {
     if (!toast) return;
@@ -453,8 +560,12 @@ export default function AdminDashboard() {
         </div>
 
         <div className="d-grid">
+          <a href="?tab=subscriptions" className="d-quick-card" onClick={(e) => { e.preventDefault(); setTab('subscriptions'); }}>
+            <span className="d-quick-card__icon" style={{ color: 'var(--color-primary)' }}><DashIcon name="subscription" size={24} /></span>
+            <span>{dir === 'rtl' ? 'الاشتراكات والأسعار' : 'Subscriptions & Pricing'}</span>
+          </a>
           <a href="?tab=users" className="d-quick-card" onClick={(e) => { e.preventDefault(); setTab('users'); }}>
-            <span className="d-quick-card__icon" style={{ color: 'var(--color-primary)' }}><DashIcon name="users" size={24} /></span>
+            <span className="d-quick-card__icon" style={{ color: '#494bd6' }}><DashIcon name="users" size={24} /></span>
             <span>{dir === 'rtl' ? 'إدارة المستخدمين' : 'User Management'}</span>
           </a>
           <a href="?tab=sellers" className="d-quick-card" onClick={(e) => { e.preventDefault(); setTab('sellers'); }}>
@@ -735,113 +846,189 @@ export default function AdminDashboard() {
           </table>
         </div>
       </div>
-
-      {showForm && (
-        <div className="d-modal">
-          <div className="d-modal__card">
-            <div className="d-modal__header">
-              <h3>{editing ? (dir === 'rtl' ? 'تعديل المنتج' : 'Edit Product') : (dir === 'rtl' ? 'إضافة منتج جديد' : 'Add New Product')}</h3>
-              <button className="d-modal__close" onClick={() => setShowForm(false)}>✕</button>
-            </div>
-            <form className="d-form" onSubmit={saveProduct} style={{ maxWidth: '100%' }}>
-              <div className="d-form__row">
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'اسم المنتج (عربي)' : 'Product Name (Arabic)'} *</label>
-                  <input value={form.name} onChange={e => setField('name', e.target.value)} className="d-form__input" required placeholder={dir === 'rtl' ? 'مثال: قالب متجر إلكتروني' : 'e.g. E-commerce template'} />
-                </div>
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'اسم المنتج (إنجليزي)' : 'Product Name (English)'}</label>
-                  <input value={form.name_en} onChange={e => setField('name_en', e.target.value)} className="d-form__input" placeholder="e.g. Online Store Template" />
-                </div>
-              </div>
-
-              <div className="d-form__group">
-                <label>{dir === 'rtl' ? 'الوصف' : 'Description'}</label>
-                <textarea value={form.description} onChange={e => setField('description', e.target.value)} className="d-form__input d-form__textarea" rows={3} />
-              </div>
-
-              <div className="d-form__row">
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'السعر ($)' : 'Price ($)'} *</label>
-                  <input value={form.price} onChange={e => setField('price', e.target.value)} type="number" step="0.01" min="0" className="d-form__input" required />
-                </div>
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'سعر الخصم ($) (اختياري)' : 'Sale Price ($) (optional)'}</label>
-                  <input value={form.sale_price} onChange={e => setField('sale_price', e.target.value)} type="number" step="0.01" min="0" className="d-form__input" />
-                </div>
-              </div>
-
-              <div className="d-form__row">
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'التصنيف' : 'Category'}</label>
-                  <select value={form.category_id} onChange={e => setField('category_id', e.target.value)} className="d-form__input">
-                    <option value="">{dir === 'rtl' ? '— بدون تصنيف —' : '— No category —'}</option>
-                    {categories.map(c => (
-                      <option key={c.id} value={c.id}>{dir === 'rtl' ? (c.name || c.name_en) : (c.name_en || c.name)}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'الحالة' : 'Status'}</label>
-                  <select value={form.status} onChange={e => setField('status', e.target.value)} className="d-form__input">
-                    <option value="pending">{dir === 'rtl' ? 'قيد المراجعة' : 'Pending'}</option>
-                    <option value="active">{dir === 'rtl' ? 'نشط' : 'Active'}</option>
-                    <option value="rejected">{dir === 'rtl' ? 'مرفوض' : 'Rejected'}</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="d-form__row">
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'اسم البائع' : 'Seller Name'}</label>
-                  <input value={form.seller_name} onChange={e => setField('seller_name', e.target.value)} className="d-form__input" />
-                </div>
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'اسم المتجر' : 'Store Name'}</label>
-                  <input value={form.store_name} onChange={e => setField('store_name', e.target.value)} className="d-form__input" />
-                </div>
-              </div>
-
-              <div className="d-form__row">
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'رابط الصورة المصغرة' : 'Thumbnail URL'}</label>
-                  <input value={form.thumbnail} onChange={e => setField('thumbnail', e.target.value)} className="d-form__input" placeholder="https://..." />
-                </div>
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'المخزون' : 'Stock'}</label>
-                  <input value={form.stock} onChange={e => setField('stock', e.target.value)} type="number" min="0" className="d-form__input" />
-                </div>
-              </div>
-
-              <div className="d-form__group">
-                <label>{dir === 'rtl' ? 'روابط الصور (سطر لكل رابط)' : 'Image URLs (one per line)'}</label>
-                <textarea value={form.images} onChange={e => setField('images', e.target.value)} className="d-form__input d-form__textarea" rows={3} placeholder="https://..." />
-              </div>
-
-              <div className="d-form__group">
-                <label>{dir === 'rtl' ? 'الوسوم (مفصولة بفاصلة)' : 'Tags (comma separated)'}</label>
-                <input value={form.tags} onChange={e => setField('tags', e.target.value)} className="d-form__input" placeholder="react, template, ecommerce" />
-              </div>
-
-              <div className="d-form__group">
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 24 }}>
-                  <input type="checkbox" checked={form.featured} onChange={e => setField('featured', e.target.checked)} style={{ width: 18, height: 18 }} />
-                  {dir === 'rtl' ? 'منتج مميز (يظهر في الواجهة)' : 'Featured product (shown on homepage)'}
-                </label>
-              </div>
-
-              <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
-                <button type="submit" className="btn btn--primary" disabled={saving}>
-                  {saving ? (dir === 'rtl' ? 'جارٍ الحفظ...' : 'Saving...') : (editing ? (dir === 'rtl' ? 'حفظ التعديلات' : 'Save Changes') : (dir === 'rtl' ? 'إضافة المنتج' : 'Add Product'))}
-                </button>
-                <button type="button" className="btn" onClick={() => setShowForm(false)}>{dir === 'rtl' ? 'إلغاء' : 'Cancel'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </>
   );
+
+  const renderSubscriptions = () => {
+    const stdPrice = (v) => {
+      const n = Number(v) || 0;
+      return n ? '$' + n.toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0 }) : '—';
+    };
+    const priceRange = (prods) => {
+      const active = prods.filter(p => p.status !== 'rejected').map(p => Number(p.sale_price != null ? p.sale_price : p.price) || 0);
+      if (!active.length) return '—';
+      const min = Math.min(...active);
+      const max = Math.max(...active);
+      return min === max ? stdPrice(min) : `${stdPrice(min)} – ${stdPrice(max)}`;
+    };
+
+    return (
+      <>
+        <div className="d-card d-card--flat">
+          <div className="d-card__header">
+            <div>
+              <h3 className="d-card__title" style={{ marginBottom: 8 }}>
+                {dir === 'rtl' ? 'إدارة اشتراكات الأقسام والفروع' : 'Subscription Sections & Branches'}
+              </h3>
+              <p className="d-card__sub" style={{ margin: 0, color: 'var(--color-secondary)', fontSize: '0.875rem' }}>
+                {dir === 'rtl'
+                  ? 'اضبط الأسعار وعدد المنتجات لكل قسم وفرع — تعدّل مباشرة وتظهر في الموقع فوراً.'
+                  : 'Set prices and manage products for every section & branch — changes appear on the site instantly.'}
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+              <button className="btn" onClick={ensureBranchCategory} disabled={syncing} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <DashIcon name="refresh" size={16} />
+                {syncing
+                  ? (dir === 'rtl' ? 'جارٍ المزامنة...' : 'Syncing...')
+                  : (dir === 'rtl' ? 'مزامنة الأقسام والفروع' : 'Sync sections & branches')}
+              </button>
+            </div>
+          </div>
+
+          <div className="d-stats d-stats--compact">
+            <StatCard label={dir === 'rtl' ? 'الأقسام' : 'Sections'} value={sectionsData.length} icon="layers" iconBg="rgba(139, 92, 246, 0.14)" glowColor="rgba(139, 92, 246, 0.2)" delay={50} />
+            <StatCard label={dir === 'rtl' ? 'الفروع' : 'Branches'} value={totalBranches} icon="subscription" iconBg="rgba(73, 75, 214, 0.16)" glowColor="rgba(73, 75, 214, 0.2)" delay={120} />
+            <StatCard label={dir === 'rtl' ? 'المنتجات' : 'Products'} value={subProducts.length} icon="products" iconBg="rgba(255, 98, 1, 0.14)" glowColor="rgba(255, 98, 1, 0.18)" delay={190} />
+            <StatCard label={dir === 'rtl' ? 'بانتظار المراجعة' : 'Pending'} value={subProducts.filter(p => p.status === 'pending').length} icon="clock" iconBg="rgba(245, 158, 11, 0.14)" glowColor="rgba(245, 158, 11, 0.2)" trend={subProducts.filter(p => p.status === 'pending').length ? null : (dir === 'rtl' ? 'كلها معتمدة' : 'All approved')} delay={260} />
+          </div>
+        </div>
+
+        {sectionsData.map(group => {
+          const sectionTotal = group.branches.reduce((s, b) => s + b.products.length, 0);
+          const sectionPending = group.branches.reduce((s, b) => s + b.products.filter(p => p.status === 'pending').length, 0);
+          return (
+            <div className="d-card d-sub-section" key={group.key}>
+              <div className="d-sub-section__head">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  {group.card ? (
+                    <img src={group.card} alt="" className="d-sub-section__thumb" loading="lazy" />
+                  ) : (
+                    <div className="d-sub-section__thumb d-sub-section__thumb--empty">
+                      <DashIcon name="layers" size={22} />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="d-card__title" style={{ marginBottom: 4 }}>{dir === 'rtl' ? group.title_ar : group.title_en}</h3>
+                    <p className="d-card__sub" style={{ margin: 0, color: 'var(--color-secondary)', fontSize: '0.8125rem' }}>
+                      {dir === 'rtl' ? `${group.branches.length} فروع · ${sectionTotal} منتجات` : `${group.branches.length} branches · ${sectionTotal} products`}
+                    </p>
+                  </div>
+                </div>
+                {sectionPending > 0 && <span className="d-badge d-badge--pending">{sectionPending} {dir === 'rtl' ? 'بانتظار المراجعة' : 'pending'}</span>}
+              </div>
+
+              <div className="d-sub-section__branches">
+                {group.branches.map((branch) => {
+                  const isOpen = openBranches.has(branch.key);
+                  const hasCategory = !!branch.category;
+                  return (
+                    <div className={`d-sub-branch ${isOpen ? 'd-sub-branch--open' : ''}`} key={branch.key}>
+                      <div className="d-sub-branch__head" onClick={() => toggleBranch(branch.key)} role="button" tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleBranch(branch.key); } }}>
+                        <span className="d-sub-branch__img">
+                          <img src={branch.icon} alt="" loading="lazy" />
+                        </span>
+                        <div className="d-sub-branch__meta">
+                          <strong>{dir === 'rtl' ? branch.title_ar : branch.title_en}</strong>
+                          <span>
+                            {hasCategory
+                              ? (dir === 'rtl' ? (branch.category.name || branch.category.name_en) : (branch.category.name_en || branch.category.name))
+                              : (dir === 'rtl' ? 'لا يوجد تصنيف مرتبط — اضغط مزامنة' : 'No linked category — run sync')}
+                            {' · '}{branch.products.length} {dir === 'rtl' ? 'منتجات' : 'products'}
+                          </span>
+                        </div>
+                        <div className="d-sub-branch__price" onClick={(e) => e.stopPropagation()}>
+                          <span className="d-sub-branch__price-label">{dir === 'rtl' ? 'نطاق السعر' : 'Price range'}</span>
+                          <span className="d-sub-branch__price-value">{priceRange(branch.products)}</span>
+                        </div>
+                        <div className="d-sub-branch__actions" onClick={(e) => e.stopPropagation()}>
+                          <button className="d-actions__btn d-actions__btn--approve" onClick={() => openAddForBranch(branch, group)}>
+                            <span style={{ fontSize: '0.9rem', lineHeight: 1 }}>+</span> {dir === 'rtl' ? 'منتج' : 'Product'}
+                          </button>
+                        </div>
+                        <span className="d-sub-branch__chevron" aria-hidden="true">{isOpen ? (dir === 'rtl' ? '▴' : '▴') : (dir === 'rtl' ? '▾' : '▾')}</span>
+                      </div>
+
+                      {isOpen && (
+                        branch.products.length === 0 ? (
+                          <div className="d-empty" style={{ padding: '16px 20px' }}>
+                            {dir === 'rtl' ? 'لا توجد منتجات لهذا الفرع بعد — اضغط "+ منتج" لإضافة أول منتج وتحديد سعره.' : 'No products for this branch yet — click "+ Product" to add the first one and set its price.'}
+                          </div>
+                        ) : (
+                          <div className="d-table-wrap">
+                            <table className="d-table d-table--products">
+                              <thead>
+                                <tr>
+                                  <th>{dir === 'rtl' ? 'المنتج' : 'Product'}</th>
+                                  <th>{dir === 'rtl' ? 'السعر ($)' : 'Price ($)'}</th>
+                                  <th>{dir === 'rtl' ? 'الخصم ($)' : 'Sale ($)'}</th>
+                                  <th>{dir === 'rtl' ? 'المبيعات' : 'Sales'}</th>
+                                  <th>{dir === 'rtl' ? 'الحالة' : 'Status'}</th>
+                                  <th>{dir === 'rtl' ? 'إجراءات' : 'Actions'}</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {branch.products.map((p) => (
+                                  <tr key={p.id}>
+                                    <td>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, maxWidth: 240 }}>
+                                        <ProductImage src={p.thumbnail} name={p.name} size={38} />
+                                        <div style={{ overflow: 'hidden' }}>
+                                          <strong style={{ display: 'block', whiteSpace: 'normal' }}>{dir === 'rtl' ? (p.name || p.name_en) : (p.name_en || p.name)}</strong>
+                                          {p.seller_name && <div style={{ fontSize: '0.7rem', color: 'var(--color-secondary)' }}>{p.seller_name}</div>}
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        className="d-form__input d-price-input"
+                                        value={priceDraft[p.id]?.price ?? (p.price ?? 0)}
+                                        onChange={e => setDraftPrice(p.id, 'price', e.target.value)}
+                                      />
+                                    </td>
+                                    <td>
+                                      <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        className="d-form__input d-price-input"
+                                        value={priceDraft[p.id]?.sale_price ?? (p.sale_price ?? '')}
+                                        onChange={e => setDraftPrice(p.id, 'sale_price', e.target.value)}
+                                      />
+                                    </td>
+                                    <td>{p.sales || 0}</td>
+                                    <td><StatusPill status={p.status} dir={dir} /></td>
+                                    <td>
+                                      <div className="d-actions" style={{ flexWrap: 'wrap' }}>
+                                        <button className="d-actions__btn d-actions__btn--approve" onClick={() => saveQuickPrice(p)}>{dir === 'rtl' ? 'حفظ السعر' : 'Save price'}</button>
+                                        {p.status !== 'active' && (
+                                          <button className="d-actions__btn d-actions__btn--approve" onClick={() => setProductStatus(p.id, 'active')}>{dir === 'rtl' ? 'اعتماد' : 'Approve'}</button>
+                                        )}
+                                        <button className="d-actions__btn" onClick={() => openEdit(p)}>{dir === 'rtl' ? 'تعديل' : 'Edit'}</button>
+                                        <button className="d-actions__btn d-actions__btn--danger" onClick={() => removeProduct(p)}>{dir === 'rtl' ? 'حذف' : 'Delete'}</button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </>
+    );
+  };
 
   const renderCategories = () => {
     const productCount = (catId) => products.filter(p => p.category_id === catId).length;
@@ -1000,6 +1187,7 @@ export default function AdminDashboard() {
   const renderTopbar = () => {
     const titles = {
       overview: dir === 'rtl' ? 'نظرة عامة' : 'Overview',
+      subscriptions: dir === 'rtl' ? 'الاشتراكات والأسعار' : 'Subscriptions & Pricing',
       users: dir === 'rtl' ? 'إدارة المستخدمين' : 'User Management',
       sellers: dir === 'rtl' ? 'إدارة البائعين' : 'Seller Management',
       products: dir === 'rtl' ? 'مراجعة المنتجات' : 'Product Moderation',
@@ -1012,6 +1200,7 @@ export default function AdminDashboard() {
     };
     const subs = {
       overview: dir === 'rtl' ? 'متابعة أداء المنصة لحظياً' : 'Monitor platform performance in real time',
+      subscriptions: dir === 'rtl' ? 'اضبط أسعار الأقسام والفروع والمنتجات' : 'Set prices for sections, branches & products',
       users: dir === 'rtl' ? 'إدارة حسابات المشترين والبائعين' : 'Manage buyer & seller accounts',
       sellers: dir === 'rtl' ? 'مراقبة أداء البائعين وأعمالهم' : 'Track seller activity and stores',
       products: dir === 'rtl' ? 'اعتماد المنتجات ومراجعة الجودة' : 'Approve and review products',
@@ -1045,6 +1234,7 @@ export default function AdminDashboard() {
 
   const renderContent = () => {
     switch (tab) {
+      case 'subscriptions': return renderSubscriptions();
       case 'users': return renderUsers();
       case 'sellers': return renderSellers();
       case 'products': return renderProducts();
@@ -1081,6 +1271,110 @@ export default function AdminDashboard() {
           </div>
         ) : renderContent()}
       </div>
+      {showForm && (
+        <div className="d-modal">
+          <div className="d-modal__card">
+            <div className="d-modal__header">
+              <h3>{editing ? (dir === 'rtl' ? 'تعديل المنتج' : 'Edit Product') : (dir === 'rtl' ? 'إضافة منتج جديد' : 'Add New Product')}</h3>
+              <button className="d-modal__close" onClick={() => setShowForm(false)}>✕</button>
+            </div>
+            <form className="d-form" onSubmit={saveProduct} style={{ maxWidth: '100%' }}>
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'اسم المنتج (عربي)' : 'Product Name (Arabic)'} *</label>
+                  <input value={form.name} onChange={e => setField('name', e.target.value)} className="d-form__input" required placeholder={dir === 'rtl' ? 'مثال: اشتراك نتفليكس شهري' : 'e.g. Netflix monthly subscription'} />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'اسم المنتج (إنجليزي)' : 'Product Name (English)'}</label>
+                  <input value={form.name_en} onChange={e => setField('name_en', e.target.value)} className="d-form__input" placeholder="e.g. Netflix Monthly" />
+                </div>
+              </div>
+
+              <div className="d-form__group">
+                <label>{dir === 'rtl' ? 'الوصف' : 'Description'}</label>
+                <textarea value={form.description} onChange={e => setField('description', e.target.value)} className="d-form__input d-form__textarea" rows={3} />
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'السعر ($)' : 'Price ($)'} *</label>
+                  <input value={form.price} onChange={e => setField('price', e.target.value)} type="number" step="0.01" min="0" className="d-form__input" required />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'سعر الخصم ($) (اختياري)' : 'Sale Price ($) (optional)'}</label>
+                  <input value={form.sale_price} onChange={e => setField('sale_price', e.target.value)} type="number" step="0.01" min="0" className="d-form__input" />
+                </div>
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'التصنيف' : 'Category'}</label>
+                  <select value={form.category_id} onChange={e => setField('category_id', e.target.value)} className="d-form__input">
+                    <option value="">{dir === 'rtl' ? '— بدون تصنيف —' : '— No category —'}</option>
+                    {categories.map(c => (
+                      <option key={c.id} value={c.id}>{dir === 'rtl' ? (c.name || c.name_en) : (c.name_en || c.name)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'الحالة' : 'Status'}</label>
+                  <select value={form.status} onChange={e => setField('status', e.target.value)} className="d-form__input">
+                    <option value="pending">{dir === 'rtl' ? 'قيد المراجعة' : 'Pending'}</option>
+                    <option value="active">{dir === 'rtl' ? 'نشط' : 'Active'}</option>
+                    <option value="rejected">{dir === 'rtl' ? 'مرفوض' : 'Rejected'}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'اسم البائع' : 'Seller Name'}</label>
+                  <input value={form.seller_name} onChange={e => setField('seller_name', e.target.value)} className="d-form__input" />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'اسم المتجر' : 'Store Name'}</label>
+                  <input value={form.store_name} onChange={e => setField('store_name', e.target.value)} className="d-form__input" />
+                </div>
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'رابط الصورة المصغرة' : 'Thumbnail URL'}</label>
+                  <input value={form.thumbnail} onChange={e => setField('thumbnail', e.target.value)} className="d-form__input" placeholder="https://..." />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'المخزون' : 'Stock'}</label>
+                  <input value={form.stock} onChange={e => setField('stock', e.target.value)} type="number" min="0" className="d-form__input" />
+                </div>
+              </div>
+
+              <div className="d-form__group">
+                <label>{dir === 'rtl' ? 'روابط الصور (سطر لكل رابط)' : 'Image URLs (one per line)'}</label>
+                <textarea value={form.images} onChange={e => setField('images', e.target.value)} className="d-form__input d-form__textarea" rows={3} placeholder="https://..." />
+              </div>
+
+              <div className="d-form__group">
+                <label>{dir === 'rtl' ? 'الوسوم (مفصولة بفاصلة)' : 'Tags (comma separated)'}</label>
+                <input value={form.tags} onChange={e => setField('tags', e.target.value)} className="d-form__input" placeholder="netflix, streaming, monthly" />
+              </div>
+
+              <div className="d-form__group">
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 24 }}>
+                  <input type="checkbox" checked={form.featured} onChange={e => setField('featured', e.target.checked)} style={{ width: 18, height: 18 }} />
+                  {dir === 'rtl' ? 'منتج مميز (يظهر في الواجهة)' : 'Featured product (shown on homepage)'}
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
+                <button type="submit" className="btn btn--primary" disabled={saving}>
+                  {saving ? (dir === 'rtl' ? 'جارٍ الحفظ...' : 'Saving...') : (editing ? (dir === 'rtl' ? 'حفظ التعديلات' : 'Save Changes') : (dir === 'rtl' ? 'إضافة المنتج' : 'Add Product'))}
+                </button>
+                <button type="button" className="btn" onClick={() => setShowForm(false)}>{dir === 'rtl' ? 'إلغاء' : 'Cancel'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {toast && (
         <div style={{
           position: 'fixed',

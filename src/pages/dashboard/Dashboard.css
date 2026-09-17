@@ -1292,3 +1292,158 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   display: none;
   backdrop-filter: blur(4px);
 }
+
+/* ── Subscriptions & Pricing tab ── */
+.d-card__sub {
+  margin: 0;
+}
+
+.d-stats--compact {
+  margin-bottom: 0;
+}
+
+.d-sub-section {
+  overflow: hidden;
+}
+
+.d-sub-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.d-sub-section__thumb {
+  width: 72px;
+  height: 54px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--color-outline-variant);
+  flex-shrink: 0;
+}
+
+.d-sub-section__thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-secondary);
+  background: var(--color-surface-container-low);
+}
+
+.d-sub-section__branches {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.d-sub-branch {
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 14px;
+  background: var(--color-surface-container-lowest);
+  overflow: hidden;
+}
+
+.d-sub-branch__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  flex-wrap: wrap;
+}
+
+.d-sub-branch__head:hover {
+  background: var(--color-surface-container-low);
+}
+
+.d-sub-branch__img {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--color-outline-variant);
+  background: #fff;
+  overflow: hidden;
+}
+
+.d-sub-branch__img img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.d-sub-branch__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.d-sub-branch__meta strong {
+  font-size: 0.9375rem;
+  color: var(--color-on-surface);
+}
+
+.d-sub-branch__meta span {
+  font-size: 0.75rem;
+  color: var(--color-secondary);
+}
+
+.d-sub-branch__price {
+  margin-inline-start: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 0 8px;
+}
+
+.d-sub-branch__price-label {
+  font-size: 0.6875rem;
+  color: var(--color-secondary);
+}
+
+.d-sub-branch__price-value {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.d-sub-branch__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.d-sub-branch__chevron {
+  color: var(--color-secondary);
+  font-size: 0.875rem;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.d-price-input {
+  width: 92px;
+  padding: 6px 10px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-on-surface);
+}
+
+@media (max-width: 720px) {
+  .d-sub-branch__head {
+    gap: 10px;
+  }
+
+  .d-sub-branch__price {
+    display: none;
+  }
+}

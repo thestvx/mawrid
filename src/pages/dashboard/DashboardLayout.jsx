@@ -24,6 +24,7 @@ const BUYER_SIDEBAR = [
 
 const ADMIN_SIDEBAR = [
   { key: 'dashboard.overview', path: '/admin', icon: 'overview' },
+  { key: 'dashboard.subscriptions', path: '/admin?tab=subscriptions', icon: 'subscription' },
   { key: 'dashboard.userManagement', path: '/admin?tab=users', icon: 'users' },
   { key: 'dashboard.sellerManagement', path: '/admin?tab=sellers', icon: 'stores' },
   { key: 'dashboard.productModeration', path: '/admin?tab=products', icon: 'products' },
