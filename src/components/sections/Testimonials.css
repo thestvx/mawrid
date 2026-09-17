@@ -16,7 +16,8 @@
   line-height: 1.2;
 }
 
-.testimonials__title .split-char {
+.testimonials__title .split-char,
+.testimonials__title .split-word {
   background: linear-gradient(135deg, var(--color-primary), var(--color-orange));
   -webkit-background-clip: text;
   background-clip: text;

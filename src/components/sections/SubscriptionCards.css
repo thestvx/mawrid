@@ -128,20 +128,16 @@
 .sub-card {
   position: relative;
   display: block;
-  width: clamp(200px, 21vw, 280px);
-  aspect-ratio: 1000 / 1228;
+  width: clamp(220px, 20vw, 300px);
   flex-shrink: 0;
-  overflow: hidden;
   text-decoration: none;
   cursor: pointer;
-  background: var(--color-surface-container-lowest, #fff);
-  border-radius: 16px;
 }
 
 .sub-card__img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: cover;
 }
 

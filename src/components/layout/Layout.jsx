@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router-dom';
-import PillNav from './PillNav';
+import GooeyNavBar from './GooeyNavBar';
 import Footer from './Footer';
 
 export default function Layout() {
   return (
     <>
-      <PillNav />
+      <GooeyNavBar />
       <main style={{ minHeight: '100vh' }}>
         <Outlet />
       </main>

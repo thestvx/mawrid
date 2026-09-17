@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
+import GooeyNav from './GooeyNav';
+import './GooeyNav.css';
 import './PillNav.css';
 
 function getInitials(name) {
@@ -22,27 +24,20 @@ const NAV_ITEMS = [
   { key: 'nav.marketplace', href: '/marketplace' },
 ];
 
-export default function PillNav({ ease = 'power3.easeOut', initialLoadAnimation = false }) {
-  const { t, lang, dir, toggleLanguage } = useLanguage();
+export default function GooeyNavBar() {
+  const { t, lang, toggleLanguage } = useLanguage();
   const { user, isAuthenticated, role, logout } = useAuth();
   const location = useLocation();
 
-  const isRtl = dir === 'rtl';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
-  const circleRefs = useRef([]);
-  const tlRefs = useRef([]);
-  const activeTweenRefs = useRef([]);
   const hamburgerRef = useRef(null);
   const mobileMenuRef = useRef(null);
-  const navItemsRef = useRef(null);
-  const logoRef = useRef(null);
 
   const items = NAV_ITEMS.map((item) => ({
     label: t(item.key),
     href: item.href,
-    active: item.href === '/' ? location.pathname === '/' : location.pathname.startsWith(item.href),
   }));
 
   useEffect(() => {
@@ -60,108 +55,6 @@ export default function PillNav({ ease = 'power3.easeOut', initialLoadAnimation 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const layout = () => {
-      circleRefs.current.forEach((circle) => {
-        if (!circle?.parentElement) return;
-
-        const pill = circle.parentElement;
-        const rect = pill.getBoundingClientRect();
-        const { width: w, height: h } = rect;
-        const R = ((w * w) / 4 + h * h) / (2 * h);
-        const D = Math.ceil(2 * R) + 2;
-        const delta = Math.ceil(R - Math.sqrt(Math.max(0, R * R - (w * w) / 4))) + 1;
-        const originY = D - delta;
-
-        circle.style.width = `${D}px`;
-        circle.style.height = `${D}px`;
-        circle.style.bottom = `-${delta}px`;
-
-        gsap.set(circle, {
-          xPercent: -50,
-          scale: 0,
-          transformOrigin: `50% ${originY}px`,
-        });
-
-        const label = pill.querySelector('.pill-label');
-        const white = pill.querySelector('.pill-label-hover');
-
-        if (label) gsap.set(label, { y: 0 });
-        if (white) gsap.set(white, { y: h + 12, opacity: 0 });
-
-        const index = circleRefs.current.indexOf(circle);
-        if (index === -1) return;
-
-        tlRefs.current[index]?.kill();
-        const tl = gsap.timeline({ paused: true });
-
-        tl.to(circle, { scale: 1.2, xPercent: -50, duration: 2, ease, overwrite: 'auto' }, 0);
-
-        if (label) tl.to(label, { y: -(h + 8), duration: 2, ease, overwrite: 'auto' }, 0);
-
-        if (white) {
-          gsap.set(white, { y: Math.ceil(h + 100), opacity: 0 });
-          tl.to(white, { y: 0, opacity: 1, duration: 2, ease, overwrite: 'auto' }, 0);
-        }
-
-        tlRefs.current[index] = tl;
-      });
-    };
-
-    layout();
-
-    const onResize = () => layout();
-    window.addEventListener('resize', onResize);
-
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(layout).catch(() => {});
-    }
-
-    const menu = mobileMenuRef.current;
-    if (menu) {
-      gsap.set(menu, { visibility: 'hidden', opacity: 0, scaleY: 1 });
-    }
-
-    if (initialLoadAnimation) {
-      const logo = logoRef.current;
-      const navItems = navItemsRef.current;
-
-      if (logo) {
-        gsap.set(logo, { scale: 0 });
-        gsap.to(logo, { scale: 1, duration: 0.6, ease });
-      }
-
-      if (navItems) {
-        gsap.set(navItems, { width: 0, overflow: 'hidden' });
-        gsap.to(navItems, { width: 'auto', duration: 0.6, ease });
-      }
-    }
-
-    return () => window.removeEventListener('resize', onResize);
-  }, [items, ease, initialLoadAnimation]);
-
-  const handleEnter = (i) => {
-    const tl = tlRefs.current[i];
-    if (!tl) return;
-    activeTweenRefs.current[i]?.kill();
-    activeTweenRefs.current[i] = tl.tweenTo(tl.duration(), {
-      duration: 0.3,
-      ease,
-      overwrite: 'auto',
-    });
-  };
-
-  const handleLeave = (i) => {
-    const tl = tlRefs.current[i];
-    if (!tl) return;
-    activeTweenRefs.current[i]?.kill();
-    activeTweenRefs.current[i] = tl.tweenTo(0, {
-      duration: 0.2,
-      ease,
-      overwrite: 'auto',
-    });
-  };
-
   const toggleMobileMenu = () => {
     const newState = !isMobileMenuOpen;
     setIsMobileMenuOpen(newState);
@@ -172,11 +65,11 @@ export default function PillNav({ ease = 'power3.easeOut', initialLoadAnimation 
     if (hamburger) {
       const lines = hamburger.querySelectorAll('.hamburger-line');
       if (newState) {
-        gsap.to(lines[0], { rotation: 45, y: 3, duration: 0.3, ease });
-        gsap.to(lines[1], { rotation: -45, y: -3, duration: 0.3, ease });
+        gsap.to(lines[0], { rotation: 45, y: 3, duration: 0.3, ease: 'power3.easeOut' });
+        gsap.to(lines[1], { rotation: -45, y: -3, duration: 0.3, ease: 'power3.easeOut' });
       } else {
-        gsap.to(lines[0], { rotation: 0, y: 0, duration: 0.3, ease });
-        gsap.to(lines[1], { rotation: 0, y: 0, duration: 0.3, ease });
+        gsap.to(lines[0], { rotation: 0, y: 0, duration: 0.3, ease: 'power3.easeOut' });
+        gsap.to(lines[1], { rotation: 0, y: 0, duration: 0.3, ease: 'power3.easeOut' });
       }
     }
 
@@ -185,23 +78,15 @@ export default function PillNav({ ease = 'power3.easeOut', initialLoadAnimation 
         gsap.set(menu, { visibility: 'visible' });
         gsap.fromTo(
           menu,
-          { opacity: 0, y: 10, scaleY: 1 },
-          {
-            opacity: 1,
-            y: 0,
-            scaleY: 1,
-            duration: 0.3,
-            ease,
-            transformOrigin: 'top center',
-          }
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.3, ease: 'power3.easeOut', transformOrigin: 'top center' }
         );
       } else {
         gsap.to(menu, {
           opacity: 0,
           y: 10,
-          scaleY: 1,
           duration: 0.2,
-          ease,
+          ease: 'power3.easeOut',
           transformOrigin: 'top center',
           onComplete: () => {
             gsap.set(menu, { visibility: 'hidden' });
@@ -279,47 +164,16 @@ export default function PillNav({ ease = 'power3.easeOut', initialLoadAnimation 
   };
 
   return (
-    <div className="pill-nav-container">
-      <nav className="pill-nav" aria-label="Primary">
-        <Link className="pill-logo" to="/" aria-label={isRtl ? 'الرئيسية' : 'Home'} ref={logoRef}>
+    <div className="gooey-navbar">
+      <nav className="gooey-navbar__nav" aria-label="Primary">
+        <Link className="pill-logo" to="/" aria-label={lang === 'ar' ? 'الرئيسية' : 'Home'}>
           <img src="/logos/Black-logo.png" alt="Mawrid - مَورد" className="pill-logo__img" />
         </Link>
 
-        <div className="pill-nav-items desktop-only" ref={navItemsRef}>
-          <ul className="pill-list" role="menubar">
-            {items.map((item, i) => (
-              <li key={item.href} role="none">
-                <Link
-                  role="menuitem"
-                  to={item.href}
-                  className={`pill${item.active ? ' is-active' : ''}`}
-                  aria-label={item.label}
-                  onMouseEnter={() => handleEnter(i)}
-                  onMouseLeave={() => handleLeave(i)}
-                >
-                  <span
-                    className="hover-circle"
-                    aria-hidden="true"
-                    ref={(el) => {
-                      circleRefs.current[i] = el;
-                    }}
-                  />
-                  <span className="label-stack">
-                    <span className="pill-label">{item.label}</span>
-                    <span className="pill-label-hover" aria-hidden="true">
-                      {item.label}
-                    </span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <div className="gooey-navbar__track">
+          <GooeyNav items={items} />
           <div className="pill-extras">
-            <button
-              className="pill-lang"
-              onClick={toggleLanguage}
-              aria-label={t('nav.langSwitch')}
-            >
+            <button className="pill-lang" onClick={toggleLanguage} aria-label={t('nav.langSwitch')}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
@@ -356,11 +210,7 @@ export default function PillNav({ ease = 'power3.easeOut', initialLoadAnimation 
         <ul className="mobile-menu-list">
           {items.map((item) => (
             <li key={item.href}>
-              <Link
-                to={item.href}
-                className={`mobile-menu-link${item.active ? ' is-active' : ''}`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
+              <Link to={item.href} className="mobile-menu-link" onClick={() => setIsMobileMenuOpen(false)}>
                 {item.label}
               </Link>
             </li>
@@ -388,11 +238,7 @@ export default function PillNav({ ease = 'power3.easeOut', initialLoadAnimation 
           {isAuthenticated && (
             <>
               <li>
-                <Link
-                  to="/storefront"
-                  className="mobile-menu-link"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
+                <Link to="/storefront" className="mobile-menu-link" onClick={() => setIsMobileMenuOpen(false)}>
                   {t('nav.openShop')}
                 </Link>
               </li>

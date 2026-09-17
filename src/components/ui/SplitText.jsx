@@ -40,6 +40,10 @@ const SplitText = ({
     }
   }, []);
 
+  const splitTypeToUse =
+    /[\u0600-\u06FF]/.test(text || '') && splitType.includes('chars') ? 'words' : splitType;
+  const useArabicWords = splitTypeToUse !== splitType;
+
   useGSAP(
     () => {
       if (!ref.current || !text || !fontsLoaded) return;
@@ -69,16 +73,16 @@ const SplitText = ({
 
       let targets;
       const assignTargets = self => {
-        if (splitType.includes('chars') && self.chars.length) targets = self.chars;
-        if (!targets && splitType.includes('words') && self.words.length) targets = self.words;
-        if (!targets && splitType.includes('lines') && self.lines.length) targets = self.lines;
+        if (splitTypeToUse.includes('chars') && self.chars.length) targets = self.chars;
+        if (!targets && splitTypeToUse.includes('words') && self.words.length) targets = self.words;
+        if (!targets && splitTypeToUse.includes('lines') && self.lines.length) targets = self.lines;
         if (!targets) targets = self.chars || self.words || self.lines;
       };
 
       const splitInstance = new GSAPSplitText(el, {
-        type: splitType,
+        type: splitTypeToUse,
         smartWrap: true,
-        autoSplit: splitType === 'lines',
+        autoSplit: splitTypeToUse === 'lines',
         linesClass: 'split-line',
         wordsClass: 'split-word',
         charsClass: 'split-char',
@@ -132,7 +136,8 @@ const SplitText = ({
         delay,
         duration,
         ease,
-        splitType,
+        splitTypeToUse,
+        useArabicWords,
         JSON.stringify(from),
         JSON.stringify(to),
         threshold,
@@ -146,7 +151,6 @@ const SplitText = ({
   const renderTag = () => {
     const style = {
       textAlign,
-      overflow: 'hidden',
       display: 'inline-block',
       whiteSpace: 'normal',
       wordWrap: 'break-word',
