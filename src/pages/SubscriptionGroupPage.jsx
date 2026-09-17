@@ -42,7 +42,6 @@ export default function SubscriptionGroupPage() {
   }
 
   const title = isRtl ? group.title_ar : group.title_en;
-  const subtitle = isRtl ? group.subtitle_ar : group.subtitle_en;
 
   return (
     <div className="sub-page" style={{ paddingTop: '110px' }}>
@@ -53,31 +52,13 @@ export default function SubscriptionGroupPage() {
           <span>{title}</span>
         </nav>
 
-        <header className="sub-page__hero"
-          style={{ ['--card']: `url(${group.card})` }}
-        >
-          <div className="sub-page__hero-overlay" />
-          <div className="sub-page__hero-content">
-            <span className="sub-page__hero-tag">{isRtl ? 'قسم الاشتراكات' : 'Subscription section'}</span>
-            <h1 className="sub-page__hero-title">{title}</h1>
-            <p className="sub-page__hero-sub">{subtitle}</p>
-            <div className="sub-page__hero-meta">
-              <span className="sub-page__hero-count">
-                {group.subs.length} {isRtl ? 'قسم فرعي' : 'sub-sections'}
-              </span>
-            </div>
-          </div>
-        </header>
+        <img src={group.line} alt="" className="sub-page__line" loading="lazy" />
 
-        <section className="sub-page__block">
-          <div className="sub-page__block-header">
-            <h2>{isRtl ? 'الأقسام الفرعية' : 'Sub-sections'}</h2>
-            <p>{isRtl ? 'اختر المنصة وابدأ التصفح' : 'Pick a platform to start browsing'}</p>
-          </div>
+        <section className="sub-page__icons-block">
           <div className="sub-page__icons">
             {group.subs.map((sub, i) => (
-              <Link to={`/subscription/${sub.key}`} className="sub-icon" key={sub.key} style={{ animationDelay: `${i * 60}ms` }}>
-                <span className="sub-icon__img-wrap">
+              <Link to={`/subscription/${sub.key}`} className="sub-icon" key={sub.key} style={{ animationDelay: `${i * 70}ms` }}>
+                <span className="sub-icon__img">
                   <img src={sub.icon} alt="" loading="lazy" />
                 </span>
                 <span className="sub-icon__name">{isRtl ? sub.title_ar : sub.title_en}</span>
@@ -89,7 +70,7 @@ export default function SubscriptionGroupPage() {
         <section className="sub-page__block">
           <div className="sub-page__block-header">
             <h2>{isRtl ? 'منتجات القسم' : 'Products in this section'}</h2>
-            <p>{isRtl ? title : title}</p>
+            <p>{title}</p>
           </div>
           {loading ? (
             <div className="sub-page__empty">{isRtl ? 'جارٍ التحميل...' : 'Loading...'}</div>
