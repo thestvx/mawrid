@@ -140,14 +140,9 @@
 .sub-cards__track {
   display: flex;
   width: max-content;
-  animation: sub-marquee 70s linear infinite;
+  transform: translate3d(-50%, 0, 0);
+  animation: sub-marquee 60s linear infinite;
   will-change: transform;
-  transform: translateZ(0);
-}
-
-.sub-cards:hover .sub-cards__track,
-.sub-cards:focus-within .sub-cards__track {
-  animation-play-state: paused;
 }
 
 .sub-cards__group {
@@ -175,8 +170,8 @@
 }
 
 @keyframes sub-marquee {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
+  from { transform: translate3d(-50%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
 }
 
 @media (max-width: 640px) {
