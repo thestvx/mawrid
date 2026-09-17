@@ -50,7 +50,9 @@ export default function SubscriptionCards() {
       offset += speed * dt;
       if (groupW > 0) {
         const position = offset % groupW;
-        track.style.transform = `translate3d(${-position}px, 0, 0)`;
+        const rtl = document.documentElement.dir === 'rtl';
+        const x = rtl ? position : -groupW + position;
+        track.style.transform = `translate3d(${x}px, 0, 0)`;
       }
       raf = requestAnimationFrame(tick);
     };
@@ -100,7 +102,10 @@ export default function SubscriptionCards() {
       for (const s of states) {
         s.offset += 32 * dt;
         if (s.groupW > 0) {
-          s.track.style.transform = `translate3d(${-(s.offset % s.groupW)}px, 0, 0)`;
+          const position = s.offset % s.groupW;
+          const rtl = document.documentElement.dir === 'rtl';
+          const x = rtl ? position : -s.groupW + position;
+          s.track.style.transform = `translate3d(${x}px, 0, 0)`;
         }
       }
       raf = requestAnimationFrame(tick);
@@ -178,7 +183,6 @@ export default function SubscriptionCards() {
                       key={`${ri}-${half}-${sub.key}`}
                     >
                       <img src={sub.icon} alt={sub.title_ar} className="sub-icon__img" loading="lazy" />
-                      <span>{isRtl ? sub.title_ar : sub.title_en}</span>
                     </Link>
                   ))}
                 </div>

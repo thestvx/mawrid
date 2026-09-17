@@ -78,6 +78,24 @@
       { key: 'freefire', title_ar: 'اشتراك فري فاير', title_en: 'Free Fire', icon: '/images/icons/gaming/freefire.png', categorySlug: 'free-fire', tag_ar: 'ألعاب', tag_en: 'Gaming' },
     ],
   },
+  {
+    key: 'stream',
+    title_ar: 'قسم اشتراكات الترفيه',
+    title_en: 'Entertainment Subscriptions',
+    subtitle_ar: 'اشتراكات منصات البث والترفيه لمتابعة مسلسلاتك وعروضك المفضلة.',
+    subtitle_en: 'Streaming and entertainment subscriptions for your favourite shows.',
+    card: '/images/cards/streamcard.png',
+    line: '/images/lines/streamline.png',
+    categorySlug: 'entertainment',
+    subs: [
+      { key: 'netflix', title_ar: 'اشتراك نتفلكس', title_en: 'Netflix', icon: '/images/icons/stream/netflix.png', categorySlug: 'netflix', tag_ar: 'ترفيه', tag_en: 'Entertainment' },
+      { key: 'spotify', title_ar: 'اشتراك سبوتيفاي', title_en: 'Spotify', icon: '/images/icons/stream/spotify.png', categorySlug: 'spotify', tag_ar: 'ترفيه', tag_en: 'Entertainment' },
+      { key: 'todtv', title_ar: 'اشتراك تود تي في', title_en: 'TOD TV', icon: '/images/icons/stream/todtv.png', categorySlug: 'tod-tv', tag_ar: 'ترفيه', tag_en: 'Entertainment' },
+      { key: 'osn', title_ar: 'اشتراك OSN', title_en: 'OSN', icon: '/images/icons/stream/osn.png', categorySlug: 'osn', tag_ar: 'ترفيه', tag_en: 'Entertainment' },
+      { key: 'crunchyroll', title_ar: 'اشتراك كرانشي رول', title_en: 'Crunchyroll', icon: '/images/icons/stream/crunchyroll.png', categorySlug: 'crunchyroll', tag_ar: 'ترفيه', tag_en: 'Entertainment' },
+      { key: 'youtube', title_ar: 'اشتراك يوتيوب بريميوم', title_en: 'YouTube Premium', icon: '/images/icons/stream/youtube.png', categorySlug: 'youtube-premium', tag_ar: 'ترفيه', tag_en: 'Entertainment' },
+    ],
+  },
 ];
 
 export function findGroup(key) {
