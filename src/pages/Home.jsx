@@ -57,24 +57,17 @@ export default function Home() {
         <SubscriptionCards />
       </SectionReveal>
 
-      <SectionReveal>
-        <WhyMawrid />
-      </SectionReveal>
-
-      <motion.div
-        className="why-banner"
-        initial={{ opacity: 0, y: 48 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-60px' }}
-        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-      >
+      <SectionReveal className="why-banner">
         <img
           src="/images/backgrounds/whymawrid.png"
           alt="لماذا مَورد؟ — Why Mawrid?"
           className="why-banner__img"
-          loading="lazy"
         />
-      </motion.div>
+      </SectionReveal>
+
+      <SectionReveal>
+        <WhyMawrid />
+      </SectionReveal>
 
       <SectionReveal>
         <Testimonials />

@@ -107,11 +107,6 @@ export default function Stepper({
         ) : (
           <div className={`stepper__footer ${footerClassName}`}>
             <div className={`stepper__nav ${currentStep !== 1 ? 'spread' : 'end'}`}>
-              {currentStep !== 1 && (
-                <button onClick={handleBack} className={`stepper__btn stepper__btn--back`} {...backButtonProps}>
-                  {backButtonText}
-                </button>
-              )}
               <button
                 onClick={isLastStep ? handleComplete : handleNext}
                 className="stepper__btn stepper__btn--next"
@@ -119,6 +114,11 @@ export default function Stepper({
               >
                 {isLastStep ? completeButtonText : nextButtonText}
               </button>
+              {currentStep !== 1 && (
+                <button onClick={handleBack} className={`stepper__btn stepper__btn--back`} {...backButtonProps}>
+                  {backButtonText}
+                </button>
+              )}
             </div>
           </div>
         )}

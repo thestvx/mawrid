@@ -11,6 +11,11 @@
 
 .carousel-track {
   display: flex;
+  direction: ltr;
+}
+
+[dir="rtl"] .carousel-item {
+  direction: rtl;
 }
 
 .carousel-item {
