@@ -28,6 +28,19 @@ export default function App() {
   const isProtected = location.pathname === '/admin' || location.pathname === '/owner';
   const [loading, setLoading] = useState(() => !isProtected);
 
+  useEffect(() => {
+    const isAsset = (t) => t && t instanceof Element && (t.tagName === 'IMG' || t.tagName === 'SVG' || t.tagName === 'CANVAS' || !!t.closest('img, svg, canvas'));
+    const block = (e) => {
+      if (isAsset(e.target)) e.preventDefault();
+    };
+    document.addEventListener('contextmenu', block);
+    document.addEventListener('dragstart', block);
+    return () => {
+      document.removeEventListener('contextmenu', block);
+      document.removeEventListener('dragstart', block);
+    };
+  }, []);
+
   return (
     <>
       {loading && <LoadingScreen onFinish={() => setLoading(false)} />}
@@ -35,10 +48,9 @@ export default function App() {
         <ScrollToTop />
         <div className="site-dotfield" aria-hidden="true">
           <DotField
-            dotRadius={2}
-            dotSpacing={14}
+            dotRadius={3}
+            dotSpacing={15}
             bulgeStrength={72}
-            glowRadius={180}
             sparkle={false}
             waveAmplitude={0}
             cursorRadius={500}
@@ -46,7 +58,6 @@ export default function App() {
             bulgeOnly
             gradientFrom="rgba(255, 98, 1, 0.30)"
             gradientTo="rgba(255, 189, 154, 0.18)"
-            glowColor="#ffb597"
           />
         </div>
         <div style={{ position: 'relative', zIndex: 1 }}>

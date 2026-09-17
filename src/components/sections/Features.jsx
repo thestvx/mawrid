@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
+import SplitText from '../ui/SplitText';
 import './Features.css';
 
 const features = [
@@ -65,7 +66,16 @@ export default function Features() {
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
         >
-          <h2 className="features__title">{t('features.title')}</h2>
+          <SplitText
+            text={t('features.title')}
+            tag="h2"
+            className="features__title"
+            textAlign="center"
+            delay={26}
+            duration={1}
+            threshold={0.15}
+            from={{ opacity: 0, y: 30 }}
+          />
           <p className="features__sub">{t('features.subtitle')}</p>
         </motion.div>
 

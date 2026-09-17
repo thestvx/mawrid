@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { fetchCategories, fetchProducts } from '../lib/supabase';
 import ProductCard from '../components/marketplace/ProductCard';
+import AnimatedContent from '../components/ui/AnimatedContent';
 import './Marketplace.css';
 
 const PAGE_SIZE = 12;
@@ -19,17 +20,6 @@ export default function Marketplace() {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('newest');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [visible, setVisible] = useState(false);
-  const gridRef = useRef(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.05 }
-    );
-    if (gridRef.current) observer.observe(gridRef.current);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     fetchCategories().then(({ data }) => setCategories(data || []));
@@ -113,7 +103,7 @@ export default function Marketplace() {
             </div>
           </aside>
 
-          <main className="marketplace__main" ref={gridRef}>
+          <main className="marketplace__main">
             <div className="marketplace__title-row">
               <h1 className="marketplace__heading">{title}</h1>
               <span className="marketplace__count">
@@ -152,9 +142,17 @@ export default function Marketplace() {
             ) : (
               <div className="marketplace__grid">
                 {filtered.slice(0, visibleCount).map((product, i) => (
-                  <div key={product.id} className={visible ? `animate-slide-up stagger-${(i % 6) + 1}` : ''}>
+                  <AnimatedContent
+                    key={product.id}
+                    distance={40}
+                    direction="vertical"
+                    duration={0.7}
+                    threshold={0.1}
+                    delay={i * 0.06}
+                    className="marketplace__card-wrap"
+                  >
                     <ProductCard product={product} index={i} />
-                  </div>
+                  </AnimatedContent>
                 ))}
               </div>
             )}

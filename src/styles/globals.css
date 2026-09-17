@@ -114,6 +114,23 @@ body:lang(en) {
   font-family: var(--font-english);
 }
 
+/* ── Asset download protection ── */
+img,
+svg,
+canvas,
+video,
+iframe {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+a img,
+a svg {
+  pointer-events: auto;
+}
+
 img {
   max-width: 100%;
   height: auto;
