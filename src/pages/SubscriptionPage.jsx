@@ -67,6 +67,22 @@ export default function SubscriptionPage() {
           </div>
         </header>
 
+        {sub.plans && sub.plans.length > 0 && (
+          <section className="sub-page__block">
+            <div className="sub-page__block-header">
+              <h2>{isRtl ? 'عروض وبطاقات الاشتراك' : 'Offers & Cards'}</h2>
+              <p>{title}</p>
+            </div>
+            <div className="sub-page__plans">
+              {sub.plans.map((src, i) => (
+                <div className="sub-page__plan" key={src} style={{ animationDelay: `${i * 60}ms` }}>
+                  <img src={src} alt={`${isRtl ? sub.title_ar : sub.title_en} ${i + 1}`} loading="lazy" />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="sub-page__block">
           <div className="sub-page__block-header">
             <h2>{isRtl ? 'منتجات الاشتراك' : 'Subscription products'}</h2>

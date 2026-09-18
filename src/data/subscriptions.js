@@ -9,8 +9,8 @@
     line: '/images/lines/ailine.png',
     categorySlug: 'artificial-intelligence',
     subs: [
-      { key: 'chatgpt', title_ar: 'اشتراك شات جي بي تي', title_en: 'ChatGPT', icon: '/images/icons/ai/chatgpt.png', categorySlug: 'chatgpt', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
-      { key: 'gemini', title_ar: 'اشتراك جيميني', title_en: 'Gemini', icon: '/images/icons/ai/gemini.png', categorySlug: 'google-gemini', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
+      { key: 'chatgpt', title_ar: 'اشتراك شات جي بي تي', title_en: 'ChatGPT', icon: '/images/icons/ai/chatgpt.png', categorySlug: 'chatgpt', tag_ar: 'أدوات AI', tag_en: 'AI Tools', plans: ['/sub/chatgpt/chatgpt-1months.png', '/sub/chatgpt/chatgpt-3months.png', '/sub/chatgpt/chatgpt-6months.png', '/sub/chatgpt/chatgpt-1year.png', '/sub/chatgpt/chatgptplus-1months.png', '/sub/chatgpt/chatgptplus-3months.png', '/sub/chatgpt/chatgptplus-6months.png', '/sub/chatgpt/chatgptplus-1year.png'] },
+      { key: 'gemini', title_ar: 'اشتراك جيميني', title_en: 'Gemini', icon: '/images/icons/ai/gemini.png', categorySlug: 'google-gemini', tag_ar: 'أدوات AI', tag_en: 'AI Tools', plans: ['/sub/gemini/geminipro-1months.png', '/sub/gemini/geminiultra-1months.png'] },
       { key: 'claude', title_ar: 'اشتراك كلود', title_en: 'Claude', icon: '/images/icons/ai/claude.png', categorySlug: 'claude', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
       { key: 'perplexity', title_ar: 'اشتراك بربلكسيتي', title_en: 'Perplexity', icon: '/images/icons/ai/preplexity.png', categorySlug: 'perplexity', tag_ar: 'أدوات AI', tag_en: 'AI Tools' },
     ],
@@ -39,7 +39,7 @@
     line: '/images/lines/designline.png',
     categorySlug: 'design',
     subs: [
-      { key: 'adobe', title_ar: 'اشتراك أدوبي', title_en: 'Adobe', icon: '/images/icons/design/adobe.png', categorySlug: 'adobe', tag_ar: 'تصميم', tag_en: 'Design' },
+      { key: 'adobe', title_ar: 'اشتراك أدوبي', title_en: 'Adobe', icon: '/images/icons/design/adobe.png', categorySlug: 'adobe', tag_ar: 'تصميم', tag_en: 'Design', plans: ['/sub/adobe/adobe-1months.png', '/sub/adobe/adobe-3months.png', '/sub/adobe/adobe-4months.png', '/sub/adobe/adobe-8months.png', '/sub/adobe/adobe-1year.png'] },
       { key: 'freepik', title_ar: 'اشتراك فري بيك', title_en: 'Freepik', icon: '/images/icons/design/freepik.png', categorySlug: 'freepik', tag_ar: 'تصميم', tag_en: 'Design' },
       { key: 'canva', title_ar: 'اشتراك كانفا', title_en: 'Canva', icon: '/images/icons/design/canva.png', categorySlug: 'canva', tag_ar: 'تصميم', tag_en: 'Design' },
     ],
@@ -94,20 +94,6 @@
       { key: 'osn', title_ar: 'اشتراك OSN', title_en: 'OSN', icon: '/images/icons/stream/osn.png', categorySlug: 'osn', tag_ar: 'ترفيه', tag_en: 'Entertainment' },
       { key: 'crunchyroll', title_ar: 'اشتراك كرانشي رول', title_en: 'Crunchyroll', icon: '/images/icons/stream/crunchyroll.png', categorySlug: 'crunchyroll', tag_ar: 'ترفيه', tag_en: 'Entertainment' },
       { key: 'youtube', title_ar: 'اشتراك يوتيوب بريميوم', title_en: 'YouTube Premium', icon: '/images/icons/stream/youtube.png', categorySlug: 'youtube-premium', tag_ar: 'ترفيه', tag_en: 'Entertainment' },
-    ],
-  },
-  {
-    key: 'courses',
-    title_ar: 'قسم اشتراكات التعليم',
-    title_en: 'Courses Subscriptions',
-    subtitle_ar: 'اشتراكات منصات التعليم وتطوير المهارات لمستقبلٍ أكثر إشراقاً.',
-    subtitle_en: 'Subscriptions for learning platforms and skill development for a brighter future.',
-    card: '/images/cards/coursescard.png',
-    line: '/images/lines/coursesline.png',
-    categorySlug: 'education',
-    subs: [
-      { key: 'coursera', title_ar: 'اشتراك كورسيرا', title_en: 'Coursera', icon: '/images/icons/courses/coursera.png', categorySlug: 'coursera', tag_ar: 'تعليم', tag_en: 'Education' },
-      { key: 'duolingo', title_ar: 'اشتراك دولينجو', title_en: 'Duolingo', icon: '/images/icons/courses/dolingo.png', categorySlug: 'duolingo', tag_ar: 'تعليم', tag_en: 'Education' },
     ],
   },
 ];

@@ -8,7 +8,12 @@ import './SubscriptionCards.css';
 
 const groups = subscriptionGroups;
 
-const allIcons = groups.flatMap((g) => g.subs);
+const seen = new Map();
+const allIcons = groups.flatMap((g) => g.subs).filter((s) => {
+  if (seen.has(s.key)) return false;
+  seen.set(s.key, s);
+  return true;
+});
 const mid = Math.ceil(allIcons.length / 2);
 const iconRows = [allIcons.slice(0, mid), allIcons.slice(mid)];
 
@@ -178,7 +183,7 @@ export default function SubscriptionCards() {
                 <div className="sub-icons__group" key={half} aria-hidden={half === 1}>
                   {row.map((sub) => (
                     <Link
-                      to={`/category/${sub.categorySlug}`}
+                      to={`/subscription/${sub.key}`}
                       className="sub-icon"
                       key={`${ri}-${half}-${sub.key}`}
                     >
