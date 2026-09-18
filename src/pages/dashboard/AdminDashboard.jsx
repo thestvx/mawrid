@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import DashIcon from '../../components/dashboard/DashIcon';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { subscriptionGroups } from '../../data/subscriptions';
+import { matchPlanProduct } from '../../lib/plans';
 
 const EMPTY_PRODUCT = {
   name: '',
@@ -300,6 +301,17 @@ export default function AdminDashboard() {
     [products, subscriptionCatIds]
   );
   const totalBranches = sectionsData.reduce((s, g) => s + g.branches.length, 0);
+
+  const planImgByProduct = useMemo(() => {
+    const map = {};
+    sectionsData.forEach((g) => g.branches.forEach((b) => {
+      (b.plans || []).forEach((src) => {
+        const m = matchPlanProduct(src, b.products);
+        if (m) map[m.id] = src;
+      });
+    }));
+    return map;
+  }, [sectionsData]);
 
   const toggleBranch = (key) => {
     setOpenBranches(prev => {
@@ -975,6 +987,11 @@ export default function AdminDashboard() {
       const max = Math.max(...active);
       return min === max ? stdPrice(min) : `${stdPrice(min)} – ${stdPrice(max)}`;
     };
+    const displayImg = (p) => {
+      const th = p.thumbnail || (p.images && p.images[0]);
+      if (th && th.startsWith('/sub/')) return th;
+      return planImgByProduct[p.id] || th;
+    };
 
     return (
       <>
@@ -1089,7 +1106,7 @@ export default function AdminDashboard() {
                                   <tr key={p.id}>
                                     <td>
                                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, maxWidth: 250 }}>
-                                        <HoverPreview src={p.thumbnail || (p.images && p.images[0])} name={p.name} size={38} />
+                                        <HoverPreview src={displayImg(p)} name={p.name} size={38} />
                                         <div style={{ overflow: 'hidden', flex: 1 }}>
                                           <input
                                             className="d-form__input d-name-input"

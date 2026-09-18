@@ -73,6 +73,17 @@ export async function fetchProductById(id) {
   return { data, error: null };
 }
 
+export async function fetchSellers() {
+  if (!supabase) return emptyResult();
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('role', 'seller')
+    .order('created_at', { ascending: true });
+  if (error) { console.warn('sellers load failed:', error.message); return emptyResult(); }
+  return { data: data || [], error: null };
+}
+
 export async function fetchStoreStats() {
   if (!supabase) return { products: 0, sellers: 0, users: 0 };
   const [p, u, s] = await Promise.all([

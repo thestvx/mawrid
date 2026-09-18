@@ -147,6 +147,31 @@
   100% { left: 200%; }
 }
 
+.hero__btn--suppliers {
+  background: linear-gradient(135deg, #2b3440, #14181f);
+  color: #fff;
+  box-shadow:
+    0 4px 20px rgba(20, 24, 31, 0.3),
+    0 0 0 0 rgba(20, 24, 31, 0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero__btn--suppliers:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow:
+      0 8px 32px rgba(20, 24, 31, 0.4),
+      0 0 60px rgba(20, 24, 31, 0.18);
+  }
+  .hero__btn--suppliers:hover .hero__btn-shine {
+    animation: btn-shine 0.6s ease forwards;
+  }
+}
+
+.hero__btn--suppliers:active {
+  transform: translateY(-1px) scale(0.98);
+  transition-duration: var(--duration-fast);
+}
+
 .hero__btn--secondary {
   background: rgba(255, 255, 255, 0.9);
   color: var(--color-text);
