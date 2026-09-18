@@ -17,7 +17,10 @@ export default function PlanCard({ sub, src, index = 0, products = [] }) {
   const { salePrice } = productPrices(product);
   const price = salePrice > 0 ? salePrice : 0;
   const hasPrice = price > 0;
-  const title = isRtl ? sub.title_ar : sub.title_en;
+  const offerName = (product && (product.name || product.name_en))
+    ? (isRtl ? (product.name || product.name_en) : (product.name_en || product.name))
+    : '';
+  const title = offerName || (isRtl ? sub.title_ar : sub.title_en);
 
   const [added, setAdded] = useState(false);
   const addedTimer = useRef(null);

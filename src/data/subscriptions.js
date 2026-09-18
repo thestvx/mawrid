@@ -26,7 +26,7 @@
     categorySlug: 'courses',
     subs: [
       { key: 'duolingo', title_ar: 'اشتراك دولينقو', title_en: 'Duolingo', icon: '/images/icons/courses/dolingo.png', categorySlug: 'duolingo', tag_ar: 'تعليم', tag_en: 'Education' },
-      { key: 'coursera', title_ar: 'اشتراك كورسيرا', title_en: 'Coursera', icon: '/images/icons/courses/coursera.png', categorySlug: 'coursera', tag_ar: 'تعليم', tag_en: 'Education' },
+      { key: 'coursera', title_ar: 'اشتراك كورسيرا', title_en: 'Coursera', icon: '/images/icons/courses/coursera.png', categorySlug: 'coursera', tag_ar: 'تعليم', tag_en: 'Education', plans: ['/sub/coursera/courseraplus-1year.png'] },
     ],
   },
   {
@@ -54,9 +54,9 @@
     line: '/images/lines/officeline.png',
     categorySlug: 'business',
     subs: [
-      { key: 'linkedin', title_ar: 'اشتراك لينكد إن', title_en: 'LinkedIn', icon: '/images/icons/office/linkedin.png', categorySlug: 'linkedin', tag_ar: 'أعمال', tag_en: 'Business' },
+      { key: 'linkedin', title_ar: 'اشتراك لينكد إن', title_en: 'LinkedIn', icon: '/images/icons/office/linkedin.png', categorySlug: 'linkedin', tag_ar: 'أعمال', tag_en: 'Business', plans: ['/sub/linkedin/linkedinpremium-3months.png', '/sub/linkedin/linkedinpremium-6months.png', '/sub/linkedin/linkedinpremium-1year.png'] },
       { key: 'microsoft', title_ar: 'اشتراك مايكروسوفت', title_en: 'Microsoft', icon: '/images/icons/office/microsoft.png', categorySlug: 'microsoft', tag_ar: 'أعمال', tag_en: 'Business' },
-      { key: 'office365', title_ar: 'اشتراك أوفيس 360', title_en: 'Office 365', icon: '/images/icons/office/office360.png', categorySlug: 'office-365', tag_ar: 'أعمال', tag_en: 'Business' },
+      { key: 'office365', title_ar: 'اشتراك أوفيس 360', title_en: 'Office 365', icon: '/images/icons/office/office360.png', categorySlug: 'office-365', tag_ar: 'أعمال', tag_en: 'Business', plans: ['/sub/office/office365-1year.png', '/sub/office/office365personal-1year.png'] },
     ],
   },
   {

@@ -193,6 +193,34 @@ function ProductImage({ src, name, size = 44 }) {
   );
 }
 
+function HoverPreview({ src, name, size = 38 }) {
+  const [pos, setPos] = useState(null);
+  return (
+    <span
+      className="d-img-hover"
+      style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}
+      onMouseEnter={(e) => setPos({ x: e.clientX, y: e.clientY })}
+      onMouseMove={(e) => setPos({ x: e.clientX, y: e.clientY })}
+      onMouseLeave={() => setPos(null)}
+    >
+      <ProductImage src={src} name={name} size={size} />
+      {pos && src && (
+        <span
+          className="d-img-hover__preview"
+          style={{
+            position: 'fixed',
+            left: Math.min(pos.x + 18, window.innerWidth - 340),
+            top: Math.min(pos.y + 14, window.innerHeight - 440),
+            zIndex: 5000,
+          }}
+        >
+          <img src={src} alt={name} />
+        </span>
+      )}
+    </span>
+  );
+}
+
 export default function AdminDashboard() {
   const { dir } = useLanguage();
   const { user } = useAuth();
@@ -285,21 +313,28 @@ export default function AdminDashboard() {
     const price = d.price !== undefined && d.price !== '' ? parseFloat(d.price) : (Number(p.price) || 0);
     const hasSale = d.sale_price !== undefined;
     const sale = hasSale && d.sale_price !== '' ? parseFloat(d.sale_price) : (p.sale_price != null ? p.sale_price : null);
-    const res = await supabase.from('products').update({
+    const nameChanged = d.name !== undefined && d.name.trim() !== (p.name || '');
+    const nameEnChanged = d.name_en !== undefined && d.name_en.trim() !== (p.name_en || '');
+    const payload = {
       price,
       sale_price: sale,
+      ...(nameChanged ? { name: d.name.trim() } : {}),
+      ...(nameEnChanged ? { name_en: d.name_en.trim() } : {}),
       ...(pricingColumnsReady ? {
         price_eur: draftOr(p, 'price_eur', d.price_eur),
         sale_price_eur: draftOr(p, 'sale_price_eur', d.sale_price_eur),
         price_dzd: draftOr(p, 'price_dzd', d.price_dzd),
         sale_price_dzd: draftOr(p, 'sale_price_dzd', d.sale_price_dzd),
       } : {}),
-    }).eq('id', p.id);
-    if (res.error) { notify(dir === 'rtl' ? 'فشل حفظ السعر' : 'Failed to save price'); return; }
+    };
+    const res = await supabase.from('products').update(payload).eq('id', p.id);
+    if (res.error) { notify(dir === 'rtl' ? 'فشل الحفظ' : 'Failed to save'); return; }
     const next = { ...priceDraft };
     delete next[p.id];
     setPriceDraft(next);
-    notify(dir === 'rtl' ? 'تم تحديث السعر' : 'Price updated');
+    notify(nameChanged
+      ? (dir === 'rtl' ? 'تم حفظ اسم العرض والسعر' : 'Offer name & price saved')
+      : (dir === 'rtl' ? 'تم تحديث السعر' : 'Price updated'));
     loadAll();
   };
 
@@ -1039,11 +1074,23 @@ export default function AdminDashboard() {
                                 {branch.products.map((p) => (
                                   <tr key={p.id}>
                                     <td>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, maxWidth: 240 }}>
-                                        <ProductImage src={p.thumbnail} name={p.name} size={38} />
-                                        <div style={{ overflow: 'hidden' }}>
-                                          <strong style={{ display: 'block', whiteSpace: 'normal' }}>{dir === 'rtl' ? (p.name || p.name_en) : (p.name_en || p.name)}</strong>
-                                          {p.seller_name && <div style={{ fontSize: '0.7rem', color: 'var(--color-secondary)' }}>{p.seller_name}</div>}
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, maxWidth: 250 }}>
+                                        <HoverPreview src={p.thumbnail || (p.images && p.images[0])} name={p.name} size={38} />
+                                        <div style={{ overflow: 'hidden', flex: 1 }}>
+                                          <input
+                                            className="d-form__input d-name-input"
+                                            value={priceDraft[p.id]?.name ?? (p.name ?? '')}
+                                            onChange={e => setDraftPrice(p.id, 'name', e.target.value)}
+                                            placeholder={dir === 'rtl' ? 'اسم العرض...' : 'Offer name...'}
+                                            title={dir === 'rtl' ? 'عدّل اسم العرض — يظهر في الموقع فور الحفظ' : 'Edit the offer name — appears on the site after saving'}
+                                          />
+                                          <input
+                                            className="d-form__input d-name-input d-name-input--en"
+                                            value={priceDraft[p.id]?.name_en ?? (p.name_en ?? '')}
+                                            onChange={e => setDraftPrice(p.id, 'name_en', e.target.value)}
+                                            placeholder="EN name..."
+                                            dir="ltr"
+                                          />
                                         </div>
                                       </div>
                                     </td>
@@ -1095,7 +1142,7 @@ export default function AdminDashboard() {
                                     <td><StatusPill status={p.status} dir={dir} /></td>
                                     <td>
                                       <div className="d-actions" style={{ flexWrap: 'wrap' }}>
-                                        <button className="d-actions__btn d-actions__btn--approve" onClick={() => saveQuickPrice(p)}>{dir === 'rtl' ? 'حفظ السعر' : 'Save price'}</button>
+                                        <button className="d-actions__btn d-actions__btn--approve" onClick={() => saveQuickPrice(p)}>{dir === 'rtl' ? 'حفظ' : 'Save'}</button>
                                         {p.status !== 'active' && (
                                           <button className="d-actions__btn d-actions__btn--approve" onClick={() => setProductStatus(p.id, 'active')}>{dir === 'rtl' ? 'اعتماد' : 'Approve'}</button>
                                         )}
