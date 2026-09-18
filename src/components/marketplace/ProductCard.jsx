@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -13,6 +13,20 @@ export default function ProductCard({ product, index = 0 }) {
   const isRtl = dir === 'rtl';
   const { add } = useCart();
   const { productPrices, fmtValue } = useCurrency();
+
+  const [added, setAdded] = useState(false);
+  const addedTimer = useRef(null);
+
+  useEffect(() => () => window.clearTimeout(addedTimer.current), []);
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+    if (added) return;
+    add(product);
+    setAdded(true);
+    window.clearTimeout(addedTimer.current);
+    addedTimer.current = window.setTimeout(() => setAdded(false), 1900);
+  };
 
   const title = isRtl ? product.name : product.name_en || product.name;
   const image = product.thumbnail || (Array.isArray(product.images) && product.images[0]) || '';
@@ -65,13 +79,31 @@ export default function ProductCard({ product, index = 0 }) {
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
               </svg>
             </button>
-            <button className="product-card__action-btn product-card__action-btn--cart" onClick={(e) => { e.preventDefault(); add(product); }} aria-label={isRtl ? 'أضف إلى السلة' : 'Add to cart'}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-              </svg>
+            <button
+              className={`product-card__action-btn product-card__action-btn--cart ${added ? 'product-card__action-btn--cart-added' : ''}`}
+              onClick={handleAdd}
+              aria-label={isRtl ? 'أضف إلى السلة' : 'Add to cart'}
+            >
+              {added ? (
+                <svg className="product-card__check" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4.5 12.5l5 5L19.5 6.5" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+              )}
             </button>
           </div>
+          {added && (
+            <span className="product-card__toast">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4.5 12.5l5 5L19.5 6.5" />
+              </svg>
+              {isRtl ? 'تمت الإضافة إلى سلتك' : 'Added to your cart'}
+            </span>
+          )}
         </div>
         <div className="product-card__body">
           {product.seller_name && (

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -18,10 +19,18 @@ export default function PlanCard({ sub, src, index = 0, products = [] }) {
   const hasPrice = price > 0;
   const title = isRtl ? sub.title_ar : sub.title_en;
 
+  const [added, setAdded] = useState(false);
+  const addedTimer = useRef(null);
+
+  useEffect(() => () => window.clearTimeout(addedTimer.current), []);
+
   const handleAdd = (e) => {
     e.preventDefault();
-    if (!hasPrice) return;
+    if (!hasPrice || added) return;
     add(planCartItem(sub, src, product));
+    setAdded(true);
+    window.clearTimeout(addedTimer.current);
+    addedTimer.current = window.setTimeout(() => setAdded(false), 1900);
   };
 
   return (
@@ -39,16 +48,27 @@ export default function PlanCard({ sub, src, index = 0, products = [] }) {
         <div className="plan-card__overlay">
           <button
             type="button"
-            className={`plan-card__cta ${!hasPrice ? 'plan-card__cta--disabled' : ''}`}
+            className={`plan-card__cta ${added ? 'plan-card__cta--added' : ''} ${!hasPrice ? 'plan-card__cta--disabled' : ''}`}
             onClick={handleAdd}
-            disabled={!hasPrice}
+            disabled={!hasPrice || added}
             aria-label={isRtl ? 'أضف إلى السلة' : 'Add to cart'}
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-              <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-            </svg>
-            <span className="plan-card__cta-label">{isRtl ? 'أضف إلى السلة' : 'Add to cart'}</span>
+            {added ? (
+              <>
+                <svg className="plan-card__check" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4.5 12.5l5 5L19.5 6.5" />
+                </svg>
+                <span className="plan-card__added-label">{isRtl ? 'تمت الإضافة إلى سلتك' : 'Added to your cart'}</span>
+              </>
+            ) : (
+              <>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                  <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                <span className="plan-card__cta-label">{isRtl ? 'أضف إلى السلة' : 'Add to cart'}</span>
+              </>
+            )}
             {hasPrice && <span className="plan-card__cta-price">{fmtValue(price)}</span>}
           </button>
         </div>

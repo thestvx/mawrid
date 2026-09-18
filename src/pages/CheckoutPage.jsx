@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -28,23 +29,108 @@ export default function CheckoutPage() {
 
   if (placed) {
     return (
-      <div className="checkout-page">
-        <div className="checkout-page__glow checkout-page__glow--1" aria-hidden="true" />
-        <div className="checkout-page__glow checkout-page__glow--2" aria-hidden="true" />
-        <div className="checkout-page__box checkout-page__box--ok">
-          <span className="checkout-page__ok">
-            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1">
-              <circle cx="12" cy="12" r="10" /><path d="M8 12.4l2.6 2.6 5.4-5.6" />
-            </svg>
-          </span>
-          <h2>{rtl ? 'تم استلام طلبك!' : 'Order received!'}</h2>
-          <p>{rtl ? 'شكراً لثقتك بمَورد. تم تأكيد الدفع — سيصلك التفعيل والفواتير على بريدك خلال دقائق.' : 'Thank you for trusting Mawrid. Payment confirmed — your activation and receipt are coming to your inbox within minutes.'}</p>
-          <span className="checkout-page__ref">{ref}</span>
-          <div className="checkout-page__row">
-            <Link to="/dashboard/buyer" className="btn btn--primary">{rtl ? 'لوحة تحكمي' : 'My dashboard'}</Link>
-            <Link to="/marketplace" className="btn btn--ghost">{rtl ? 'مواصلة التسوق' : 'Continue shopping'}</Link>
+      <div className="co-succ-overlay">
+        <div className="co-succ-backdrop" aria-hidden="true" />
+        <motion.div
+          className="co-succ-card"
+          initial={{ opacity: 0, y: 46, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+        >
+          <div className="co-succ-badge">
+            <span className="co-succ-ring co-succ-ring--1" aria-hidden="true" />
+            <span className="co-succ-ring co-succ-ring--2" aria-hidden="true" />
+            <span className="co-succ-confetti co-succ-confetti--1" aria-hidden="true" />
+            <span className="co-succ-confetti co-succ-confetti--2" aria-hidden="true" />
+            <span className="co-succ-confetti co-succ-confetti--3" aria-hidden="true" />
+            <span className="co-succ-confetti co-succ-confetti--4" aria-hidden="true" />
+            <span className="co-succ-confetti co-succ-confetti--5" aria-hidden="true" />
+            <motion.svg
+              width="66"
+              height="66"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <motion.circle
+                cx="12"
+                cy="12"
+                r="10"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5, ease: 'easeInOut' }}
+              />
+              <motion.path
+                d="M8 12.4l2.6 2.6 5.4-5.6"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.45, delay: 0.5, ease: 'easeInOut' }}
+              />
+            </motion.svg>
           </div>
-        </div>
+
+          <motion.h2
+            className="co-succ-title"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {rtl ? 'تم استلام طلبك بنجاح!' : 'Order received!'}
+          </motion.h2>
+
+          <motion.p
+            className="co-succ-sub"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {rtl ? 'شكراً لثقتك بمَورد — تم تأكيد الدفع بنجاح.' : 'Thank you for trusting Mawrid — your payment has been confirmed.'}
+          </motion.p>
+
+          <motion.div
+            className="co-succ-ref"
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.8, type: 'spring', stiffness: 320, damping: 20 }}
+          >
+            <span>{rtl ? 'رقم الطلب' : 'Order number'}</span>
+            <strong>{ref}</strong>
+          </motion.div>
+
+          <motion.div
+            className="co-succ-note"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            <span>
+              {rtl
+                ? 'سيصلك تفعيل طلبك خلال أقل من 24 ساعة عبر بريدك الإلكتروني.'
+                : 'Your order will be delivered to your email within less than 24 hours.'}
+            </span>
+          </motion.div>
+
+          <motion.div
+            className="co-succ-actions"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Link to="/dashboard/buyer" className="co-succ-btn co-succ-btn--primary">
+              {rtl ? 'لوحة تحكمي' : 'My dashboard'}
+            </Link>
+            <Link to="/marketplace" className="co-succ-btn co-succ-btn--ghost">
+              {rtl ? 'مواصلة التسوق' : 'Continue shopping'}
+            </Link>
+          </motion.div>
+        </motion.div>
       </div>
     );
   }
@@ -61,8 +147,10 @@ export default function CheckoutPage() {
             </svg>
           </span>
           <h2>{rtl ? 'سجّل دخولك للمتابعة' : 'Sign in to continue'}</h2>
-          <p>{rtl ? 'سيتم إعادتك إلى الشيك أوت بعد الدخول.' : 'You will return to checkout after signing in.'}</p>
-          <Link to="/auth?mode=signin&next=/checkout" className="btn btn--primary">{rtl ? 'تسجيل الدخول' : 'Sign in'}</Link>
+          <p>{rtl ? 'سيتم إعادتك إلى الصفحة بعد الدخول.' : 'You will return after signing in.'}</p>
+          <Link to="/auth?mode=signin&next=/checkout" className="co-succ-btn co-succ-btn--primary">
+            {rtl ? 'تسجيل الدخول' : 'Sign in'}
+          </Link>
         </div>
       </div>
     );
@@ -82,7 +170,9 @@ export default function CheckoutPage() {
           </span>
           <h2>{rtl ? 'سلتك فارغة' : 'Your cart is empty'}</h2>
           <p>{rtl ? 'أضف منتجات قبل إتمام الدفع.' : 'Add items before checking out.'}</p>
-          <Link to="/marketplace" className="btn btn--primary">{rtl ? 'تصفح المتجر' : 'Browse marketplace'}</Link>
+          <Link to="/marketplace" className="co-succ-btn co-succ-btn--primary">
+            {rtl ? 'تصفح المتجر' : 'Browse marketplace'}
+          </Link>
         </div>
       </div>
     );

@@ -97,3 +97,40 @@
   font-size: 11px;
   direction: ltr;
 }
+
+/* added-to-cart state */
+.plan-card__cta--added {
+  background: linear-gradient(135deg, #25a35e, #12824a);
+  box-shadow: 0 10px 24px rgba(18, 130, 74, 0.45);
+  animation: plan-card-added-pop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.plan-card__cta--added:hover {
+  transform: none;
+  box-shadow: 0 10px 24px rgba(18, 130, 74, 0.45);
+}
+
+.plan-card__cta--added:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+@keyframes plan-card-added-pop {
+  0% { transform: scale(0.94); }
+  55% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.plan-card__check {
+  animation: plan-card-check-draw 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  stroke-dasharray: 26;
+  stroke-dashoffset: 26;
+}
+
+@keyframes plan-card-check-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.plan-card__added-label {
+  white-space: nowrap;
+}
