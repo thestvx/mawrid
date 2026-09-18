@@ -27,6 +27,31 @@ export function planPrice(product) {
   return isFinite(n) ? n : 0;
 }
 
+const TIER_WORDS = ['plus', 'pro', 'ultra', 'max', 'premium', 'prime', 'standard', 'better', 'one', 'family', 'team', 'kids', 'bundle'];
+
+function planTier(src) {
+  if (!src) return '';
+  const base = String(src).split('/').pop().replace(/\.[a-z0-9]+$/i, '');
+  return base.replace(/-?\d+(y(ear(s)?)?|m(onth(s)?)?)$/i, '').replace(/[-_]/g, '').toLowerCase();
+}
+
+function compact(text) {
+  return String(text || '').toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g, '');
+}
+
+function tierScore(p, tier) {
+  if (!tier || tier.length < 2) return 0;
+  const c = compact(`${p.name || ''} ${p.name_en || ''} ${p.slug || ''} ${(Array.isArray(p.tags) ? p.tags : []).join(' ')}`);
+  let score = 0;
+  if (c.includes(tier)) score += tier.length * 2 + 12;
+  if (tier !== c) {
+    for (const m of TIER_WORDS) {
+      if (tier.includes(m) !== c.includes(m)) score -= 12;
+    }
+  }
+  return score;
+}
+
 export function matchPlanProduct(src, products) {
   const months = parsePlanDuration(src);
   const list = Array.isArray(products) ? products.filter((p) => p) : [];
@@ -40,12 +65,16 @@ export function matchPlanProduct(src, products) {
     kws.push(String(months), `${months}m`, 'month', 'mo', 'شهر');
   }
 
+  const tier = planTier(src);
+  if (tier) kws.push(tier);
+
   const scored = list.map((p) => {
-    const hay = `${p.name || ''} ${p.name_en || ''} ${p.slug || ''} ${(p.tags || []).join(' ')}`.toLowerCase();
+    const hay = `${p.name || ''} ${p.name_en || ''} ${p.slug || ''} ${(Array.isArray(p.tags) ? p.tags : []).join(' ')}`.toLowerCase();
     let score = 0;
     for (const kw of kws) {
       if (hay.includes(kw.toLowerCase())) score += kw.length + 1;
     }
+    score += tierScore(p, tier);
     return { p, score };
   });
 
