@@ -48,6 +48,10 @@ export default function PlanCard({ sub, src, index = 0, products = [] }) {
       </div>
 
       <div className="plan-card__body">
+        <div className="plan-card__name">
+          <span className="plan-card__name-title">{title}</span>
+          {label && <span className="plan-card__name-duration">{label}</span>}
+        </div>
         <div className="plan-card__price">
           <span className="plan-card__price-caption">{isRtl ? 'السعر' : 'Price'}</span>
           {hasPrice ? (
