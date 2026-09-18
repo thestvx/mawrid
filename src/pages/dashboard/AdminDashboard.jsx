@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -195,6 +196,31 @@ function ProductImage({ src, name, size = 44 }) {
 
 function HoverPreview({ src, name, size = 38 }) {
   const [pos, setPos] = useState(null);
+  const preview = pos && src ? createPortal(
+    (() => {
+      const pw = 330;
+      const ph = 420;
+      const gap = 18;
+      const left = pos.x + gap + pw <= window.innerWidth - 8 ? pos.x + gap : Math.max(8, pos.x - gap - pw);
+      const top = pos.y + gap + ph <= window.innerHeight - 8 ? pos.y + gap : Math.max(8, pos.y - gap - ph);
+      return (
+        <span
+          className="d-img-hover__preview"
+          style={{
+            position: 'fixed',
+            left,
+            top,
+            maxWidth: pw,
+            maxHeight: ph,
+            zIndex: 2147480000,
+          }}
+        >
+          <img src={src} alt={name} />
+        </span>
+      );
+    })(),
+    document.body
+  ) : null;
   return (
     <span
       className="d-img-hover"
@@ -204,19 +230,7 @@ function HoverPreview({ src, name, size = 38 }) {
       onMouseLeave={() => setPos(null)}
     >
       <ProductImage src={src} name={name} size={size} />
-      {pos && src && (
-        <span
-          className="d-img-hover__preview"
-          style={{
-            position: 'fixed',
-            left: Math.min(pos.x + 18, window.innerWidth - 340),
-            top: Math.min(pos.y + 14, window.innerHeight - 440),
-            zIndex: 5000,
-          }}
-        >
-          <img src={src} alt={name} />
-        </span>
-      )}
+      {preview}
     </span>
   );
 }
