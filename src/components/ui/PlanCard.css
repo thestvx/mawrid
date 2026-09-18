@@ -50,28 +50,65 @@
   transition: background 0.3s ease;
 }
 
+.plan-card__body {
+  padding: 16px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.plan-card__price {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.plan-card__price-caption {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-on-surface-variant);
+}
+
+.plan-card__price-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -0.3px;
+}
+
+.plan-card__price-value--na {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-on-surface-variant);
+  letter-spacing: 0;
+}
+
 .plan-card__cta {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 9px;
   width: 100%;
-  padding: 11px 14px;
+  padding: 12px 16px;
   border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #e2a86a, #c78a48);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-primary-container), var(--color-primary));
   color: #fff;
-  font-size: 13px;
+  font-size: 0.95rem;
   font-weight: 800;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 10px 24px rgba(185, 128, 46, 0.45);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow: 0 10px 24px rgba(165, 60, 0, 0.30);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background 0.25s ease;
 }
 
 .plan-card__cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(185, 128, 46, 0.55);
+  box-shadow: 0 14px 30px rgba(165, 60, 0, 0.42);
 }
 
 .plan-card__cta:active {
@@ -84,18 +121,10 @@
   box-shadow: none;
 }
 
+.plan-card__cta:disabled:hover,
 .plan-card__cta--disabled:hover {
   transform: none;
   box-shadow: none;
-}
-
-.plan-card__cta-price {
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  direction: ltr;
 }
 
 /* added-to-cart state */

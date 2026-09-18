@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { findGroup } from '../data/subscriptions';
 import { fetchProducts } from '../lib/supabase';
-import ProductCard from '../components/marketplace/ProductCard';
 import PlanCard from '../components/ui/PlanCard';
 import './SubscriptionPages.css';
 
@@ -14,7 +13,6 @@ export default function SubscriptionGroupPage() {
   const group = findGroup(groupKey);
 
   const [productsBySub, setProductsBySub] = useState({});
-  const [groupProducts, setGroupProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,30 +22,18 @@ export default function SubscriptionGroupPage() {
     setLoading(true);
     const subs = currentGroup.subs || [];
     const tasks = [];
-    if (currentGroup.categorySlug) {
-      tasks.push(
-        fetchProducts({ categorySlug: currentGroup.categorySlug })
-          .then(({ data }) => ({ kind: 'group', data: data || [] }))
-          .catch(() => ({ kind: 'group', data: [] }))
-      );
-    }
     subs.forEach((s) => {
       if (!s.categorySlug) return;
       tasks.push(
         fetchProducts({ categorySlug: s.categorySlug })
-          .then(({ data }) => ({ kind: 'sub', key: s.key, data: data || [] }))
-          .catch(() => ({ kind: 'sub', key: s.key, data: [] }))
+          .then(({ data }) => ({ key: s.key, data: data || [] }))
+          .catch(() => ({ key: s.key, data: [] }))
       );
     });
     Promise.all(tasks).then((results) => {
       if (!active) return;
       const map = {};
-      let groupData = [];
-      results.forEach((r) => {
-        if (r.kind === 'group') groupData = r.data;
-        else map[r.key] = r.data;
-      });
-      setGroupProducts(groupData);
+      results.forEach((r) => { map[r.key] = r.data; });
       setProductsBySub(map);
       setLoading(false);
     });
@@ -100,7 +86,7 @@ export default function SubscriptionGroupPage() {
 
           {loading ? (
             <div className="sub-page__empty">{isRtl ? 'جارٍ التحميل...' : 'Loading...'}</div>
-          ) : groupProducts.length === 0 && group.subs.every((s) => !s.plans?.length && !(productsBySub[s.key] || []).length) ? (
+          ) : group.subs.every((s) => !s.plans?.length && !(productsBySub[s.key] || []).length) ? (
             <div className="sub-page__empty">
               <span className="material-symbols-outlined sub-page__empty-icon">inventory_2</span>
               <p>{isRtl ? 'لا توجد عروض أو منتجات بعد في هذا القسم.' : 'No offers or products in this section yet.'}</p>
@@ -108,19 +94,10 @@ export default function SubscriptionGroupPage() {
             </div>
           ) : (
             <div className="sub-page__group">
-              {groupProducts.length > 0 && (
-                <div className="sub-page__group-block">
-                  <div className="sub-page__grid">
-                    {groupProducts.map((product, i) => (
-                      <ProductCard key={product.id} product={product} index={i} />
-                    ))}
-                  </div>
-                </div>
-              )}
               {group.subs.map((sub) => {
                 const products = productsBySub[sub.key] || [];
                 const hasPlans = sub.plans && sub.plans.length > 0;
-                if (!hasPlans && products.length === 0) return null;
+                if (!hasPlans) return null;
                 return (
                   <div className="sub-page__group-block" key={sub.key}>
                     <div className="sub-page__group-head">
@@ -130,28 +107,16 @@ export default function SubscriptionGroupPage() {
                         </span>
                         <span>{isRtl ? sub.title_ar : sub.title_en}</span>
                       </Link>
-                      {hasPlans && (
-                        <Link to={`/subscription/${sub.key}`} className="sub-page__group-link">
-                          {isRtl ? 'كل العروض' : 'All offers'}
-                        </Link>
-                      )}
+                      <Link to={`/subscription/${sub.key}`} className="sub-page__group-link">
+                        {isRtl ? 'كل العروض' : 'All offers'}
+                      </Link>
                     </div>
 
-                    {hasPlans && (
-                      <div className="sub-page__plans">
-                        {sub.plans.map((src, i) => (
-                          <PlanCard key={src} sub={sub} src={src} index={i} products={products} />
-                        ))}
-                      </div>
-                    )}
-
-                    {products.length > 0 && (
-                      <div className="sub-page__grid">
-                        {products.map((product, i) => (
-                          <ProductCard key={product.id} product={product} index={i} />
-                        ))}
-                      </div>
-                    )}
+                    <div className="sub-page__plans">
+                      {sub.plans.map((src, i) => (
+                        <PlanCard key={src} sub={sub} src={src} index={i} products={products} />
+                      ))}
+                    </div>
                   </div>
                 );
               })}

@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { findSub } from '../data/subscriptions';
 import { fetchProducts } from '../lib/supabase';
-import ProductCard from '../components/marketplace/ProductCard';
 import PlanCard from '../components/ui/PlanCard';
 import './SubscriptionPages.css';
 
@@ -15,16 +14,13 @@ export default function SubscriptionPage() {
   const categorySlug = found ? found.sub.categorySlug : null;
 
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!categorySlug) return;
     let active = true;
-    setLoading(true);
     fetchProducts({ categorySlug }).then(({ data }) => {
       if (active) {
         setProducts(data || []);
-        setLoading(false);
       }
     });
     return () => { active = false; };
@@ -81,30 +77,6 @@ export default function SubscriptionPage() {
             </div>
           </section>
         )}
-
-        <section className="sub-page__block">
-          <div className="sub-page__block-header">
-            <h2>{isRtl ? 'منتجات الاشتراك' : 'Subscription products'}</h2>
-            <p>{title}</p>
-          </div>
-          {loading ? (
-            <div className="sub-page__empty">{isRtl ? 'جارٍ التحميل...' : 'Loading...'}</div>
-          ) : products.length === 0 ? (
-            <div className="sub-page__empty">
-              <span className="material-symbols-outlined sub-page__empty-icon">inventory_2</span>
-              <p>{isRtl ? `لا توجد منتجات متاحة لـ ${title} بعد.` : `No products available for ${isRtl ? sub.title_ar : sub.title_en} yet.`}</p>
-              <Link to={`/category/${group.key}`} className="btn btn--outline">
-                {isRtl ? 'استكشف أقسام أخرى' : 'Explore other sub-sections'}
-              </Link>
-            </div>
-          ) : (
-            <div className="sub-page__grid">
-              {products.map((product, i) => (
-                <ProductCard key={product.id} product={product} index={i} />
-              ))}
-            </div>
-          )}
-        </section>
       </div>
     </div>
   );

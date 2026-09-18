@@ -41,7 +41,7 @@
     subs: [
       { key: 'adobe', title_ar: 'اشتراك أدوبي', title_en: 'Adobe', icon: '/images/icons/design/adobe.png', categorySlug: 'adobe', tag_ar: 'تصميم', tag_en: 'Design', plans: ['/sub/adobe/adobe-1months.png', '/sub/adobe/adobe-3months.png', '/sub/adobe/adobe-4months.png', '/sub/adobe/adobe-8months.png', '/sub/adobe/adobe-1year.png'] },
       { key: 'freepik', title_ar: 'اشتراك فري بيك', title_en: 'Freepik', icon: '/images/icons/design/freepik.png', categorySlug: 'freepik', tag_ar: 'تصميم', tag_en: 'Design' },
-      { key: 'canva', title_ar: 'اشتراك كانفا', title_en: 'Canva', icon: '/images/icons/design/canva.png', categorySlug: 'canva', tag_ar: 'تصميم', tag_en: 'Design' },
+      { key: 'canva', title_ar: 'اشتراك كانفا', title_en: 'Canva', icon: '/images/icons/design/canva.png', categorySlug: 'canva', tag_ar: 'تصميم', tag_en: 'Design', plans: ['/sub/canva/canva500user-3year.png', '/sub/canva/canvapro-1year.png'] },
     ],
   },
   {
