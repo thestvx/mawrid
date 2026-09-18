@@ -96,6 +96,20 @@
       { key: 'youtube', title_ar: 'اشتراك يوتيوب بريميوم', title_en: 'YouTube Premium', icon: '/images/icons/stream/youtube.png', categorySlug: 'youtube-premium', tag_ar: 'ترفيه', tag_en: 'Entertainment' },
     ],
   },
+  {
+    key: 'courses',
+    title_ar: 'قسم اشتراكات التعليم',
+    title_en: 'Courses Subscriptions',
+    subtitle_ar: 'اشتراكات منصات التعليم وتطوير المهارات لمستقبلٍ أكثر إشراقاً.',
+    subtitle_en: 'Subscriptions for learning platforms and skill development for a brighter future.',
+    card: '/images/cards/coursescard.png',
+    line: '/images/lines/coursesline.png',
+    categorySlug: 'education',
+    subs: [
+      { key: 'coursera', title_ar: 'اشتراك كورسيرا', title_en: 'Coursera', icon: '/images/icons/courses/coursera.png', categorySlug: 'coursera', tag_ar: 'تعليم', tag_en: 'Education' },
+      { key: 'duolingo', title_ar: 'اشتراك دولينجو', title_en: 'Duolingo', icon: '/images/icons/courses/dolingo.png', categorySlug: 'duolingo', tag_ar: 'تعليم', tag_en: 'Education' },
+    ],
+  },
 ];
 
 export function findGroup(key) {
