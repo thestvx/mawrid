@@ -1,45 +1,41 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 import SplitText from '../components/ui/SplitText';
-import { fetchSellers, fetchProducts } from '../lib/supabase';
+import SellerCard from '../components/sellers/SellerCard';
+import WorksModal from '../components/sellers/WorksModal';
+import { SELLER_SPECIALTIES, SHOWCASE_SELLERS, SHOWCASE_BRANDS } from '../data/sellers';
+import { fetchSellers } from '../lib/supabase';
 import './SellersPage.css';
 
-const SELLER_TYPES = [
-  { key: 'designers', img: '/sellers/icons/designers.png', name_ar: 'مصممين', name_en: 'Designers' },
-  { key: 'editors', img: '/sellers/icons/editors.png', name_ar: 'مونتيرين', name_en: 'Video Editors' },
-  { key: 'commentators', img: '/sellers/icons/commentators.png', name_ar: 'معلقين صوتي', name_en: 'Commentators' },
-  { key: 'creators', img: '/sellers/icons/creators.png', name_ar: 'صنّاع محتوى', name_en: 'Content Creators' },
-  { key: 'developers', img: '/sellers/icons/developers.png', name_ar: 'مبرمجين', name_en: 'Developers' },
-  { key: 'brands', img: '/sellers/icons/brands.png', name_ar: 'أصحاب براندات', name_en: 'Brand Owners' },
-];
-
-const initials = (name) => (name || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+const itemVariants = {
+  hidden: { opacity: 0, y: 26 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } },
+};
 
 export default function SellersPage() {
   const { dir } = useLanguage();
   const isRtl = dir === 'rtl';
   const scrollerRef = useRef(null);
-  const [sellers, setSellers] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [realSellers, setRealSellers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState(null);
 
   useEffect(() => {
-    let active = true;
-    Promise.all([fetchSellers(), fetchProducts({ limit: 500 })]).then(([s, p]) => {
-      if (!active) return;
-      setSellers(s.data || []);
-      setProducts(p.data || []);
+    let activeFlag = true;
+    fetchSellers().then((s) => {
+      if (!activeFlag) return;
+      setRealSellers(s.data || []);
       setLoading(false);
     });
-    return () => { active = false; };
+    return () => { activeFlag = false; };
   }, []);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
-    const track = scroller.querySelector('.sellers-marquee__track');
-    const base = track?.querySelector('.sellers-marquee__group');
+    const track = scroller.querySelector('.s-icons__track');
+    const base = track?.querySelector('.s-icons__group');
     if (!track || !base) return;
 
     const ensureCopies = () => {
@@ -56,7 +52,7 @@ export default function SellersPage() {
     let raf = null;
     let last = null;
     let offset = 0;
-    const speed = 36;
+    const speed = 30;
 
     const tick = (now) => {
       if (last == null) last = now;
@@ -81,12 +77,30 @@ export default function SellersPage() {
     };
   }, []);
 
-  const countBySeller = (u) => {
-    const byId = products.filter((p) => p.seller_id && p.seller_id === u.firebase_uid).length;
-    if (byId > 0) return byId;
-    const byName = products.filter((p) => p.seller_name && u.name && p.seller_name === u.name).length;
-    return byName;
-  };
+  const realCards = realSellers.map((u, i) => {
+    const key = SELLER_SPECIALTIES[i % SELLER_SPECIALTIES.length].key;
+    const name = u.name || (isRtl ? 'بائع مَورد' : 'Mawrid seller');
+    return {
+      id: `real-${u.id}`,
+      kind: 'seller',
+      specialtyKey: key,
+      name,
+      name_en: name,
+      role_ar: u.store_name ? `متجر ${u.store_name}` : 'مورّد على مَورد',
+      role_en: u.store_name || 'Supplier on Mawrid',
+      cover: 'linear-gradient(135deg,#ffb199,#a53c00)',
+      avatarGradient: 'linear-gradient(135deg,#ff8a3d,#7e2c00)',
+      verified: false,
+      bio_ar: u.email || '',
+      bio_en: u.email || '',
+      availability: 'full',
+      hours: { from: '09:00', to: '18:00', zone: 'GST' },
+      stats: { projects: 0, products: 0, rating: 0 },
+      works: [],
+    };
+  });
+
+  const cards = [...realCards, ...SHOWCASE_SELLERS, ...SHOWCASE_BRANDS];
 
   return (
     <main className="sellers-page">
@@ -106,64 +120,67 @@ export default function SellersPage() {
           />
           <p className="sellers-hero__sub">
             {isRtl
-              ? 'تعرف على مورّدينا ومبدعينا، من مصممين ومونتيرين ومعلقين ومبرمجين حتى أصحاب البراندات'
-              : 'Meet our suppliers and creators — from designers, editors and commentators to developers and brand owners'}
+              ? 'مورّدون ومبدعون موثّقون — كل واحد في تخصّصه، بأوقات عمل واضحة ومعرض للأعمال. اطلب منه مباشرة.'
+              : 'Verified suppliers and creators — each in their craft, with clear working hours and a live portfolio.'}
           </p>
           <div className="sellers-hero__stat">
-            <b>{loading ? '…' : sellers.length}</b>
-            <span>{isRtl ? 'مورّد معتمد في مَورد' : 'verified suppliers on Mawrid'}</span>
+            <b>{loading ? '…' : realSellers.length}</b>
+            <span>{isRtl ? 'مورّد مسجّل في مَورد' : 'registered suppliers on Mawrid'}</span>
           </div>
         </div>
       </section>
 
-      <div className="sellers-marquee" ref={scrollerRef} aria-label={isRtl ? 'تخصصات المورّدين' : 'Supplier categories'}>
-        <div className="sellers-marquee__track">
-          <div className="sellers-marquee__group">
-            {SELLER_TYPES.map((t) => (
-              <div className="seller-tag" key={t.key}>
-                <span className="seller-tag__img">
+      <div className="s-icons" ref={scrollerRef} aria-label={isRtl ? 'تخصصات المورّدين' : 'Supplier categories'}>
+        <div className="s-icons__track">
+          <div className="s-icons__group">
+            {SELLER_SPECIALTIES.map((t) => (
+              <div className="s-icon" key={t.key}>
+                <span className="s-icon__bubble">
                   <img src={t.img} alt={isRtl ? t.name_ar : t.name_en} loading="lazy" />
                 </span>
-                <span className="seller-tag__label">{isRtl ? t.name_ar : t.name_en}</span>
+                <span className="s-icon__label">{isRtl ? t.name_ar : t.name_en}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="container sellers-grid-wrap">
+      <div className="container">
+        <div className="sellers-grid-head">
+          <SplitText
+            text={isRtl ? 'مورّدونا المميّزون' : 'Featured suppliers'}
+            tag="h2"
+            className="sellers-grid__title"
+            textAlign={isRtl ? 'right' : 'left'}
+            delay={16}
+            duration={0.9}
+            splitType="chars"
+            threshold={0.2}
+            from={{ opacity: 0, y: 28 }}
+          />
+          <p className="sellers-grid__sub">
+            {isRtl ? 'اضغط "عرض الأعمال" لمعاينة ملفّ العمل، ولأصحاب البراندات لكي تطلب الموديل واللون' : 'Hit "View works" to preview the portfolio — brand owners accept model & color requests'}
+          </p>
+        </div>
+
         <motion.div
           className="sellers-grid"
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          variants={{ show: { transition: { staggerChildren: 0.07 } } }}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: '-80px' }}
         >
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => <div className="seller-card seller-card--skeleton" key={i} />)
-            : sellers.map((u, i) => (
-              <div className="seller-card" key={u.id} style={{ animationDelay: `${i * 45}ms` }}>
-                <div className="seller-card__top">
-                  <span className="seller-card__avatar">{initials(u.name)}</span>
-                  <span className="seller-card__badge">{isRtl ? 'مورّد' : 'Supplier'}</span>
-                </div>
-                <strong className="seller-card__name">{u.name || (isRtl ? 'بائع' : 'Seller')}</strong>
-                {u.store_name && <span className="seller-card__store">{u.store_name}</span>}
-                <div className="seller-card__footer">
-                  <span className="seller-card__count">
-                    {countBySeller(u)} {isRtl ? 'منتج' : 'products'}
-                  </span>
-                </div>
-              </div>
-            ))}
+          {cards.map((p, i) => (
+            <motion.div key={p.id} variants={itemVariants} style={{ zIndex: i }}>
+              <SellerCard profile={p} onOpen={setActive} />
+            </motion.div>
+          ))}
         </motion.div>
-
-        {!loading && sellers.length === 0 && (
-          <div className="sellers-empty">
-            <img src="/sellers/icons/creators.png" alt="" />
-            <p>{isRtl ? 'ما عندنا مورّدين مسجلين لحاليًا' : 'No registered suppliers yet'}</p>
-          </div>
-        )}
       </div>
+
+      <AnimatePresence>
+        {active && <WorksModal profile={active} onClose={() => setActive(null)} />}
+      </AnimatePresence>
     </main>
   );
 }
