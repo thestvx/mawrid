@@ -359,7 +359,7 @@ export default function BuyerDashboard() {
                 <DashIcon name="favorites" size={26} />
               </div>
               <h4 style={{ position: 'relative', zIndex: 1 }}>{item.title}</h4>
-              <span className="d-fav-card__price" style={{ position: 'relative', zIndex: 1 }}>${item.price}</span>
+              <span className="d-fav-card__price" style={{ position: 'relative', zIndex: 1 }}>{fmt(convertUsd(item.price))}</span>
             </div>
           ))}
         </div>
