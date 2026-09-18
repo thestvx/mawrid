@@ -26,6 +26,7 @@ function buildItem(product) {
     originalPrice: Number(product.price) || price,
     qty: 1,
     options: product.options || {},
+    link: product.link || (product.id ? `/product/${product.id}` : ''),
   };
 }
 

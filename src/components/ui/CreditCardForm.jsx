@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import './CreditCardForm.css';
@@ -35,42 +35,58 @@ function detectBrand(number) {
   return null;
 }
 
-function maskMiddle(number) {
-  const n = String(number).replace(/\s/g, '');
-  if (n.length <= 6) return '•••• ' + n;
-  const first = n.slice(0, 4);
-  const last = n.slice(-4);
-  const mid = '•'.repeat(Math.min(8, n.length - 8 < 0 ? 4 : n.length - 8));
-  return `${first} ${mid} ${last}`;
+function NumberSlots({ value, active }) {
+  const digits = String(value || '').replace(/\s/g, '').split('').slice(0, 16);
+  const cells = [];
+  for (let i = 0; i < 16; i++) {
+    if (i > 0 && i % 4 === 0) cells.push(<span className="cc-slot-gap" key={'g' + i} />);
+    const ch = digits[i] || '•';
+    cells.push(
+      <span className={`cc-slot ${active && i === digits.length ? 'cc-slot--active' : ''}`} key={i}>
+        {ch}
+      </span>
+    );
+  }
+  return <span className="cc-slots">{cells}</span>;
 }
 
-function CardVisual({ number, name, expiry, cvv, brand, isFlipped }) {
+function CardVisual({ number, name, expiry, cvv, brand, isFlipped, focused }) {
   const brandInfo = BRANDS[brand] || BRANDS.visa;
   return (
     <div className={`cc-visual ${isFlipped ? 'cc-visual--flipped' : ''}`}>
       <div className="cc-visual__inner">
         <div className="cc-visual__face cc-visual__face--front">
-          <div className="cc-visual__chip" />
-          <span className="cc-visual__brand" style={{ color: brandInfo.color }}>
-            {brandInfo.name === 'USDT' ? (
-              <span className="cc-visual__usdt">₮</span>
-            ) : (
-              brandInfo.name
-            )}
-          </span>
-          <span className="cc-visual__number">{number ? maskMiddle(number) : '•••• •••• •••• ••••'}</span>
+          <div className="cc-visual__ring cc-visual__ring--1" aria-hidden="true" />
+          <div className="cc-visual__ring cc-visual__ring--2" aria-hidden="true" />
+          <div className="cc-visual__bar">
+            <div className="cc-visual__chip" />
+            <span className="cc-visual__brand">
+              {brandInfo.name === 'USDT' ? (
+                <span className="cc-visual__usdt">₮</span>
+              ) : (
+                brandInfo.name
+              )}
+            </span>
+          </div>
+          <div className="cc-visual__numrow">
+            <NumberSlots value={number} active={focused === 'number'} />
+          </div>
           <div className="cc-visual__meta">
-            <div className="cc-visual__label">CARD HOLDER</div>
-            <div className="cc-visual__value cc-visual__value--name">{name || 'YOUR NAME'}</div>
-            <div className="cc-visual__label">EXPIRES</div>
-            <div className="cc-visual__value">{expiry || 'MM/YY'}</div>
+            <div className={`cc-visual__field ${focused === 'name' ? 'cc-visual__field--active' : ''}`}>
+              <div className="cc-visual__label">CARD HOLDER</div>
+              <div className="cc-visual__value cc-visual__value--name">{name || 'YOUR NAME'}</div>
+            </div>
+            <div className={`cc-visual__field ${focused === 'expiry' ? 'cc-visual__field--active' : ''}`}>
+              <div className="cc-visual__label">EXPIRES</div>
+              <div className="cc-visual__value">{expiry || 'MM/YY'}</div>
+            </div>
           </div>
         </div>
         <div className="cc-visual__face cc-visual__face--back">
           <div className="cc-visual__stripe" />
           <div className="cc-visual__cvv-row">
             <span className="cc-visual__label">CVV</span>
-            <span className="cc-visual__cvv">{cvv || '•••'}</span>
+            <span className={`cc-visual__cvv ${focused === 'cvv' ? 'cc-visual__cvv--active' : ''}`}>{cvv || '•••'}</span>
           </div>
           <div className="cc-visual__footer">mawrid-{brand}</div>
         </div>
@@ -150,6 +166,7 @@ export default function CreditCardForm({ onSubmit, defaultBank = 'card', disable
           cvv={cvv}
           brand={tab === 'usdt' ? 'usdt' : detectBrand(number) || 'visa'}
           isFlipped={focused === 'cvv'}
+          focused={focused}
         />
       </div>
 

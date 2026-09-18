@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
 import GooeyNav from './GooeyNav';
 import './GooeyNav.css';
 import './PillNav.css';
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
 export default function GooeyNavBar() {
   const { t, lang, toggleLanguage } = useLanguage();
   const { user, isAuthenticated, role, logout } = useAuth();
+  const { count } = useCart();
   const location = useLocation();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -113,6 +115,18 @@ export default function GooeyNavBar() {
   const avatarColor = getAvatarColor(userName);
   const signUpForSellers = '/auth?mode=signup&role=seller';
 
+  const cartPill = (
+    <Link to="/cart" className="pill-cart" aria-label={lang === 'ar' ? 'سلة التسوق' : 'Shopping cart'}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+        <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+      </svg>
+      {count > 0 && (
+        <span key={count} className="pill-cart__badge pill-cart__badge--pop">{count > 99 ? '99+' : count}</span>
+      )}
+    </Link>
+  );
+
   const renderDesktopAuth = () => {
     if (isAuthenticated) {
       return (
@@ -173,6 +187,7 @@ export default function GooeyNavBar() {
         <div className="gooey-navbar__track">
           <GooeyNav items={items} />
           <div className="pill-extras">
+            {cartPill}
             <button className="pill-lang" onClick={toggleLanguage} aria-label={t('nav.langSwitch')}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
@@ -190,6 +205,7 @@ export default function GooeyNavBar() {
         </div>
 
         <div className="pill-mobile-actions mobile-only">
+          {cartPill}
           <button className="pill-lang" onClick={toggleLanguage} aria-label={t('nav.langSwitch')}>
             {lang === 'ar' ? 'EN' : 'AR'}
           </button>

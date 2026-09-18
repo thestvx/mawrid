@@ -197,6 +197,55 @@
   z-index: 4;
 }
 
+/* ── Cart pill ── */
+.pill-cart {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--nav-h) - 6px);
+  min-width: calc(var(--nav-h) - 6px);
+  padding: 0 10px;
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  border-radius: 9999px;
+  transition: color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pill-cart:hover {
+  color: var(--active-dot);
+  transform: translateY(-1px);
+}
+
+.pill-cart__badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: var(--active-dot);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+.pill-cart__badge--pop {
+  animation: pill-cart-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pill-cart-pop {
+  0% { transform: scale(0.3); }
+  60% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
 /* ── Extras (lang / auth) ── */
 .pill-extras {
   display: flex;

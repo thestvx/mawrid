@@ -79,6 +79,7 @@
 }
 .cart-page__price-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .cart-page__price { font-weight: 800; color: #b6752f; font-size: 14px; }
+.cart-page__oldprice { font-size: 12px; color: #b8a582; text-decoration: line-through; font-weight: 600; }
 
 .cart-page__qty { display: inline-flex; align-items: center; gap: 0; border: 1px solid #e6d8bd; border-radius: 10px; overflow: hidden; }
 .cart-page__qty-btn {
@@ -118,6 +119,15 @@
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .cart-page__cta:hover { transform: translateY(-2px); box-shadow: 0 18px 38px rgba(199, 138, 72, 0.5); }
+.cart-page__cta--ghost {
+  width: auto;
+  margin: 0 auto;
+  background: #fff;
+  color: #8a6a44;
+  border: 1px solid #e6d8bd;
+  box-shadow: none;
+}
+.cart-page__cta--ghost:hover { background: #fbf4e6; box-shadow: none; }
 .cart-page__pay-note { text-align: center; font-size: 11px; color: #a9976f; margin-top: 12px; }
 
 .cart-page__empty { text-align: center; padding: 70px 18px; }

@@ -50,6 +50,8 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
   const initialRole = searchParams.get('role') === 'seller' ? 'seller' : 'buyer';
+  const rawNext = searchParams.get('next');
+  const nextPath = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : null;
 
   const [mode, setMode] = useState(initialMode);
   const [role, setRole] = useState(initialRole);
@@ -65,11 +67,12 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) {
-      if (userRole === 'seller') navigate('/dashboard/seller', { replace: true });
+      if (nextPath) navigate(nextPath, { replace: true });
+      else if (userRole === 'seller') navigate('/dashboard/seller', { replace: true });
       else if (userRole === 'buyer') navigate('/dashboard/buyer', { replace: true });
       else if (userRole === 'admin') navigate('/owner', { replace: true });
     }
-  }, [user, userRole, navigate]);
+  }, [user, userRole, navigate, nextPath]);
 
   const switchMode = (newMode) => {
     setError('');
@@ -100,8 +103,6 @@ export default function Auth() {
           return;
         }
         await signup({ email, password, name, role, phone, storeName });
-        if (role === 'seller') navigate('/dashboard/seller', { replace: true });
-        else navigate('/dashboard/buyer', { replace: true });
       }
     } catch (err) {
       const code = err.code;

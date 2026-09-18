@@ -1,0 +1,99 @@
+.plan-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(200, 165, 150, 0.35);
+  box-shadow: 0 12px 32px rgba(74, 47, 29, 0.10);
+  animation: plan-card-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes plan-card-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.plan-card__media {
+  position: relative;
+}
+
+.plan-card__media > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.plan-card__badge {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 12px;
+  background: rgba(24, 18, 12, 0.72);
+  color: #ffe8c8;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  letter-spacing: 0.2px;
+}
+
+.plan-card__overlay {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 34px 12px 12px;
+  background: linear-gradient(to top, rgba(20, 14, 8, 0.78), rgba(20, 14, 8, 0.12) 55%, transparent);
+  transition: background 0.3s ease;
+}
+
+.plan-card__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 14px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #e2a86a, #c78a48);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 10px 24px rgba(185, 128, 46, 0.45);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.plan-card__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(185, 128, 46, 0.55);
+}
+
+.plan-card__cta:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.plan-card__cta--disabled {
+  background: rgba(120, 100, 82, 0.55);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.plan-card__cta--disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.plan-card__cta-price {
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  direction: ltr;
+}

@@ -4,6 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { findSub } from '../data/subscriptions';
 import { fetchProducts } from '../lib/supabase';
 import ProductCard from '../components/marketplace/ProductCard';
+import PlanCard from '../components/ui/PlanCard';
 import './SubscriptionPages.css';
 
 export default function SubscriptionPage() {
@@ -75,9 +76,7 @@ export default function SubscriptionPage() {
             </div>
             <div className="sub-page__plans">
               {sub.plans.map((src, i) => (
-                <div className="sub-page__plan" key={src} style={{ animationDelay: `${i * 60}ms` }}>
-                  <img src={src} alt={`${isRtl ? sub.title_ar : sub.title_en} ${i + 1}`} loading="lazy" />
-                </div>
+                <PlanCard key={src} sub={sub} src={src} index={i} products={products} />
               ))}
             </div>
           </section>
