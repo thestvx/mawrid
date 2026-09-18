@@ -246,6 +246,127 @@
   100% { transform: scale(1); }
 }
 
+/* ── Currency switcher ── */
+.pill-currency {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.pill-currency__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: calc(var(--nav-h) - 6px);
+  padding: 0 12px;
+  border: none;
+  border-radius: 9999px;
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  font-weight: 800;
+  font-size: 0.8125rem;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pill-currency__trigger:hover {
+  color: var(--active-dot);
+  transform: translateY(-1px);
+}
+
+.pill-currency__code {
+  font-weight: 800;
+}
+
+.pill-currency__menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 210px;
+  background: var(--color-surface-container-lowest, #ffffff);
+  border: 1px solid var(--color-outline-variant, #e2e2e9);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
+  padding: 6px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: pill-dropdown-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[dir="rtl"] .pill-currency__menu {
+  right: auto;
+  left: 0;
+}
+
+.pill-currency__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+  text-align: start;
+  transition: background 0.15s ease;
+}
+
+.pill-currency__item:hover {
+  background: var(--color-surface-container-low, #f3f3f7);
+}
+
+.pill-currency__item--active {
+  background: rgba(255, 98, 1, 0.08);
+}
+
+.pill-currency__symbol {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8125rem;
+  background: var(--color-secondary-container, #ececf5);
+  color: var(--color-on-secondary-container, #1a1a2e);
+}
+
+.pill-currency__item--active .pill-currency__symbol {
+  background: rgba(255, 98, 1, 0.16);
+  color: #a53c00;
+}
+
+.pill-currency__name {
+  display: flex;
+  flex-direction: column;
+  font-weight: 800;
+  font-size: 0.8125rem;
+  color: var(--color-on-surface, #14181b);
+  line-height: 1.15;
+}
+
+.pill-currency__name em {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.6875rem;
+  color: var(--color-secondary, #5f6b7a);
+}
+
+.pill-currency__check {
+  margin-left: auto;
+  color: var(--active-dot);
+  font-weight: 800;
+}
+
 /* ── Extras (lang / auth) ── */
 .pill-extras {
   display: flex;

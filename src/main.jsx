@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { CurrencyProvider } from './contexts/CurrencyContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import Lenis from 'lenis';
@@ -41,11 +42,13 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <SmoothScroll>
         <LanguageProvider>
-          <AuthProvider>
-            <CartProvider>
-              <App />
-            </CartProvider>
-          </AuthProvider>
+          <CurrencyProvider>
+            <AuthProvider>
+              <CartProvider>
+                <App />
+              </CartProvider>
+            </AuthProvider>
+          </CurrencyProvider>
         </LanguageProvider>
       </SmoothScroll>
     </BrowserRouter>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useCurrency } from '../contexts/CurrencyContext';
 import { useCart } from '../contexts/CartContext';
 import { fetchCategories, fetchProductById, fetchProducts } from '../lib/supabase';
 import './Details.css';
@@ -10,6 +11,7 @@ export default function Details() {
   const { dir } = useLanguage();
   const isRtl = dir === 'rtl';
   const { add } = useCart();
+  const { productPrices, fmtValue } = useCurrency();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
@@ -96,8 +98,9 @@ export default function Details() {
     product.images.forEach((src) => { if (src && !images.includes(src)) images.push(src); });
   }
   const gallery = images.length ? images : [''];
-  const hasSale = Number(product.sale_price) > 0 && Number(product.sale_price) < Number(product.price);
-  const shownPrice = hasSale ? product.sale_price : product.price;
+  const { price, salePrice } = productPrices(product);
+  const hasSale = salePrice > 0 && salePrice < price;
+  const shownPrice = hasSale ? salePrice : price;
 
   return (
     <div className="details" style={{ paddingTop: '100px' }}>
@@ -163,8 +166,8 @@ export default function Details() {
               )}
 
               <div className="details__price">
-                <span className="details__price-current">${Number(shownPrice).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-                {hasSale && <span className="details__price-old">${Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>}
+                <span className="details__price-current">{fmtValue(shownPrice)}</span>
+                {hasSale && <span className="details__price-old">{fmtValue(price)}</span>}
               </div>
 
               <div className="details__actions">
@@ -212,6 +215,8 @@ export default function Details() {
             <div className="details__related-grid">
               {related.map((item) => {
                 const rThumb = item.thumbnail || (Array.isArray(item.images) ? item.images[0] : '') || '';
+                const rPrices = productPrices(item);
+                const rShown = rPrices.salePrice > 0 && rPrices.salePrice < rPrices.price ? rPrices.salePrice : rPrices.price;
                 return (
                   <Link key={item.id} to={`/product/${item.id}`} className="details__related-card">
                     <div className="details__related-image">
@@ -219,7 +224,7 @@ export default function Details() {
                     </div>
                     <div className="details__related-body">
                       <h3>{isRtl ? item.name : item.name_en || item.name}</h3>
-                      <span className="details__related-price">${Number(item.sale_price > 0 && item.sale_price < item.price ? item.sale_price : item.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                      <span className="details__related-price">{fmtValue(rShown)}</span>
                     </div>
                   </Link>
                 );

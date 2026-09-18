@@ -215,6 +215,17 @@
 
 /* ── Navbar bar (floating dark strip, orange gooey nav inside) ── */
 .gooey-navbar {
+  --nav-h: 46px;
+  --logo-h: 28px;
+  --pill-pad-x: 20px;
+  --pill-gap: 4px;
+
+  --base: #14181b;
+  --pill-bg: #ffffff;
+  --pill-text: #14181b;
+  --hover-text: #ffffff;
+  --active-dot: #ff6201;
+
   position: fixed;
   top: 1em;
   left: 50%;

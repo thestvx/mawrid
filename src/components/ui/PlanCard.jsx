@@ -1,19 +1,20 @@
 import { motion } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import { useCart } from '../../contexts/CartContext';
-import { durationLabel, matchPlanProduct, planCartItem, planPrice } from '../../lib/plans';
+import { durationLabel, matchPlanProduct, planCartItem } from '../../lib/plans';
 import './PlanCard.css';
-
-const nFmt = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function PlanCard({ sub, src, index = 0, products = [] }) {
   const { dir } = useLanguage();
   const isRtl = dir === 'rtl';
   const { add } = useCart();
+  const { productPrices, fmtValue } = useCurrency();
 
   const label = durationLabel(src, isRtl);
   const product = matchPlanProduct(src, products);
-  const price = planPrice(product);
+  const { salePrice } = productPrices(product);
+  const price = salePrice > 0 ? salePrice : 0;
   const hasPrice = price > 0;
   const title = isRtl ? sub.title_ar : sub.title_en;
 
@@ -48,7 +49,7 @@ export default function PlanCard({ sub, src, index = 0, products = [] }) {
               <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
             </svg>
             <span className="plan-card__cta-label">{isRtl ? 'أضف إلى السلة' : 'Add to cart'}</span>
-            {hasPrice && <span className="plan-card__cta-price">${nFmt(price)}</span>}
+            {hasPrice && <span className="plan-card__cta-price">{fmtValue(price)}</span>}
           </button>
         </div>
       </div>

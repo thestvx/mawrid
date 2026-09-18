@@ -2,14 +2,9 @@ import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import { useCart } from '../../contexts/CartContext';
 import './ProductCard.css';
-
-function formatPrice(value) {
-  const n = Number(value);
-  if (!isFinite(n)) return '';
-  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 export default function ProductCard({ product, index = 0 }) {
   const cardRef = useRef(null);
@@ -17,14 +12,16 @@ export default function ProductCard({ product, index = 0 }) {
   const { dir } = useLanguage();
   const isRtl = dir === 'rtl';
   const { add } = useCart();
+  const { productPrices, fmtValue } = useCurrency();
 
   const title = isRtl ? product.name : product.name_en || product.name;
   const image = product.thumbnail || (Array.isArray(product.images) && product.images[0]) || '';
-  const hasSale = Number(product.sale_price) > 0 && Number(product.sale_price) < Number(product.price);
-  const shownPrice = hasSale ? product.sale_price : product.price;
+  const { price, salePrice } = productPrices(product);
+  const hasSale = salePrice > 0 && salePrice < price;
+  const shownPrice = hasSale ? salePrice : price;
   const discountPct =
-    hasSale && Number(product.price) > 0
-      ? Math.round((1 - Number(product.sale_price) / Number(product.price)) * 100)
+    hasSale && price > 0
+      ? Math.round((1 - salePrice / price) * 100)
       : 0;
 
   return (
@@ -87,9 +84,9 @@ export default function ProductCard({ product, index = 0 }) {
           )}
           <h3 className="product-card__title">{title}</h3>
           <div className="product-card__footer">
-            <span className="product-card__price">${formatPrice(shownPrice)}</span>
+            <span className="product-card__price">{fmtValue(shownPrice)}</span>
             {hasSale && (
-              <span className="product-card__old-price">${formatPrice(product.price)}</span>
+              <span className="product-card__old-price">{fmtValue(price)}</span>
             )}
           </div>
         </div>

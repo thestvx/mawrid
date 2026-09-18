@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import DashIcon from '../../components/dashboard/DashIcon';
 import './Dashboard.css';
 
@@ -105,6 +106,7 @@ export default function BuyerDashboard() {
   const tab = new URLSearchParams(window.location.search).get('tab') || 'overview';
 
   const isRtl = dir === 'rtl';
+  const { convertUsd, meta, fmt } = useCurrency();
 
   const totalSpent = RECENT_ORDERS.reduce((sum, o) => sum + o.amount, 0);
   const completedOrders = RECENT_ORDERS.filter((o) => o.status === 'completed').length;
@@ -146,7 +148,7 @@ export default function BuyerDashboard() {
         </div>
         <div className="d-stat" style={{ position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, right: 0, width: 96, height: 96, background: 'rgba(47,46,190,0.08)', borderRadius: '0 0 0 999px' }} />
-          <span className="d-stat__value"><AnimatedNumber value={totalSpent} suffix="$" /></span>
+          <span className="d-stat__value"><AnimatedNumber value={convertUsd(totalSpent)} suffix={meta.symbol} /></span>
           <span className="d-stat__label">{t('dashboard.totalRevenue')}</span>
         </div>
         <div className="d-stat" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -310,7 +312,7 @@ export default function BuyerDashboard() {
                   <td className="d-table__id">{o.id}</td>
                   <td>{o.date}</td>
                   <td>{o.product}</td>
-                  <td>${o.amount.toFixed(2)}</td>
+                  <td>{fmt(convertUsd(o.amount))}</td>
                   <td><span className={`d-badge d-badge--${o.status}`}>{t(`dashboard.order${o.status.charAt(0).toUpperCase() + o.status.slice(1)}`)}</span></td>
                 </tr>
               ))}

@@ -12,6 +12,10 @@ const EMPTY_PRODUCT = {
   description: '',
   price: '',
   sale_price: '',
+  price_eur: '',
+  sale_price_eur: '',
+  price_dzd: '',
+  sale_price_dzd: '',
   category_id: '',
   seller_name: '',
   store_name: '',
@@ -22,6 +26,12 @@ const EMPTY_PRODUCT = {
   status: 'pending',
   featured: false,
 };
+
+const PRICING_MIGRATION_SQL = `ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS price_eur numeric,
+  ADD COLUMN IF NOT EXISTS sale_price_eur numeric,
+  ADD COLUMN IF NOT EXISTS price_dzd numeric,
+  ADD COLUMN IF NOT EXISTS sale_price_dzd numeric;`;
 
 function useAnimatedNumber(target, duration = 2500, prefix = '', suffix = '') {
   const [display, setDisplay] = useState(prefix + '0' + suffix);
@@ -197,6 +207,7 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pricingColumnsReady, setPricingColumnsReady] = useState(true);
   const [dbError, setDbError] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -261,12 +272,29 @@ export default function AdminDashboard() {
     setPriceDraft(d => ({ ...d, [id]: { ...(d[id] || {}), [field]: value } }));
   };
 
+  const draftOr = (p, field, draftVal) => {
+    const raw = draftVal;
+    if (raw === undefined) return p[field] != null ? p[field] : null;
+    if (raw === '') return null;
+    const n = parseFloat(raw);
+    return isFinite(n) ? n : null;
+  };
+
   const saveQuickPrice = async (p) => {
     const d = priceDraft[p.id] || {};
     const price = d.price !== undefined && d.price !== '' ? parseFloat(d.price) : (Number(p.price) || 0);
     const hasSale = d.sale_price !== undefined;
-    const sale = hasSale && d.sale_price !== '' ? parseFloat(d.sale_price) : null;
-    const res = await supabase.from('products').update({ price, sale_price: sale }).eq('id', p.id);
+    const sale = hasSale && d.sale_price !== '' ? parseFloat(d.sale_price) : (p.sale_price != null ? p.sale_price : null);
+    const res = await supabase.from('products').update({
+      price,
+      sale_price: sale,
+      ...(pricingColumnsReady ? {
+        price_eur: draftOr(p, 'price_eur', d.price_eur),
+        sale_price_eur: draftOr(p, 'sale_price_eur', d.sale_price_eur),
+        price_dzd: draftOr(p, 'price_dzd', d.price_dzd),
+        sale_price_dzd: draftOr(p, 'sale_price_dzd', d.sale_price_dzd),
+      } : {}),
+    }).eq('id', p.id);
     if (res.error) { notify(dir === 'rtl' ? 'فشل حفظ السعر' : 'Failed to save price'); return; }
     const next = { ...priceDraft };
     delete next[p.id];
@@ -350,6 +378,27 @@ export default function AdminDashboard() {
     loadAll();
   }, [loadAll]);
 
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    supabase
+      .from('products')
+      .select('price_eur')
+      .limit(1)
+      .then((res) => {
+        if (res.error && /price_eur/.test(res.error.message || '')) setPricingColumnsReady(false);
+      })
+      .catch(() => {});
+  }, []);
+
+  const copyMigrationSql = async () => {
+    try {
+      await navigator.clipboard.writeText(PRICING_MIGRATION_SQL);
+      notify(dir === 'rtl' ? 'تم نسخ كود SQL — ألصقه في محرر SQL في Supabase' : 'SQL copied — paste it into the Supabase SQL editor');
+    } catch {
+      notify(dir === 'rtl' ? 'تعذّر النسخ' : 'Copy failed');
+    }
+  };
+
   const catName = useCallback((id) => {
     const c = categories.find(x => x.id === id);
     if (!c) return '';
@@ -370,6 +419,10 @@ export default function AdminDashboard() {
       description: p.description || '',
       price: p.price != null ? String(p.price) : '',
       sale_price: p.sale_price != null ? String(p.sale_price) : '',
+      price_eur: p.price_eur != null ? String(p.price_eur) : '',
+      sale_price_eur: p.sale_price_eur != null ? String(p.sale_price_eur) : '',
+      price_dzd: p.price_dzd != null ? String(p.price_dzd) : '',
+      sale_price_dzd: p.sale_price_dzd != null ? String(p.sale_price_dzd) : '',
       category_id: p.category_id || '',
       seller_name: p.seller_name || '',
       store_name: p.store_name || '',
@@ -384,6 +437,12 @@ export default function AdminDashboard() {
   };
 
   const setField = (key, value) => setForm(f => ({ ...f, [key]: value }));
+
+  const savePriceNumber = (v) => {
+    if (v === '' || v == null) return null;
+    const n = parseFloat(v);
+    return isFinite(n) ? n : null;
+  };
 
   const saveProduct = async (e) => {
     e.preventDefault();
@@ -404,6 +463,12 @@ export default function AdminDashboard() {
       stock: parseInt(form.stock, 10) || 0,
       status: form.status,
       featured: form.featured,
+      ...(pricingColumnsReady ? {
+        price_eur: savePriceNumber(form.price_eur),
+        sale_price_eur: savePriceNumber(form.sale_price_eur),
+        price_dzd: savePriceNumber(form.price_dzd),
+        sale_price_dzd: savePriceNumber(form.sale_price_dzd),
+      } : {}),
     };
     let res;
     if (editing) {
@@ -963,6 +1028,8 @@ export default function AdminDashboard() {
                                   <th>{dir === 'rtl' ? 'المنتج' : 'Product'}</th>
                                   <th>{dir === 'rtl' ? 'السعر ($)' : 'Price ($)'}</th>
                                   <th>{dir === 'rtl' ? 'الخصم ($)' : 'Sale ($)'}</th>
+                                  <th>{dir === 'rtl' ? 'السعر (€)' : 'Price (€)'}</th>
+                                  <th>{dir === 'rtl' ? 'السعر (دج)' : 'Price (دج)'}</th>
                                   <th>{dir === 'rtl' ? 'المبيعات' : 'Sales'}</th>
                                   <th>{dir === 'rtl' ? 'الحالة' : 'Status'}</th>
                                   <th>{dir === 'rtl' ? 'إجراءات' : 'Actions'}</th>
@@ -998,6 +1065,30 @@ export default function AdminDashboard() {
                                         className="d-form__input d-price-input"
                                         value={priceDraft[p.id]?.sale_price ?? (p.sale_price ?? '')}
                                         onChange={e => setDraftPrice(p.id, 'sale_price', e.target.value)}
+                                      />
+                                    </td>
+                                    <td>
+                                      <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        className="d-form__input d-price-input"
+                                        value={priceDraft[p.id]?.price_eur ?? (p.price_eur ?? '')}
+                                        onChange={e => setDraftPrice(p.id, 'price_eur', e.target.value)}
+                                        disabled={!pricingColumnsReady}
+                                        title={dir === 'rtl' ? 'السعر باليورو — فارغ = تحويل تلقائي' : 'Price in EUR — empty = auto'}
+                                      />
+                                    </td>
+                                    <td>
+                                      <input
+                                        type="number"
+                                        step="any"
+                                        min="0"
+                                        className="d-form__input d-price-input"
+                                        value={priceDraft[p.id]?.price_dzd ?? (p.price_dzd ?? '')}
+                                        onChange={e => setDraftPrice(p.id, 'price_dzd', e.target.value)}
+                                        disabled={!pricingColumnsReady}
+                                        title={dir === 'rtl' ? 'السعر بالدينار — فارغ = تحويل تلقائي' : 'Price in DZD — empty = auto'}
                                       />
                                     </td>
                                     <td>{p.sales || 0}</td>
@@ -1257,6 +1348,20 @@ export default function AdminDashboard() {
         .d-quick-card__icon { display: inline-flex; }
       `}</style>
       <div className="d-content">
+        {!loading && !dbError && !pricingColumnsReady && (
+          <div className="d-card d-card--notice">
+            <h3 className="d-card__title">{dir === 'rtl' ? 'أعمدة أسعار العملات غير مضبوطة بعد' : 'Currency price columns not set up yet'}</h3>
+            <p style={{ color: 'var(--color-secondary)', fontSize: '0.875rem', margin: '0 0 12px' }}>
+              {dir === 'rtl'
+                ? 'حقول اليورو والدينار ستتحول تلقائياً من السعر بالدولار لغاية ما تضيف الأعمدة. شغّل كود SQL التالي مرة واحدة في محرر SQL في Supabase لتفعيل أسعار مخصصة لكل عملة:'
+                : 'EUR & DZD prices auto-convert from the USD price until you add the columns. Run this SQL once in the Supabase SQL editor to enable per-currency prices:'}
+            </p>
+            <pre className="d-migrate-sql" style={{ background: '#0f172a', color: '#cbd5e1', borderRadius: 12, padding: 14, fontSize: '0.8125rem', overflowX: 'auto', margin: '0 0 12px' }}>{PRICING_MIGRATION_SQL}</pre>
+            <button className="d-actions__btn d-actions__btn--approve" onClick={copyMigrationSql}>
+              {dir === 'rtl' ? 'نسخ كود SQL' : 'Copy SQL'}
+            </button>
+          </div>
+        )}
         {!loading && !dbError && renderTopbar()}
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
@@ -1303,6 +1408,28 @@ export default function AdminDashboard() {
                 <div className="d-form__group">
                   <label>{dir === 'rtl' ? 'سعر الخصم ($) (اختياري)' : 'Sale Price ($) (optional)'}</label>
                   <input value={form.sale_price} onChange={e => setField('sale_price', e.target.value)} type="number" step="0.01" min="0" className="d-form__input" />
+                </div>
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'السعر باليورو (€) (اختياري)' : 'Price in EUR (€) (optional)'}</label>
+                  <input value={form.price_eur} onChange={e => setField('price_eur', e.target.value)} type="number" step="0.01" min="0" className="d-form__input" disabled={!pricingColumnsReady} placeholder={dir === 'rtl' ? 'فارغ = تحويل تلقائي' : 'empty = auto converted'} />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'سعر الخصم باليورو (€)' : 'Sale Price in EUR (€)'}</label>
+                  <input value={form.sale_price_eur} onChange={e => setField('sale_price_eur', e.target.value)} type="number" step="0.01" min="0" className="d-form__input" disabled={!pricingColumnsReady} placeholder={dir === 'rtl' ? 'فارغ = تلقائي' : 'empty = auto'} />
+                </div>
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'السعر بالدينار (دج) (اختياري)' : 'Price in DZD (دج) (optional)'}</label>
+                  <input value={form.price_dzd} onChange={e => setField('price_dzd', e.target.value)} type="number" step="any" min="0" className="d-form__input" disabled={!pricingColumnsReady} placeholder={dir === 'rtl' ? 'فارغ = تحويل تلقائي' : 'empty = auto converted'} />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'سعر الخصم بالدينار (دج)' : 'Sale Price in DZD (دج)'}</label>
+                  <input value={form.sale_price_dzd} onChange={e => setField('sale_price_dzd', e.target.value)} type="number" step="any" min="0" className="d-form__input" disabled={!pricingColumnsReady} placeholder={dir === 'rtl' ? 'فارغ = تلقائي' : 'empty = auto'} />
                 </div>
               </div>
 

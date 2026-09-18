@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
+import { CURRENCIES } from '../../lib/currency';
 import GooeyNav from './GooeyNav';
 import './GooeyNav.css';
 import './PillNav.css';
@@ -27,15 +29,18 @@ const NAV_ITEMS = [
 
 export default function GooeyNavBar() {
   const { t, lang, toggleLanguage } = useLanguage();
+  const { currency, setCurrency } = useCurrency();
   const { user, isAuthenticated, role, logout } = useAuth();
   const { count } = useCart();
   const location = useLocation();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
   const hamburgerRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const currencyMenuRef = useRef(null);
 
   const items = NAV_ITEMS.map((item) => ({
     label: t(item.key),
@@ -45,12 +50,16 @@ export default function GooeyNavBar() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setUserMenuOpen(false);
+    setCurrencyMenuOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setUserMenuOpen(false);
+      }
+      if (currencyMenuRef.current && !currencyMenuRef.current.contains(e.target)) {
+        setCurrencyMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -127,6 +136,40 @@ export default function GooeyNavBar() {
     </Link>
   );
 
+  const currencySwitcher = (
+    <div className="pill-currency" ref={currencyMenuRef}>
+      <button
+        className="pill-currency__trigger"
+        onClick={() => setCurrencyMenuOpen((v) => !v)}
+        aria-label={lang === 'ar' ? 'تغيير العملة' : 'Change currency'}
+        aria-expanded={currencyMenuOpen}
+      >
+        <span className="pill-currency__code">{currency}</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+      {currencyMenuOpen && (
+        <div className="pill-currency__menu">
+          {CURRENCIES.map((c) => (
+            <button
+              key={c.code}
+              className={`pill-currency__item ${c.code === currency ? 'pill-currency__item--active' : ''}`}
+              onClick={() => { setCurrency(c.code); setCurrencyMenuOpen(false); }}
+            >
+              <span className="pill-currency__symbol">{c.symbol}</span>
+              <span className="pill-currency__name">
+                {c.code}
+                <em>{lang === 'ar' ? c.name_ar : c.name_en}</em>
+              </span>
+              {c.code === currency && <span className="pill-currency__check">✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   const renderDesktopAuth = () => {
     if (isAuthenticated) {
       return (
@@ -188,6 +231,7 @@ export default function GooeyNavBar() {
           <GooeyNav items={items} />
           <div className="pill-extras">
             {cartPill}
+            {currencySwitcher}
             <button className="pill-lang" onClick={toggleLanguage} aria-label={t('nav.langSwitch')}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
@@ -206,6 +250,7 @@ export default function GooeyNavBar() {
 
         <div className="pill-mobile-actions mobile-only">
           {cartPill}
+          {currencySwitcher}
           <button className="pill-lang" onClick={toggleLanguage} aria-label={t('nav.langSwitch')}>
             {lang === 'ar' ? 'EN' : 'AR'}
           </button>

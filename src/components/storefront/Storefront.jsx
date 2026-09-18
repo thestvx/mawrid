@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import { fetchCategories, fetchProducts } from '../../lib/supabase';
 import AnimatedContent from '../ui/AnimatedContent';
 import './Storefront.css';
 
 export default function Storefront() {
   const { dir } = useLanguage();
+  const { productPrices, fmtValue } = useCurrency();
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -190,7 +192,8 @@ export default function Storefront() {
               visible.map((product, i) => {
                 const title = isRtl ? product.name : product.name_en || product.name;
                 const image = product.thumbnail || (Array.isArray(product.images) ? product.images[0] : '') || '';
-                const price = Number(product.sale_price > 0 && product.sale_price < product.price ? product.sale_price : product.price || 0);
+                const { price, salePrice } = productPrices(product);
+                const shown = salePrice > 0 && salePrice < price ? salePrice : price;
                 return (
                   <AnimatedContent key={product.id} distance={50} delay={0.1 * (i + 1)}>
                     <div className="storefront__product-card interactive-glow">
@@ -215,7 +218,7 @@ export default function Storefront() {
                             {(isRtl ? product.name : product.name_en || product.name)}
                           </p>
                           <div className="storefront__product-footer">
-                            <span className="storefront__product-price">${price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            <span className="storefront__product-price">{fmtValue(shown)}</span>
                             <span className="storefront__cart-btn">
                               <span className="material-symbols-outlined">add_shopping_cart</span>
                             </span>

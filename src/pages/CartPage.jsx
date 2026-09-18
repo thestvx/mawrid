@@ -2,11 +2,10 @@
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useCurrency } from '../contexts/CurrencyContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import './CartPage.css';
-
-const nFmt = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const staggerContainer = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 const staggerItem = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } } };
@@ -30,6 +29,7 @@ function optionValues(options) {
 export default function CartPage() {
   const { dir } = useLanguage();
   const isRtl = dir === 'rtl';
+  const { fmt } = useCurrency();
   const { items, updateQty, remove, clear, count, subtotal, tax, total, originalTotal } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -139,8 +139,8 @@ export default function CartPage() {
                         )}
 
                         <div className="cart-page__price-row">
-                          <span className="cart-page__price">${nFmt(item.price)}</span>
-                          {hasOldPrice && <span className="cart-page__oldprice">${nFmt(item.originalPrice)}</span>}
+                          <span className="cart-page__price">{fmt(item.price)}</span>
+                          {hasOldPrice && <span className="cart-page__oldprice">{fmt(item.originalPrice)}</span>}
                           <div className="cart-page__qty">
                             <button
                               className="cart-page__qty-btn"
@@ -170,7 +170,7 @@ export default function CartPage() {
                             <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
                           </svg>
                         </button>
-                        <span className="cart-page__line-total">${nFmt(Number(item.price) * Number(item.qty))}</span>
+                        <span className="cart-page__line-total">{fmt(Number(item.price) * Number(item.qty))}</span>
                       </div>
                     </motion.div>
                   );
@@ -185,13 +185,13 @@ export default function CartPage() {
               transition={{ duration: 0.55, delay: 0.12 }}
             >
               <h3 className="cart-page__summary-title">{isRtl ? 'ملخص الطلب' : 'Order Summary'}</h3>
-              <div className="cart-page__row"><span>{isRtl ? 'المجموع الفرعي' : 'Subtotal'}</span><span>${nFmt(subtotal)}</span></div>
-              <div className="cart-page__row"><span>{isRtl ? 'الضريبة (VAT 15%)' : 'Tax (VAT 15%)'}</span><span>${nFmt(tax)}</span></div>
+              <div className="cart-page__row"><span>{isRtl ? 'المجموع الفرعي' : 'Subtotal'}</span><span>{fmt(subtotal)}</span></div>
+              <div className="cart-page__row"><span>{isRtl ? 'الضريبة (VAT 15%)' : 'Tax (VAT 15%)'}</span><span>{fmt(tax)}</span></div>
               <div className="cart-page__row"><span>{isRtl ? 'الشحن' : 'Shipping'}</span><span>{isRtl ? 'مجاني' : 'Free'}</span></div>
               {savings > 0 && (
-                <div className="cart-page__row cart-page__saved"><span>{isRtl ? 'وفّرت' : 'You saved'}</span><span>${nFmt(savings)}</span></div>
+                <div className="cart-page__row cart-page__saved"><span>{isRtl ? 'وفّرت' : 'You saved'}</span><span>{fmt(savings)}</span></div>
               )}
-              <div className="cart-page__row cart-page__row--lg"><span>{isRtl ? 'الإجمالي' : 'Total'}</span><span className="cart-page__row--total">${nFmt(total)}</span></div>
+              <div className="cart-page__row cart-page__row--lg"><span>{isRtl ? 'الإجمالي' : 'Total'}</span><span className="cart-page__row--total">{fmt(total)}</span></div>
               <button className="cart-page__cta" onClick={handleCheckout}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
