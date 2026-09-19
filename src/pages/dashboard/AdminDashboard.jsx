@@ -4,7 +4,9 @@ import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import DashIcon from '../../components/dashboard/DashIcon';
+import { ImageField, MediaAddButton } from '../../components/dashboard/MediaUploader';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { mediaTypeFromUrl, cloudinaryThumb } from '../../lib/cloudinary';
 import { subscriptionGroups } from '../../data/subscriptions';
 import { SELLER_SPECIALTIES } from '../../data/sellers';
 import { matchPlanProduct } from '../../lib/plans';
@@ -771,7 +773,12 @@ export default function AdminDashboard() {
       hours_zone: supplierForm.hours_zone,
       availability: supplierForm.availability,
       rating: supplierForm.rating === '' ? 0 : (parseFloat(supplierForm.rating) || 0),
-      works: parseUrlList(supplierForm.works).map((src, i) => ({ id: `w${i}`, type: 'image', src, title_ar: '', title_en: '' })),
+      works: parseUrlList(supplierForm.works).map((src, i) => {
+        const type = mediaTypeFromUrl(src);
+        const item = { id: `w${i}`, type, src, title_ar: '', title_en: '' };
+        if (type === 'video') item.poster = cloudinaryThumb(src);
+        return item;
+      }),
       models: parseUrlList(supplierForm.models).map((src, i) => ({ id: `m${i}`, image: src, name_ar: '', name_en: '', colors: [] })),
     };
     let res;
@@ -2004,12 +2011,12 @@ export default function AdminDashboard() {
 
               <div className="d-form__row">
                 <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'رابط صورة الحساب' : 'Avatar URL'}</label>
-                  <input value={supplierForm.avatar_url} onChange={e => setSupplierField('avatar_url', e.target.value)} className="d-form__input" placeholder="https://..." />
+                  <label>{dir === 'rtl' ? 'صورة الحساب (أفاتار)' : 'Profile photo (avatar)'}</label>
+                  <ImageField value={supplierForm.avatar_url} onChange={(v) => setSupplierField('avatar_url', v)} />
                 </div>
                 <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'رابط صورة الغلاف' : 'Cover URL'}</label>
-                  <input value={supplierForm.cover} onChange={e => setSupplierField('cover', e.target.value)} className="d-form__input" placeholder="https://..." />
+                  <label>{dir === 'rtl' ? 'صورة الغلاف' : 'Cover image'}</label>
+                  <ImageField value={supplierForm.cover} onChange={(v) => setSupplierField('cover', v)} />
                 </div>
               </div>
 
@@ -2029,12 +2036,19 @@ export default function AdminDashboard() {
               </div>
 
               <div className="d-form__group">
-                <label>{dir === 'rtl' ? 'روابط الأعمال / الصور (سطر لكل رابط)' : 'Works / image URLs (one per line)'}</label>
+                <label>{dir === 'rtl' ? 'روابط الأعمال (سطر لكل رابط)' : 'Works URLs (one per line)'}</label>
+                <MediaAddButton
+                  onAdd={(url) => setSupplierField('works', (v) => (v ? v + '\n' : v || '') + url)}
+                />
                 <textarea value={supplierForm.works} onChange={e => setSupplierField('works', e.target.value)} className="d-form__input d-form__textarea" rows={3} placeholder="https://..." />
               </div>
 
               <div className="d-form__group">
-                <label>{dir === 'rtl' ? 'روابط الموديلات (سطر لكل رابط)' : 'Model image URLs (one per line)'}</label>
+                <label>{dir === 'rtl' ? 'روابط الموديلات (سطر لكل رابط)' : 'Model URLs (one per line)'}</label>
+                <MediaAddButton
+                  accept="image/*"
+                  onAdd={(url) => setSupplierField('models', (v) => (v ? v + '\n' : v || '') + url)}
+                />
                 <textarea value={supplierForm.models} onChange={e => setSupplierField('models', e.target.value)} className="d-form__input d-form__textarea" rows={3} placeholder="https://..." />
               </div>
 

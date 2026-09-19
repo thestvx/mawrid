@@ -222,94 +222,79 @@ export default function SellerStorefront() {
 
   return (
     <main className="store-page">
-      <section className="store-hero">
-        <div className="store-hero__bg" style={coverStyle}>
-          <img className="store-hero__mark" src={SPECIALTY_ICON[profile.specialtyKey]} alt="" />
-        </div>
-        <div className="store-hero__veil" />
-
-        <div className="container store-hero__inner">
-          <motion.nav
-            className="store-crumbs"
-            aria-label="breadcrumb"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: EASE }}
-          >
-            <Link to="/">{isRtl ? 'الرئيسية' : 'Home'}</Link>
-            <Chevron isRtl={isRtl} />
-            <Link to="/sellers">{isRtl ? 'سوق المورّدين' : 'Sellers'}</Link>
-            <Chevron isRtl={isRtl} />
-            <Link to={`/sellers/${profile.specialtyKey}`}>{specialtyLabel}</Link>
-            <Chevron isRtl={isRtl} />
-            <span className="is-current">{name}</span>
-          </motion.nav>
-
-          <motion.div
-            className="store-hero__id"
-            variants={stagger}
-            initial="hidden"
-            animate="show"
-          >
-            <motion.span
-              className="store-hero__avatar"
-              style={profile.avatar_url ? undefined : { background: profile.avatarGradient }}
-              variants={rise}
-            >
-              {profile.avatar_url ? <img src={profile.avatar_url} alt={name} /> : initials(name)}
-              {profile.verified && <Verified size={24} />}
-            </motion.span>
-
-            <motion.div className="store-hero__text" variants={rise}>
-              <h1 className="store-hero__name">
-                {name}
-                {profile.verified && <Verified size={17} />}
-              </h1>
-              <p className="store-hero__role">{role}</p>
-              <div className="store-hero__chips">
-                <Stars rating={profile.stats.rating} />
-                <span className={`store-chip store-chip--${profile.availability}`}>{isRtl ? av.ar : av.en}</span>
-                <span className="store-chip">
-                  <ClockIcon size={13} />
-                  {hoursLabel}
-                </span>
-                <span className="store-chip">
-                  <PinIcon size={13} />
-                  {specialtyLabel}
-                </span>
-              </div>
-            </motion.div>
-
-            <motion.div className="store-hero__actions" variants={rise}>
-              <button className="store-btn store-btn--primary" onClick={openPrimary}>
-                {isRtl ? (isBrand ? 'اطلب موديل ولون' : 'اطلب خدمة') : (isBrand ? 'Request a model' : 'Hire now')}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isRtl ? 'scaleX(-1)' : undefined }}>
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </button>
-              <button className="store-btn store-btn--ghost" onClick={share}>
-                {copied ? (isRtl ? 'تم النسخ' : 'Copied') : (isRtl ? 'مشاركة' : 'Share')}
-              </button>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      <div className="container">
-        <motion.div
-          className="store-stats"
-          variants={stagger}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
+      <div className="container store-shell">
+        <motion.nav
+          className="store-crumbs"
+          aria-label="breadcrumb"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: EASE }}
         >
+          <Link to="/">{isRtl ? 'الرئيسية' : 'Home'}</Link>
+          <Chevron isRtl={isRtl} />
+          <Link to="/sellers">{isRtl ? 'سوق المورّدين' : 'Sellers'}</Link>
+          <Chevron isRtl={isRtl} />
+          <Link to={`/sellers/${profile.specialtyKey}`}>{specialtyLabel}</Link>
+          <Chevron isRtl={isRtl} />
+          <span className="is-current">{name}</span>
+        </motion.nav>
+
+        <motion.section
+          className="store-banner"
+          style={coverStyle}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: EASE }}
+        >
+          <img className="store-banner__mark" src={SPECIALTY_ICON[profile.specialtyKey]} alt="" />
+        </motion.section>
+
+        <header className="store-head">
+          <div className="store-head__left">
+            <span className="store-avatar" style={profile.avatar_url ? undefined : { background: profile.avatarGradient }}>
+              {profile.avatar_url ? <img src={profile.avatar_url} alt={name} /> : initials(name)}
+              {profile.verified && <Verified size={22} />}
+            </span>
+            <div className="store-head__info">
+              <div className="store-head__title">
+                <h1 className="store-name">{name}</h1>
+                {profile.verified && <Verified size={16} />}
+              </div>
+              <p className="store-role">{role}</p>
+              <div className="store-meta">
+                <span className="store-meta__item">
+                  <Stars rating={profile.stats.rating} />
+                </span>
+                <span className="store-meta__dot" aria-hidden="true" />
+                <span className="store-meta__item"><ClockIcon size={14} /> {hoursLabel}</span>
+                <span className="store-meta__dot" aria-hidden="true" />
+                <span className="store-meta__item"><PinIcon size={14} /> {specialtyLabel}</span>
+                <span className="store-meta__dot" aria-hidden="true" />
+                <span className="store-meta__item"><BoltIcon size={14} /> {isRtl ? av.ar : av.en}</span>
+              </div>
+            </div>
+          </div>
+          <div className="store-head__actions">
+            <button className="store-btn store-btn--dark" onClick={openPrimary}>
+              {isRtl ? (isBrand ? 'اطلب موديل' : 'اطلب خدمة') : (isBrand ? 'Request a model' : 'Hire now')}
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isRtl ? 'scaleX(-1)' : undefined }}>
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+            <button className="store-btn store-btn--outline" onClick={share}>
+              {copied ? (isRtl ? 'تم النسخ' : 'Copied') : (isRtl ? 'مشاركة' : 'Share')}
+            </button>
+          </div>
+        </header>
+
+        <div className="store-stats">
           {stats.map((s, i) => (
-            <motion.div className="store-stat" key={i} variants={rise}>
+            <div className="store-stat" key={i}>
               <b>{s.star ? <Stars rating={s.value} /> : s.value}</b>
               <span>{isRtl ? s.ar : s.en}</span>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         <div className="store-body">
           <div className="store-main">
@@ -478,7 +463,7 @@ export default function SellerStorefront() {
                     ? 'Pick the model, color and quantity — the supplier confirms within 24 hours.'
                     : 'Send your brief and get a reply within 24 hours.')}
               </p>
-              <button className="store-btn store-btn--primary store-btn--block" onClick={openPrimary}>
+              <button className="store-btn store-btn--dark store-btn--block" onClick={openPrimary}>
                 {isRtl ? 'ابدأ الطلب الآن' : 'Start your order'}
               </button>
             </div>
