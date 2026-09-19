@@ -55,7 +55,8 @@ ALTER TABLE users
   ADD COLUMN IF NOT EXISTS availability text DEFAULT 'full',
   ADD COLUMN IF NOT EXISTS rating numeric DEFAULT 0,
   ADD COLUMN IF NOT EXISTS works jsonb DEFAULT '[]'::jsonb,
-  ADD COLUMN IF NOT EXISTS models jsonb DEFAULT '[]'::jsonb;
+  ADD COLUMN IF NOT EXISTS models jsonb DEFAULT '[]'::jsonb,
+  ADD COLUMN IF NOT EXISTS verified_at timestamptz;
 
 -- 2) allow the admin dashboard (anon key) to delete rows
 DROP POLICY IF EXISTS "users_delete_app" ON public.users;
@@ -326,6 +327,7 @@ export default function AdminDashboard() {
   const [toast, setToast] = useState(null);
   const [suppliersReady, setSuppliersReady] = useState(true);
   const [websiteReady, setWebsiteReady] = useState(true);
+  const [verifiedAtReady, setVerifiedAtReady] = useState(true);
   const [showSupplierForm, setShowSupplierForm] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [supplierForm, setSupplierForm] = useState(EMPTY_SUPPLIER);
@@ -551,6 +553,7 @@ export default function AdminDashboard() {
     if (!isSupabaseConfigured) return;
     let flag = true;
     hasUserColumn('website').then((ok) => { if (flag && !ok) setWebsiteReady(false); });
+    hasUserColumn('verified_at').then((ok) => { if (flag && !ok) setVerifiedAtReady(false); });
     return () => { flag = false; };
   }, []);
 
@@ -856,7 +859,11 @@ export default function AdminDashboard() {
       notify(dir === 'rtl' ? 'شغّل كود SQL أولاً لتفعيل حالة المورّد' : 'Run the SQL first to enable supplier status');
       return;
     }
-    const res = await supabase.from('users').update({ seller_status: status }).eq('id', u.id);
+    const payload = { seller_status: status };
+    if (await hasUserColumn('verified_at')) {
+      payload.verified_at = status === 'verified' ? new Date().toISOString() : null;
+    }
+    const res = await supabase.from('users').update(payload).eq('id', u.id);
     if (res.error) { notify(dir === 'rtl' ? 'فشل التحديث' : 'Update failed'); return; }
     const msg = status === 'verified'
       ? (dir === 'rtl' ? 'تم توثيق المورّد' : 'Supplier verified')
@@ -1148,7 +1155,7 @@ export default function AdminDashboard() {
 
     return (
       <>
-        {(!suppliersReady || !websiteReady) && (
+        {(!suppliersReady || !websiteReady || !verifiedAtReady) && (
           <div className="d-card d-card--notice" style={{ marginBottom: 20 }}>
             <h3 className="d-card__title">{dir === 'rtl' ? 'حقول المورّدين غير مضبوطة بعد' : 'Supplier fields not set up yet'}</h3>
             <p style={{ color: 'var(--color-secondary)', fontSize: '0.875rem', margin: '0 0 12px' }}>
@@ -2063,7 +2070,7 @@ export default function AdminDashboard() {
               <h3>{editingSupplier ? (dir === 'rtl' ? 'تعديل بيانات المورّد' : 'Edit supplier') : (dir === 'rtl' ? 'إضافة مورّد جديد' : 'Add new supplier')}</h3>
               <button className="d-modal__close" onClick={() => setShowSupplierForm(false)}>✕</button>
             </div>
-            {(!suppliersReady || !websiteReady) && (
+            {(!suppliersReady || !websiteReady || !verifiedAtReady) && (
               <p style={{ color: 'var(--color-error)', fontSize: '0.8125rem', margin: '0 0 12px' }}>
                 {dir === 'rtl'
                   ? 'لن يُحفظ المورّد قبل تشغيل كود SQL الخاص بأعمدة المورّدين.'

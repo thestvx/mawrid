@@ -127,25 +127,33 @@ export default function SellerDashboard() {
   const [celebrate, setCelebrate] = useState(false);
 
   const uid = user?.uid;
-  const celebrationKey = uid ? 'mawrid_verified_celebrated_' + uid : '';
-  const sellerStatus = profile.seller_status || user?.seller_status;
+  const seenKey = uid ? 'mawrid_verif_seen_' + uid : '';
+  const sellerStatus = user?.seller_status || profile.seller_status;
+  const verifiedAt = user?.verified_at || profile.verified_at || '';
   const isPending = role === 'seller' && !!sellerStatus && sellerStatus !== 'verified';
 
   useEffect(() => {
-    if (!uid || role !== 'seller') return;
+    if (!uid || role !== 'seller' || profileLoading) return;
     if (sellerStatus !== 'verified') return;
-    try {
-      if (localStorage.getItem(celebrationKey)) return;
-    } catch {}
-    setCelebrate(true);
-  }, [uid, role, sellerStatus, celebrationKey]);
+    const stamp = verifiedAt || 'verified';
+    let seen = null;
+    try { seen = localStorage.getItem(seenKey); } catch {}
+    if (seen !== stamp) setCelebrate(true);
+  }, [uid, role, sellerStatus, verifiedAt, profileLoading, seenKey]);
 
   useEffect(() => {
     if (uid && role === 'seller' && refreshUser) refreshUser();
   }, [uid, role, refreshUser]);
 
+  useEffect(() => {
+    if (!uid || role !== 'seller') return;
+    const onFocus = () => { if (refreshUser) refreshUser(); };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [uid, role, refreshUser]);
+
   const dismissCelebration = () => {
-    try { localStorage.setItem(celebrationKey, '1'); } catch {}
+    try { localStorage.setItem(seenKey, verifiedAt || 'verified'); } catch {}
     setCelebrate(false);
   };
   useEffect(() => {
@@ -691,7 +699,14 @@ export default function SellerDashboard() {
               <div className="sell-line" aria-hidden="true" />
               <div className="sell-welcome">
                 <div className="sell-welcome__text">
-                  <h2 className="sell-welcome__title">{t('dashboard.welcome')}</h2>
+                  <h2 className="sell-welcome__title">
+                    {profile.name
+                      ? (dir === 'rtl' ? `أهلاً ${profile.name}` : `Welcome, ${profile.name}`)
+                      : t('dashboard.welcome')}
+                    {sellerStatus === 'verified' && (
+                      <VerifiedBadge size={22} title={dir === 'rtl' ? 'بائع موثّق' : 'Verified seller'} />
+                    )}
+                  </h2>
                   <p className="sell-welcome__sub">{dir === 'rtl' ? 'إدارة متجرك ومنتجاتك بكل سهولة' : 'Manage your store and products with ease'}</p>
                 </div>
                 <div className="sell-welcome__actions">
