@@ -3,36 +3,11 @@ import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import DashIcon from '../../components/dashboard/DashIcon';
+import ConfirmDialog from '../../components/dashboard/ConfirmDialog';
 import { ImageField } from '../../components/dashboard/MediaUploader';
-import { supabase, isSupabaseConfigured, hasSellerColumns, hasUserColumn } from '../../lib/supabase';
+import { supabase, isSupabaseConfigured, hasSellerColumns, hasUserColumn, fetchCategories } from '../../lib/supabase';
 import { SELLER_SPECIALTIES } from '../../data/sellers';
 import './Dashboard.css';
-
-const ORDERS = [
-  { id: '#ORD-0451', date: '2026-07-06', customer: 'Ali Hassan', product: 'Nitec Pro UI Kit', amount: 129, status: 'completed', color: '#ff6201', initials: 'NP' },
-  { id: '#ORD-0450', date: '2026-07-05', customer: 'Sara Khalid', product: 'Abstract 3D Pack', amount: 29, status: 'completed', color: '#10b981', initials: '3D' },
-  { id: '#ORD-0449', date: '2026-07-04', customer: 'Mohammed Noor', product: 'Dashboard Pro', amount: 49, status: 'pending', color: '#494bd6', initials: 'DT' },
-  { id: '#ORD-0448', date: '2026-07-03', customer: 'Nora Ali', product: 'Nitec Pro UI Kit', amount: 129, status: 'completed', color: '#ff6201', initials: 'NP' },
-  { id: '#ORD-0447', date: '2026-07-02', customer: 'Fahad Omar', product: 'E-Commerce Template', amount: 45, status: 'cancelled', color: '#f59e0b', initials: 'EC' },
-];
-
-const PAYOUTS = [
-  { date: '2026-07-01', amount: 3250.00, status: 'completed' },
-  { date: '2026-06-15', amount: 2890.00, status: 'completed' },
-  { date: '2026-06-01', amount: 4120.00, status: 'completed' },
-  { date: '2026-05-15', amount: 1980.00, status: 'completed' },
-];
-
-const ALERTS = [
-  { type: 'warning', titleKey: 'Low Stock Alert', descKey: '2 premium items are running low.' },
-  { type: 'message', titleKey: 'New Customer Message', descKey: 'Regarding order #ORD-8921' },
-];
-
-const SEED_PRODUCTS = [
-  { id: 1, name: 'Nitec Pro UI Kit', desc: 'Premium ready components kit for product teams', price: 129, status: 'active', color: '#ff6201', initials: 'NP', image: '' },
-  { id: 2, name: 'Dashboard Template Pro', desc: 'Complete admin dashboard with 40+ blocks', price: 49, status: 'active', color: '#494bd6', initials: 'DT', image: '' },
-  { id: 3, name: 'Abstract 3D Shape Pack', desc: '200 high-res abstract 3D renders', price: 29, status: 'active', color: '#10b981', initials: '3D', image: '' },
-];
 
 const AVAILABILITY = [
   { key: 'full', ar: 'دوام كامل', en: 'Full time' },
@@ -107,6 +82,25 @@ const avatarStyle = (color, initials, size = 40) => ({
   flexShrink: 0,
 });
 
+function mapProductRow(p) {
+  const name = p.name || p.name_en || '';
+  const image = p.thumbnail || (Array.isArray(p.images) && p.images[0]) || '';
+  return {
+    id: p.id,
+    name,
+    name_en: p.name_en || '',
+    desc: p.description || '',
+    price: Number(p.price) || 0,
+    status: p.status || 'active',
+    image,
+    category_id: p.category_id || '',
+    sales: Number(p.sales) || 0,
+    stock: p.stock != null ? Number(p.stock) : 0,
+    color: '#ff6201',
+    initials: (name || 'N').slice(0, 2).toUpperCase(),
+  };
+}
+
 export default function SellerDashboard() {
   const { t, dir } = useLanguage();
   const { user, role } = useAuth();
@@ -121,28 +115,57 @@ export default function SellerDashboard() {
   const [savedMsg, setSavedMsg] = useState('');
   const [saveErr, setSaveErr] = useState('');
   const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
+  const [prdReload, setPrdReload] = useState(0);
   const [prdFormOpen, setPrdFormOpen] = useState(false);
   const [prdForm, setPrdForm] = useState(null);
+  const [prdBusy, setPrdBusy] = useState(false);
+  const [prdErr, setPrdErr] = useState('');
+  const [confirmPrd, setConfirmPrd] = useState(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
 
   const uid = user?.uid;
-  const uidRef = useRef(uid);
   useEffect(() => {
-    uidRef.current = uid;
     if (uid) {
       try {
         const raw = localStorage.getItem('mawrid_seller_profile_' + uid);
         if (raw) setProfile((p) => ({ ...p, ...JSON.parse(raw) }));
       } catch {}
-      try {
-        const raw = localStorage.getItem('mawrid_seller_products_' + uid);
-        setProducts(raw ? JSON.parse(raw) : SEED_PRODUCTS);
-      } catch {
-        setProducts(SEED_PRODUCTS);
-      }
-    } else {
-      setProducts(SEED_PRODUCTS);
     }
   }, [uid]);
+
+  // Real products owned by this seller (products.seller_id = firebase uid)
+  useEffect(() => {
+    if (!uid || !supabase || !isSupabaseConfigured) {
+      setProducts([]);
+      setProductsLoading(false);
+      return;
+    }
+    let flag = true;
+    (async () => {
+      setProductsLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('seller_id', uid)
+        .order('created_at', { ascending: false });
+      if (!flag) return;
+      if (!error && Array.isArray(data)) setProducts(data.map(mapProductRow));
+      setProductsLoading(false);
+    })();
+    return () => { flag = false; };
+  }, [uid, prdReload]);
+
+  useEffect(() => {
+    if (!supabase || !isSupabaseConfigured) return;
+    let flag = true;
+    (async () => {
+      const { data } = await fetchCategories();
+      if (flag && Array.isArray(data)) setCategories(data);
+    })();
+    return () => { flag = false; };
+  }, []);
 
   useEffect(() => {
     if (!uid) return;
@@ -170,15 +193,6 @@ export default function SellerDashboard() {
   }, [uid]);
 
   const setField = (k, v) => setProfile((p) => ({ ...p, [k]: v }));
-
-  const persistProducts = (list) => {
-    setProducts(list);
-    if (uidRef.current) {
-      try {
-        localStorage.setItem('mawrid_seller_products_' + uidRef.current, JSON.stringify(list));
-      } catch {}
-    }
-  };
 
   const saveProfile = async (e) => {
     e.preventDefault();
@@ -228,33 +242,57 @@ export default function SellerDashboard() {
 
   const openPrdForm = (p) => {
     if (isPending) return;
-    setPrdForm(p || { id: null, name: '', desc: '', price: '', status: 'active', image: '', initials: 'NW', color: '#ff6201' });
+    setPrdErr('');
+    setPrdForm(p
+      ? { id: p.id, name: p.name || '', name_en: p.name_en || '', desc: p.desc || '', price: p.price, status: p.status || 'active', image: p.image || '', category_id: p.category_id || '' }
+      : { id: null, name: '', name_en: '', desc: '', price: '', status: 'active', image: '', category_id: '' });
     setPrdFormOpen(true);
   };
 
-  const submitPrdForm = (e) => {
+  const submitPrdForm = async (e) => {
     e.preventDefault();
+    setPrdErr('');
     if (!prdForm?.name?.trim() || prdForm.price === '' || prdForm.price == null) return;
-    const entry = {
-      ...prdForm,
-      id: prdForm.id || Date.now(),
+    if (!supabase || !isSupabaseConfigured || !uid) {
+      setPrdErr(dir === 'rtl' ? 'تعذّر الاتصال بقاعدة البيانات' : 'Database connection unavailable');
+      return;
+    }
+    setPrdBusy(true);
+    const payload = {
       name: prdForm.name.trim(),
-      desc: (prdForm.desc || '').trim(),
+      name_en: (prdForm.name_en || prdForm.name).trim(),
+      description: (prdForm.desc || '').trim(),
       price: Math.max(0, Number(prdForm.price) || 0),
-      initials: (prdForm.name || '').slice(0, 2).toUpperCase(),
+      thumbnail: prdForm.image || '',
+      images: prdForm.image ? [prdForm.image] : [],
+      status: prdForm.status || 'active',
+      category_id: prdForm.category_id || null,
+      seller_id: uid,
+      seller_name: (profile.name || '').trim(),
+      store_name: (profile.store_name || '').trim(),
+      stock: Number(prdForm.stock) || 999,
     };
-    if (prdForm.id) {
-      persistProducts(products.map((p) => (p.id === prdForm.id ? entry : p)));
-    } else {
-      persistProducts([entry, ...products]);
+    const res = prdForm.id
+      ? await supabase.from('products').update(payload).eq('id', prdForm.id)
+      : await supabase.from('products').insert(payload);
+    setPrdBusy(false);
+    if (res.error) {
+      setPrdErr(res.error.message);
+      return;
     }
     setPrdFormOpen(false);
+    setPrdReload((k) => k + 1);
   };
 
-  const removePrd = (id) => {
+  const removePrd = async (id) => {
     if (isPending) return;
-    const ok = window.confirm(dir === 'rtl' ? 'حذف هذا المنتج نهائياً؟' : 'Delete this product permanently?');
-    if (ok) persistProducts(products.filter((p) => p.id !== id));
+    if (!supabase || !isSupabaseConfigured) return;
+    setConfirmBusy(true);
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    setConfirmBusy(false);
+    setConfirmPrd(null);
+    if (error) return;
+    setPrdReload((k) => k + 1);
   };
 
   const productStatusLabel = (s) => {
@@ -275,15 +313,18 @@ export default function SellerDashboard() {
 
   const initials = (profile.name || profile.store_name || 'M').slice(0, 2).toUpperCase();
 
+  const revenueTotal = products.reduce((s, p) => s + Number(p.price) * (Number(p.sales) || 0), 0);
+  const salesTotal = products.reduce((s, p) => s + (Number(p.sales) || 0), 0);
+  const ratingValue = Number(profile.rating) || 0;
+
   const handleTab = (t) => {
     setSearchParams({ tab: t });
   };
 
   const renderProducts = () => {
     const activeCount = products.filter((p) => p.status === 'active').length;
-    const estRevenue = products
-      .filter((p) => p.status === 'active')
-      .reduce((sum, p) => sum + Number(p.price) * 40, 0);
+    const revenue = products.reduce((sum, p) => sum + Number(p.price) * (Number(p.sales) || 0), 0);
+    const totalSales = products.reduce((sum, p) => sum + (Number(p.sales) || 0), 0);
 
     return (
       <div className="prod-wrap">
@@ -297,8 +338,8 @@ export default function SellerDashboard() {
             <span>{dir === 'rtl' ? 'منشور الآن' : 'Currently live'}</span>
           </div>
           <div className="prod-stat">
-            <b>${estRevenue.toLocaleString('en-US')}</b>
-            <span>{dir === 'rtl' ? 'متوسط إيراد متوقع/شهر' : 'Est. monthly revenue'}</span>
+            <b>${revenue.toLocaleString('en-US')}</b>
+            <span>{dir === 'rtl' ? `الإيراد (${totalSales} مبيعة)` : `Revenue (${totalSales} sales)`}</span>
           </div>
         </div>
 
@@ -310,7 +351,9 @@ export default function SellerDashboard() {
             </button>
           </div>
 
-          {products.length === 0 ? (
+          {productsLoading ? (
+            <p className="prod-empty">{dir === 'rtl' ? 'جارٍ تحميل منتجاتك…' : 'Loading your products…'}</p>
+          ) : products.length === 0 ? (
             <p className="prod-empty">
               {dir === 'rtl'
                 ? 'ما زال متجرك بلا منتجات. أضف أول منتج وابدأ العرض على "مَورد".'
@@ -334,7 +377,7 @@ export default function SellerDashboard() {
                       <button onClick={() => openPrdForm(p)} disabled={isPending}>
                         {dir === 'rtl' ? 'تعديل' : 'Edit'}
                       </button>
-                      <button className="danger" onClick={() => removePrd(p.id)} disabled={isPending}>
+                      <button className="danger" onClick={() => setConfirmPrd(p)} disabled={isPending}>
                         {dir === 'rtl' ? 'حذف' : 'Delete'}
                       </button>
                     </div>
@@ -404,12 +447,30 @@ export default function SellerDashboard() {
                     </select>
                   </div>
                 </div>
+                <div className="d-form__group" style={{ marginBottom: 16 }}>
+                  <label>{dir === 'rtl' ? 'التصنيف' : 'Category'}</label>
+                  <select
+                    className="d-form__input"
+                    value={prdForm.category_id}
+                    onChange={(e) => setPrdForm((f) => ({ ...f, category_id: e.target.value }))}
+                  >
+                    <option value="">{dir === 'rtl' ? 'بدون تصنيف' : 'No category'}</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name || c.name_en || c.slug}</option>
+                    ))}
+                  </select>
+                </div>
+                {prdErr && (
+                  <p style={{ margin: '0 0 12px', fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-error)' }}>{prdErr}</p>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, borderTop: '1px solid var(--color-outline-variant)', paddingTop: 16 }}>
-                  <button type="button" className="d-actions__btn" onClick={() => setPrdFormOpen(false)}>
+                  <button type="button" className="d-actions__btn" onClick={() => setPrdFormOpen(false)} disabled={prdBusy}>
                     {dir === 'rtl' ? 'إلغاء' : 'Cancel'}
                   </button>
-                  <button type="submit" className="btn btn--primary">
-                    {prdForm.id ? (dir === 'rtl' ? 'حفظ التعديلات' : 'Save changes') : (dir === 'rtl' ? 'إضافة المنتج' : 'Add product')}
+                  <button type="submit" className="btn btn--primary" disabled={prdBusy}>
+                    {prdBusy
+                      ? (dir === 'rtl' ? 'جارٍ الحفظ…' : 'Saving…')
+                      : prdForm.id ? (dir === 'rtl' ? 'حفظ التعديلات' : 'Save changes') : (dir === 'rtl' ? 'إضافة المنتج' : 'Add product')}
                   </button>
                 </div>
               </form>
@@ -561,37 +622,11 @@ export default function SellerDashboard() {
         return (
           <div className="d-card" style={{ borderRadius: 20 }}>
             <h3 className="d-card__title">{t('dashboard.orders')}</h3>
-            <div className="d-table-wrap">
-              <table className="d-table">
-                <thead>
-                  <tr>
-                    <th>{t('dashboard.orderId')}</th>
-                    <th>{t('dashboard.orderDate')}</th>
-                    <th>{t('dashboard.orderCustomer')}</th>
-                    <th>{t('dashboard.productName')}</th>
-                    <th>{t('dashboard.orderAmount')}</th>
-                    <th>{t('dashboard.orderStatus')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ORDERS.map((o) => (
-                    <tr key={o.id}>
-                      <td className="d-table__id">{o.id}</td>
-                      <td>{o.date}</td>
-                      <td>{o.customer}</td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={avatarStyle(o.color, o.initials, 32)}>{o.initials}</div>
-                          {o.product}
-                        </div>
-                      </td>
-                      <td>${o.amount}</td>
-                      <td><span className={`d-badge d-badge--${o.status}`}>{t(`dashboard.order${o.status.charAt(0).toUpperCase() + o.status.slice(1)}`)}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <p className="d-empty" style={{ padding: '48px 0', textAlign: 'center', fontSize: '0.875rem', color: 'var(--color-secondary)' }}>
+              {dir === 'rtl'
+                ? 'لا توجد طلبات بعد. ستظهر طلبات عملائك هنا بمجرد أول عملية شراء.'
+                : 'No orders yet. Your customers’ orders will appear here after the first purchase.'}
+            </p>
           </div>
         );
 
@@ -611,28 +646,13 @@ export default function SellerDashboard() {
             <h3 className="d-card__title">{t('dashboard.payouts')}</h3>
             <div className="d-balance" style={{ borderRadius: 16, background: 'linear-gradient(135deg, var(--color-primary-fixed) 0%, #fff5ed 100%)', border: '1px solid var(--color-outline-variant)' }}>
               <span className="d-balance__label">{dir === 'rtl' ? 'الرصيد الحالي' : 'Current Balance'}</span>
-              <span className="d-balance__amount" style={{ fontSize: '2.5rem' }}>$<AnimatedCounter end={12847} />.50</span>
+              <span className="d-balance__amount" style={{ fontSize: '2.5rem' }}>$<AnimatedCounter end={revenueTotal} />.00</span>
             </div>
-            <div className="d-table-wrap" style={{ marginTop: 24 }}>
-              <table className="d-table">
-                <thead>
-                  <tr>
-                    <th>{dir === 'rtl' ? 'التاريخ' : 'Date'}</th>
-                    <th>{dir === 'rtl' ? 'المبلغ' : 'Amount'}</th>
-                    <th>{dir === 'rtl' ? 'الحالة' : 'Status'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {PAYOUTS.map((p, i) => (
-                    <tr key={i}>
-                      <td>{p.date}</td>
-                      <td>${p.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                      <td><span className="d-badge d-badge--completed">{dir === 'rtl' ? 'مكتمل' : 'Completed'}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <p className="d-empty" style={{ padding: '36px 0', textAlign: 'center', fontSize: '0.875rem', color: 'var(--color-secondary)' }}>
+              {dir === 'rtl'
+                ? 'لا توجد مدفوعات أو أرصدة بعد. يظهر رصيدك بعد تأكيد الطلبات.'
+                : 'No payouts yet. Your balance appears after orders are confirmed.'}
+            </p>
           </div>
         );
 
@@ -642,47 +662,46 @@ export default function SellerDashboard() {
       default:
         return (
           <>
-            <div className="sell-line" aria-hidden="true" />
-            <div className="d-welcome">
-              <h2 className="d-welcome__title">{t('dashboard.welcome')}</h2>
-              <p className="d-welcome__sub">{dir === 'rtl' ? 'إدارة متجرك ومنتجاتك بكل سهولة' : 'Manage your store and products with ease'}</p>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <button className="btn btn--primary" onClick={() => handleTab('products')}>{t('dashboard.manageStore')}</button>
-                <button className="d-actions__btn" onClick={() => handleTab('settings')}>
-                  {dir === 'rtl' ? 'إعدادات المتجر' : 'Store settings'}
-                </button>
+            <div className="sell-hero">
+              <div className="sell-line" aria-hidden="true" />
+              <div className="sell-welcome">
+                <div className="sell-welcome__text">
+                  <h2 className="sell-welcome__title">{t('dashboard.welcome')}</h2>
+                  <p className="sell-welcome__sub">{dir === 'rtl' ? 'إدارة متجرك ومنتجاتك بكل سهولة' : 'Manage your store and products with ease'}</p>
+                </div>
+                <div className="sell-welcome__actions">
+                  <button className="btn btn--primary" onClick={() => handleTab('products')}>{t('dashboard.manageStore')}</button>
+                  <button className="d-actions__btn" onClick={() => handleTab('settings')}>
+                    {dir === 'rtl' ? 'إعدادات المتجر' : 'Store settings'}
+                  </button>
+                </div>
               </div>
             </div>
 
             <div className="d-stats">
-              <div className="d-stat" style={{ position: 'relative', overflow: 'hidden', backdropFilter: 'blur(12px)', background: 'var(--color-surface-container-lowest)', boxShadow: '0 8px 32px rgba(0,0,0,0.04)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,98,1,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, color: 'var(--color-primary)' }}>$</div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '2px 10px', borderRadius: 9999 }}>+14.5%</span>
-                </div>
-                <span className="d-stat__value" style={{ fontSize: '1.75rem' }}>$<AnimatedCounter end={48290} /></span>
+              <div className="d-stat">
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,98,1,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, color: 'var(--color-primary)' }}>$</div>
+                <span className="d-stat__value" style={{ fontSize: '1.75rem' }}>$<AnimatedCounter end={revenueTotal} /></span>
                 <span className="d-stat__label">{t('dashboard.totalRevenue')}</span>
               </div>
-              <div className="d-stat" style={{ position: 'relative', overflow: 'hidden', backdropFilter: 'blur(12px)', background: 'var(--color-surface-container-lowest)', boxShadow: '0 8px 32px rgba(0,0,0,0.04)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(73,75,214,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, color: '#494bd6' }}>S</div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '2px 10px', borderRadius: 9999 }}>+5.2%</span>
-                </div>
-                <span className="d-stat__value" style={{ fontSize: '1.75rem', color: '#494bd6' }}><AnimatedCounter end={1216} /></span>
+              <div className="d-stat">
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(73,75,214,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, color: '#494bd6' }}>S</div>
+                <span className="d-stat__value" style={{ fontSize: '1.75rem', color: '#494bd6' }}><AnimatedCounter end={salesTotal} /></span>
                 <span className="d-stat__label">{t('dashboard.totalSales')}</span>
               </div>
-              <div className="d-stat" style={{ position: 'relative', overflow: 'hidden', backdropFilter: 'blur(12px)', background: 'var(--color-surface-container-lowest)', boxShadow: '0 8px 32px rgba(0,0,0,0.04)' }}>
+              <div className="d-stat">
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, color: '#10b981' }}>P</div>
+                <span className="d-stat__value" style={{ fontSize: '1.75rem' }}>{products.length}</span>
+                <span className="d-stat__label">{t('dashboard.products')}</span>
+              </div>
+              <div className="d-stat">
                 <div style={{ position: 'absolute', right: -16, top: -16, opacity: 0.05, fontSize: 100, color: 'var(--color-primary)' }}>★</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,98,1,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, color: 'var(--color-primary)' }}>★</div>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,98,1,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, color: 'var(--color-primary)' }}>★</div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4 }}>
+                  <span className="d-stat__value" style={{ fontSize: '1.75rem', color: 'var(--color-primary-container)' }}>{ratingValue ? ratingValue.toFixed(1) : '—'}</span>
+                  <span style={{ fontSize: 12, color: 'var(--color-secondary)', marginBottom: 6 }}>/ 5.0</span>
                 </div>
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4 }}>
-                    <span className="d-stat__value" style={{ fontSize: '1.75rem', color: 'var(--color-primary-container)' }}>4.8</span>
-                    <span style={{ fontSize: 12, color: 'var(--color-secondary)', marginBottom: 6 }}>/ 5.0</span>
-                  </div>
-                  <span className="d-stat__label">{dir === 'rtl' ? 'تقييم المتجر' : 'Store Rating'}</span>
-                </div>
+                <span className="d-stat__label">{dir === 'rtl' ? 'تقييم المتجر' : 'Store Rating'}</span>
               </div>
             </div>
 
@@ -692,59 +711,81 @@ export default function SellerDashboard() {
                   <h3 className="d-card__title" style={{ marginBottom: 0 }}>{t('dashboard.topProducts')}</h3>
                   <button onClick={() => handleTab('products')} style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>{t('dashboard.viewAll')}</button>
                 </div>
-                <div className="d-table-wrap">
-                  <table className="d-table">
-                    <thead>
-                      <tr>
-                        <th>{t('dashboard.productName')}</th>
-                        <th>{t('dashboard.productSales')}</th>
-                        <th>{t('dashboard.productRevenue')}</th>
-                        <th>{t('dashboard.productStatus')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {products.map((p) => (
-                        <tr key={p.id}>
-                          <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <div style={avatarStyle(p.color || '#ff6201', p.initials, 34)}>{p.initials}</div>
-                              <strong style={{ fontSize: 13 }}>{p.name}</strong>
-                            </div>
-                          </td>
-                          <td>{Number(p.price) * 3}</td>
-                          <td style={{ fontWeight: 700, color: 'var(--color-primary-container)' }}>${(Number(p.price) * 120).toLocaleString('en-US')}</td>
-                          <td><span className={`d-badge d-badge--${p.status}`}>{productStatusLabel(p.status)}</span></td>
+                {products.length === 0 ? (
+                  <p className="prod-empty" style={{ marginTop: 8 }}>
+                    {dir === 'rtl' ? 'لا منتجات بعد — أضف منتجك الأول ليظهر هنا.' : 'No products yet — add your first product to see it here.'}
+                  </p>
+                ) : (
+                  <div className="d-table-wrap">
+                    <table className="d-table">
+                      <thead>
+                        <tr>
+                          <th>{t('dashboard.productName')}</th>
+                          <th>{t('dashboard.productSales')}</th>
+                          <th>{t('dashboard.productRevenue')}</th>
+                          <th>{t('dashboard.productStatus')}</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {products.map((p) => (
+                          <tr key={p.id}>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div style={avatarStyle(p.color || '#ff6201', p.initials, 34)}>{p.initials}</div>
+                                <strong style={{ fontSize: 13 }}>{p.name}</strong>
+                              </div>
+                            </td>
+                            <td>{p.sales || 0}</td>
+                            <td style={{ fontWeight: 700, color: 'var(--color-primary-container)' }}>${(Number(p.price) * (Number(p.sales) || 0)).toLocaleString('en-US')}</td>
+                            <td><span className={`d-badge d-badge--${p.status}`}>{productStatusLabel(p.status)}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
 
               <div className="d-card" style={{ borderRadius: 20, marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
-                <h3 className="d-card__title">{dir === 'rtl' ? 'إجراءات مطلوبة' : 'Action Needed'}</h3>
+                <h3 className="d-card__title">{dir === 'rtl' ? 'إجراءات مقترحة' : 'Suggested actions'}</h3>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {ALERTS.map((a, i) => (
-                    <div key={i} style={{
-                      display: 'flex',
-                      gap: 14,
-                      padding: 16,
-                      borderRadius: 14,
-                      background: a.type === 'warning' ? 'rgba(186,26,26,0.06)' : 'var(--color-surface-container-low)',
-                      border: a.type === 'warning' ? '1px solid rgba(186,26,26,0.12)' : '1px solid var(--color-outline-variant)',
-                    }}>
-                      <div style={{ display: 'inline-flex', color: a.type === 'warning' ? 'var(--color-error)' : 'var(--color-secondary)', marginTop: 1 }}>
-                        {a.type === 'warning' ? <DashIcon name="warn" size={20} /> : <DashIcon name="message" size={20} />}
-                      </div>
+                  {isPending && (
+                    <div style={{ display: 'flex', gap: 14, padding: 16, borderRadius: 14, background: 'var(--color-surface-container-low)', border: '1px solid var(--color-outline-variant)' }}>
+                      <div style={{ display: 'inline-flex', color: 'var(--color-secondary)', marginTop: 1 }}><DashIcon name="warn" size={20} /></div>
                       <div>
-                        <h4 style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-on-surface)', margin: 0 }}>{a.titleKey}</h4>
-                        <p style={{ fontSize: 12, color: 'var(--color-secondary)', margin: '4px 0 0' }}>{a.descKey}</p>
-                        <button style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, marginTop: 8, cursor: 'pointer' }}>
-                          {a.type === 'warning' ? (dir === 'rtl' ? 'إعادة التخزين' : 'Restock Now') : (dir === 'rtl' ? 'رد' : 'Reply')}
+                        <h4 style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-on-surface)', margin: 0 }}>
+                          {dir === 'rtl' ? 'أكمل بيانات متجرك' : 'Complete your store profile'}
+                        </h4>
+                        <p style={{ fontSize: 12, color: 'var(--color-secondary)', margin: '4px 0 0' }}>
+                          {dir === 'rtl' ? 'أضف صورة الغلاف والنبذة لتظهر بأفضل شكل بعد التوثيق.' : 'Add a cover and bio to look your best once verified.'}
+                        </p>
+                        <button onClick={() => handleTab('settings')} style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, marginTop: 8, cursor: 'pointer' }}>
+                          {dir === 'rtl' ? 'فتح الإعدادات' : 'Open settings'}
                         </button>
                       </div>
                     </div>
-                  ))}
+                  )}
+                  {!productsLoading && products.length === 0 && (
+                    <div style={{ display: 'flex', gap: 14, padding: 16, borderRadius: 14, background: 'var(--color-surface-container-low)', border: '1px solid var(--color-outline-variant)' }}>
+                      <div style={{ display: 'inline-flex', color: 'var(--color-secondary)', marginTop: 1 }}><DashIcon name="message" size={20} /></div>
+                      <div>
+                        <h4 style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-on-surface)', margin: 0 }}>
+                          {dir === 'rtl' ? 'أضف أول منتج' : 'Add your first product'}
+                        </h4>
+                        <p style={{ fontSize: 12, color: 'var(--color-secondary)', margin: '4px 0 0' }}>
+                          {dir === 'rtl' ? 'المتجر بلا منتجات — أضف منتجاً ليظهر للعملاء.' : 'Your store is empty — add a product to appear to buyers.'}
+                        </p>
+                        <button onClick={() => handleTab('products')} style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, marginTop: 8, cursor: 'pointer' }}>
+                          {dir === 'rtl' ? 'إضافة منتج' : 'Add product'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {!isPending && (productsLoading || products.length > 0) && (
+                    <p style={{ fontSize: 12, color: 'var(--color-secondary)', margin: 0 }}>
+                      {dir === 'rtl' ? 'لا توجد إجراءات مطلوبة حالياً.' : 'Nothing needs your attention right now.'}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -754,35 +795,9 @@ export default function SellerDashboard() {
                 <h3 className="d-card__title" style={{ marginBottom: 0 }}>{t('dashboard.recentOrders')}</h3>
                 <button onClick={() => handleTab('orders')} style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>{t('dashboard.viewAll')}</button>
               </div>
-              <div className="d-table-wrap">
-                <table className="d-table">
-                  <thead>
-                    <tr>
-                      <th>{t('dashboard.orderId')}</th>
-                      <th>{t('dashboard.productName')}</th>
-                      <th>{t('dashboard.orderDate')}</th>
-                      <th>{t('dashboard.orderAmount')}</th>
-                      <th>{t('dashboard.orderStatus')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ORDERS.map((o) => (
-                      <tr key={o.id}>
-                        <td className="d-table__id">{o.id}</td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={avatarStyle(o.color, o.initials, 32)}>{o.initials}</div>
-                            {o.product}
-                          </div>
-                        </td>
-                        <td>{o.date}</td>
-                        <td style={{ fontWeight: 700 }}>${o.amount}</td>
-                        <td><span className={`d-badge d-badge--${o.status}`}>{t(`dashboard.order${o.status.charAt(0).toUpperCase() + o.status.slice(1)}`)}</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <p className="d-empty" style={{ padding: '36px 0', textAlign: 'center', fontSize: '0.875rem', color: 'var(--color-secondary)' }}>
+                {dir === 'rtl' ? 'لا توجد طلبات بعد. ستظهر طلبات عملائك هنا.' : 'No orders yet. Your customers’ orders will appear here.'}
+              </p>
             </div>
           </>
         );
@@ -835,5 +850,20 @@ export default function SellerDashboard() {
     return <div className="d-content">{topBanner}<p className="d-empty" style={{ padding: '60px 0', textAlign: 'center', fontSize: '0.875rem', color: 'var(--color-secondary)' }}>{dir === 'rtl' ? 'جارٍ التحميل…' : 'Loading…'}</p></div>;
   }
 
-  return <div className="d-content">{topBanner}{renderContent()}</div>;
+  return (
+    <div className="d-content">
+      {topBanner}
+      {renderContent()}
+      <ConfirmDialog
+        open={!!confirmPrd}
+        title={dir === 'rtl' ? 'حذف المنتج نهائياً؟' : 'Delete this product?'}
+        message={confirmPrd ? (dir === 'rtl' ? `سيتم حذف "${confirmPrd.name}" نهائياً ولا يمكن التراجع.` : `"${confirmPrd.name}" will be permanently deleted. This cannot be undone.`) : ''}
+        confirmLabel={dir === 'rtl' ? 'حذف' : 'Delete'}
+        tone="danger"
+        busy={confirmBusy}
+        onConfirm={() => removePrd(confirmPrd?.id)}
+        onCancel={() => setConfirmPrd(null)}
+      />
+    </div>
+  );
 }

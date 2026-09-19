@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import DashIcon from '../../components/dashboard/DashIcon';
+import ConfirmDialog from '../../components/dashboard/ConfirmDialog';
 import { ImageField, MediaAddButton } from '../../components/dashboard/MediaUploader';
 import { supabase, isSupabaseConfigured, hasUserColumn } from '../../lib/supabase';
 import { mediaTypeFromUrl, cloudinaryThumb } from '../../lib/cloudinary';
@@ -38,7 +39,8 @@ const PRICING_MIGRATION_SQL = `ALTER TABLE products
   ADD COLUMN IF NOT EXISTS price_dzd numeric,
   ADD COLUMN IF NOT EXISTS sale_price_dzd numeric;`;
 
-const SUPPLIERS_MIGRATION_SQL = `ALTER TABLE users
+const SUPPLIERS_MIGRATION_SQL = `-- 1) supplier profile columns
+ALTER TABLE users
   ADD COLUMN IF NOT EXISTS seller_status text NOT NULL DEFAULT 'pending',
   ADD COLUMN IF NOT EXISTS specialty text,
   ADD COLUMN IF NOT EXISTS website text,
@@ -52,7 +54,20 @@ const SUPPLIERS_MIGRATION_SQL = `ALTER TABLE users
   ADD COLUMN IF NOT EXISTS availability text DEFAULT 'full',
   ADD COLUMN IF NOT EXISTS rating numeric DEFAULT 0,
   ADD COLUMN IF NOT EXISTS works jsonb DEFAULT '[]'::jsonb,
-  ADD COLUMN IF NOT EXISTS models jsonb DEFAULT '[]'::jsonb;`;
+  ADD COLUMN IF NOT EXISTS models jsonb DEFAULT '[]'::jsonb;
+
+-- 2) allow the admin dashboard (anon key) to delete rows
+DROP POLICY IF EXISTS "users_delete_app" ON public.users;
+CREATE POLICY "users_delete_app" ON public.users FOR DELETE TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "products_delete_app" ON public.products;
+CREATE POLICY "products_delete_app" ON public.products FOR DELETE TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "categories_delete_app" ON public.categories;
+CREATE POLICY "categories_delete_app" ON public.categories FOR DELETE TO anon, authenticated USING (true);
+
+-- 3) remove leftover test rows
+DELETE FROM public.users WHERE email LIKE '%@mawrid.invalid';`;
 
 const EMPTY_SUPPLIER = {
   id: '',
@@ -309,11 +324,26 @@ export default function AdminDashboard() {
   const [catForm, setCatForm] = useState({ id: '', name: '', name_en: '', slug: '', icon: '', sort_order: 0, enabled: true });
   const [toast, setToast] = useState(null);
   const [suppliersReady, setSuppliersReady] = useState(true);
+  const [websiteReady, setWebsiteReady] = useState(true);
   const [showSupplierForm, setShowSupplierForm] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [supplierForm, setSupplierForm] = useState(EMPTY_SUPPLIER);
   const [savingSupplier, setSavingSupplier] = useState(false);
   const [supplierFilter, setSupplierFilter] = useState('all');
+  const [confirmState, setConfirmState] = useState(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
+
+  const askConfirm = useCallback((opts) => setConfirmState(opts), []);
+  const runConfirm = async () => {
+    if (!confirmState?.onConfirm) return;
+    setConfirmBusy(true);
+    try {
+      await confirmState.onConfirm();
+    } finally {
+      setConfirmBusy(false);
+      setConfirmState(null);
+    }
+  };
 
   const notify = useCallback((msg) => {
     setToast(msg);
@@ -516,6 +546,13 @@ export default function AdminDashboard() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    let flag = true;
+    hasUserColumn('website').then((ok) => { if (flag && !ok) setWebsiteReady(false); });
+    return () => { flag = false; };
+  }, []);
+
   const copyMigrationSql = async () => {
     try {
       await navigator.clipboard.writeText(PRICING_MIGRATION_SQL);
@@ -624,7 +661,6 @@ export default function AdminDashboard() {
   };
 
   const removeProduct = async (p) => {
-    if (!window.confirm(dir === 'rtl' ? 'حذف المنتج نهائياً؟' : 'Delete this product permanently?')) return;
     const res = await supabase.from('products').delete().eq('id', p.id);
     if (res.error) { notify(dir === 'rtl' ? 'فشل الحذف' : 'Delete failed'); return; }
     notify(dir === 'rtl' ? 'تم حذف المنتج' : 'Product deleted');
@@ -686,7 +722,6 @@ export default function AdminDashboard() {
   });
 
   const deleteCategory = async (c) => {
-    if (!window.confirm(dir === 'rtl' ? `حذف تصنيف "${c.name}"؟` : `Delete category "${c.name}"?`)) return;
     const res = await supabase.from('categories').delete().eq('id', c.id);
     if (res.error) { notify(dir === 'rtl' ? 'فشل الحذف' : 'Delete failed'); return; }
     notify(dir === 'rtl' ? 'تم حذف التصنيف' : 'Category deleted');
@@ -832,12 +867,59 @@ export default function AdminDashboard() {
   };
 
   const removeSupplier = async (u) => {
-    if (!window.confirm(dir === 'rtl' ? `حذف المورّد "${u.name || u.email}"؟` : `Delete supplier "${u.name || u.email}"?`)) return;
     const res = await supabase.from('users').delete().eq('id', u.id);
     if (res.error) { notify(dir === 'rtl' ? 'فشل الحذف' : 'Delete failed'); return; }
     notify(dir === 'rtl' ? 'تم حذف المورّد' : 'Supplier deleted');
     loadAll();
   };
+
+  const confirmVerify = (u) => askConfirm({
+    title: dir === 'rtl' ? 'توثيق المورّد؟' : 'Verify this supplier?',
+    message: dir === 'rtl' ? `سيتم توثيق "${u.name || u.email}" ويستطيع نشر متجره ومنتجاته.` : `"${u.name || u.email}" will be verified and can publish their store & products.`,
+    confirmLabel: dir === 'rtl' ? 'توثيق' : 'Verify',
+    tone: 'primary',
+    onConfirm: () => setSellerStatus(u, 'verified'),
+  });
+
+  const confirmReject = (u) => askConfirm({
+    title: dir === 'rtl' ? 'رفض طلب الانتساب؟' : 'Reject this application?',
+    message: dir === 'rtl' ? `سيتم رفض طلب "${u.name || u.email}".` : `The application from "${u.name || u.email}" will be rejected.`,
+    confirmLabel: dir === 'rtl' ? 'رفض' : 'Reject',
+    tone: 'danger',
+    onConfirm: () => setSellerStatus(u, 'rejected'),
+  });
+
+  const confirmUnverify = (u) => askConfirm({
+    title: dir === 'rtl' ? 'إلغاء توثيق المورّد؟' : 'Unverify this supplier?',
+    message: dir === 'rtl' ? `سيعود "${u.name || u.email}" إلى حالة قيد المراجعة.` : `"${u.name || u.email}" will return to pending review.`,
+    confirmLabel: dir === 'rtl' ? 'إلغاء التوثيق' : 'Unverify',
+    tone: 'primary',
+    onConfirm: () => setSellerStatus(u, 'pending'),
+  });
+
+  const confirmDeleteSupplier = (u) => askConfirm({
+    title: dir === 'rtl' ? 'حذف المورّد نهائياً؟' : 'Delete this supplier?',
+    message: dir === 'rtl' ? `سيتم حذف "${u.name || u.email}" نهائياً ولا يمكن التراجع.` : `"${u.name || u.email}" will be permanently deleted. This cannot be undone.`,
+    confirmLabel: dir === 'rtl' ? 'حذف' : 'Delete',
+    tone: 'danger',
+    onConfirm: () => removeSupplier(u),
+  });
+
+  const confirmDeleteProduct = (p) => askConfirm({
+    title: dir === 'rtl' ? 'حذف المنتج نهائياً؟' : 'Delete this product?',
+    message: dir === 'rtl' ? `سيتم حذف "${p.name || p.name_en || ''}" نهائياً.` : `"${p.name || p.name_en || ''}" will be permanently deleted.`,
+    confirmLabel: dir === 'rtl' ? 'حذف' : 'Delete',
+    tone: 'danger',
+    onConfirm: () => removeProduct(p),
+  });
+
+  const confirmDeleteCategory = (c) => askConfirm({
+    title: dir === 'rtl' ? 'حذف التصنيف؟' : 'Delete this category?',
+    message: dir === 'rtl' ? `سيتم حذف التصنيف "${c.name}" نهائياً.` : `The category "${c.name}" will be permanently deleted.`,
+    confirmLabel: dir === 'rtl' ? 'حذف' : 'Delete',
+    tone: 'danger',
+    onConfirm: () => deleteCategory(c),
+  });
 
   const pendingProducts = products.filter(p => p.status === 'pending');
   const activeProducts = products.filter(p => p.status === 'active');
@@ -1060,7 +1142,7 @@ export default function AdminDashboard() {
 
     return (
       <>
-        {!suppliersReady && (
+        {(!suppliersReady || !websiteReady) && (
           <div className="d-card d-card--notice" style={{ marginBottom: 20 }}>
             <h3 className="d-card__title">{dir === 'rtl' ? 'حقول المورّدين غير مضبوطة بعد' : 'Supplier fields not set up yet'}</h3>
             <p style={{ color: 'var(--color-secondary)', fontSize: '0.875rem', margin: '0 0 12px' }}>
@@ -1121,8 +1203,8 @@ export default function AdminDashboard() {
                       <td>{fmtDate(u.created_at)}</td>
                       <td>
                         <div className="d-actions">
-                          <button className="d-actions__btn d-actions__btn--approve" onClick={() => setSellerStatus(u, 'verified')}>{dir === 'rtl' ? 'توثيق كمورّد' : 'Verify supplier'}</button>
-                          <button className="d-actions__btn d-actions__btn--danger" onClick={() => setSellerStatus(u, 'rejected')}>{dir === 'rtl' ? 'رفض' : 'Reject'}</button>
+                          <button className="d-actions__btn d-actions__btn--approve" onClick={() => confirmVerify(u)}>{dir === 'rtl' ? 'توثيق كمورّد' : 'Verify supplier'}</button>
+                          <button className="d-actions__btn d-actions__btn--danger" onClick={() => confirmReject(u)}>{dir === 'rtl' ? 'رفض' : 'Reject'}</button>
                           <button className="d-actions__btn" onClick={() => openEditSupplier(u)}>{dir === 'rtl' ? 'تعديل' : 'Edit'}</button>
                         </div>
                       </td>
@@ -1223,12 +1305,12 @@ export default function AdminDashboard() {
                         <td>
                           <div className="d-actions">
                             {status === 'verified' ? (
-                              <button className="d-actions__btn" onClick={() => setSellerStatus(u, 'pending')}>{dir === 'rtl' ? 'إلغاء التوثيق' : 'Unverify'}</button>
+                              <button className="d-actions__btn" onClick={() => confirmUnverify(u)}>{dir === 'rtl' ? 'إلغاء التوثيق' : 'Unverify'}</button>
                             ) : (
-                              <button className="d-actions__btn d-actions__btn--approve" onClick={() => setSellerStatus(u, 'verified')}>{dir === 'rtl' ? 'توثيق' : 'Verify'}</button>
+                              <button className="d-actions__btn d-actions__btn--approve" onClick={() => confirmVerify(u)}>{dir === 'rtl' ? 'توثيق' : 'Verify'}</button>
                             )}
                             <button className="d-actions__btn" onClick={() => openEditSupplier(u)}>{dir === 'rtl' ? 'تعديل' : 'Edit'}</button>
-                            <button className="d-actions__btn d-actions__btn--danger" onClick={() => removeSupplier(u)}>{dir === 'rtl' ? 'حذف' : 'Delete'}</button>
+                            <button className="d-actions__btn d-actions__btn--danger" onClick={() => confirmDeleteSupplier(u)}>{dir === 'rtl' ? 'حذف' : 'Delete'}</button>
                           </div>
                         </td>
                       </tr>
@@ -1343,7 +1425,7 @@ export default function AdminDashboard() {
                         <button className="d-actions__btn d-actions__btn--danger" onClick={() => setProductStatus(p.id, 'rejected')}>{dir === 'rtl' ? 'رفض' : 'Reject'}</button>
                       )}
                       <button className="d-actions__btn" onClick={() => openEdit(p)}>{dir === 'rtl' ? 'تعديل' : 'Edit'}</button>
-                      <button className="d-actions__btn d-actions__btn--danger" onClick={() => removeProduct(p)}>{dir === 'rtl' ? 'حذف' : 'Delete'}</button>
+                      <button className="d-actions__btn d-actions__btn--danger" onClick={() => confirmDeleteProduct(p)}>{dir === 'rtl' ? 'حذف' : 'Delete'}</button>
                     </div>
                   </td>
                 </tr>
@@ -1561,7 +1643,7 @@ export default function AdminDashboard() {
                                           <button className="d-actions__btn d-actions__btn--approve" onClick={() => setProductStatus(p.id, 'active')}>{dir === 'rtl' ? 'اعتماد' : 'Approve'}</button>
                                         )}
                                         <button className="d-actions__btn" onClick={() => openEdit(p)}>{dir === 'rtl' ? 'تعديل' : 'Edit'}</button>
-                                        <button className="d-actions__btn d-actions__btn--danger" onClick={() => removeProduct(p)}>{dir === 'rtl' ? 'حذف' : 'Delete'}</button>
+                                        <button className="d-actions__btn d-actions__btn--danger" onClick={() => confirmDeleteProduct(p)}>{dir === 'rtl' ? 'حذف' : 'Delete'}</button>
                                       </div>
                                     </td>
                                   </tr>
@@ -1657,7 +1739,7 @@ export default function AdminDashboard() {
                           {c.enabled ? (dir === 'rtl' ? 'إخفاء' : 'Disable') : (dir === 'rtl' ? 'تفعيل' : 'Enable')}
                         </button>
                         <button className="d-actions__btn" onClick={() => openEditCategory(c)}>{dir === 'rtl' ? 'تعديل' : 'Edit'}</button>
-                        <button className="d-actions__btn d-actions__btn--danger" onClick={() => deleteCategory(c)}>{dir === 'rtl' ? 'حذف' : 'Delete'}</button>
+                        <button className="d-actions__btn d-actions__btn--danger" onClick={() => confirmDeleteCategory(c)}>{dir === 'rtl' ? 'حذف' : 'Delete'}</button>
                       </div>
                     </td>
                   </tr>
@@ -1970,7 +2052,7 @@ export default function AdminDashboard() {
               <h3>{editingSupplier ? (dir === 'rtl' ? 'تعديل بيانات المورّد' : 'Edit supplier') : (dir === 'rtl' ? 'إضافة مورّد جديد' : 'Add new supplier')}</h3>
               <button className="d-modal__close" onClick={() => setShowSupplierForm(false)}>✕</button>
             </div>
-            {!suppliersReady && (
+            {(!suppliersReady || !websiteReady) && (
               <p style={{ color: 'var(--color-error)', fontSize: '0.8125rem', margin: '0 0 12px' }}>
                 {dir === 'rtl'
                   ? 'لن يُحفظ المورّد قبل تشغيل كود SQL الخاص بأعمدة المورّدين.'
@@ -2134,6 +2216,16 @@ export default function AdminDashboard() {
           {toast}
         </div>
       )}
+      <ConfirmDialog
+        open={!!confirmState}
+        title={confirmState?.title}
+        message={confirmState?.message}
+        confirmLabel={confirmState?.confirmLabel}
+        tone={confirmState?.tone}
+        busy={confirmBusy}
+        onConfirm={runConfirm}
+        onCancel={() => setConfirmState(null)}
+      />
     </>
   );
 }
