@@ -5,7 +5,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import DashIcon from '../../components/dashboard/DashIcon';
 import { ImageField, MediaAddButton } from '../../components/dashboard/MediaUploader';
-import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { supabase, isSupabaseConfigured, hasUserColumn } from '../../lib/supabase';
 import { mediaTypeFromUrl, cloudinaryThumb } from '../../lib/cloudinary';
 import { subscriptionGroups } from '../../data/subscriptions';
 import { SELLER_SPECIALTIES } from '../../data/sellers';
@@ -773,7 +773,6 @@ export default function AdminDashboard() {
       role: 'seller',
       seller_status: supplierForm.seller_status,
       specialty: supplierForm.specialty,
-      website: (supplierForm.website || '').trim(),
       bio: supplierForm.bio.trim(),
       bio_en: supplierForm.bio_en.trim(),
       avatar_url: supplierForm.avatar_url.trim(),
@@ -791,6 +790,9 @@ export default function AdminDashboard() {
       }),
       models: parseUrlList(supplierForm.models).map((src, i) => ({ id: `m${i}`, image: src, name_ar: '', name_en: '', colors: [] })),
     };
+    if (await hasUserColumn('website')) {
+      payload.website = (supplierForm.website || '').trim();
+    }
     let res;
     if (editingSupplier) {
       res = await supabase.from('users').update(payload).eq('id', editingSupplier.id);

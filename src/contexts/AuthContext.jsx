@@ -29,32 +29,79 @@ function clearCachedUser() {
   try { localStorage.removeItem('mawrid_user'); } catch {}
 }
 
-async function upsertUserProfile(cred, data) {
-  if (!supabase) return;
-  try {
-    const row = {
-      firebase_uid: cred.user.uid,
-      email: cred.user.email,
-      name: data.name || cred.user.displayName || '',
-      role: data.role || 'buyer',
-      phone: data.phone || '',
-      store_name: data.storeName || '',
-      created_at: data.createdAt || new Date().toISOString(),
-    };
-    if (data.role === 'seller') {
-      if (await hasSellerColumns()) {
-        row.seller_status = data.sellerStatus || 'pending';
-        row.specialty = data.specialty || '';
-      }
-      if (await hasUserColumn('website')) {
-        row.website = data.website || '';
-      }
+const PENDING_WRITE_KEY = 'mawrid_pending_profile_write';
+
+async function buildUserRow({ uid, email, displayName, role, name, phone, storeName, sellerStatus, specialty, website, createdAt }) {
+  const row = {
+    firebase_uid: uid,
+    email: email || '',
+    name: name || displayName || '',
+    role: role || 'buyer',
+    phone: phone || '',
+    store_name: storeName || '',
+    created_at: createdAt || new Date().toISOString(),
+  };
+  if (row.role === 'seller') {
+    if (await hasSellerColumns()) {
+      row.seller_status = sellerStatus || 'pending';
+      row.specialty = specialty || '';
     }
+    if (await hasUserColumn('website')) {
+      row.website = website || '';
+    }
+  }
+  return row;
+}
+
+async function upsertUserProfile(cred, data) {
+  if (!supabase) return { ok: false, error: null, configured: false };
+  try {
+    const row = await buildUserRow({
+      uid: cred.user.uid,
+      email: cred.user.email,
+      displayName: cred.user.displayName,
+      role: data.role,
+      name: data.name,
+      phone: data.phone,
+      storeName: data.storeName,
+      sellerStatus: data.sellerStatus,
+      specialty: data.specialty,
+      website: data.website,
+      createdAt: data.createdAt,
+    });
     const { error } = await supabase.from('users').upsert(row, { onConflict: 'firebase_uid' });
-    if (error) console.warn('Supabase profile write skipped:', error.message);
+    if (error) {
+      console.warn('Supabase profile write skipped:', error.message);
+      return { ok: false, error };
+    }
+    return { ok: true };
   } catch (err) {
     console.warn('Supabase profile write skipped:', err.message);
+    return { ok: false, error: err };
   }
+}
+
+function queueProfileWrite(payload) {
+  try { localStorage.setItem(PENDING_WRITE_KEY, JSON.stringify(payload)); } catch {}
+}
+
+async function flushPendingProfileWrite() {
+  if (!supabase || !isSupabaseConfigured) return false;
+  let item;
+  try {
+    const raw = localStorage.getItem(PENDING_WRITE_KEY);
+    if (!raw) return false;
+    item = JSON.parse(raw);
+  } catch { return false; }
+  const res = await upsertUserProfile(
+    { user: { uid: item.uid, email: item.email, displayName: item.displayName || '' } },
+    item.data
+  );
+  if (res.ok) {
+    try { localStorage.removeItem(PENDING_WRITE_KEY); } catch {}
+    return true;
+  }
+  return false;
 }
 
 export function AuthProvider({ children }) {
@@ -101,6 +148,9 @@ export function AuthProvider({ children }) {
           role,
           ...extraData,
         });
+        if (isSupabaseConfigured) {
+          flushPendingProfileWrite().catch(() => {});
+        }
       } else {
         setUser(null);
       }
@@ -190,11 +240,27 @@ export function AuthProvider({ children }) {
     // Keep local cache for instant reads
     saveUserLocal(cred.user.uid, userData);
 
-    // Save to Supabase (if configured)
-    await upsertUserProfile(cred, userData);
+    // Save to Supabase (if configured); if it fails, queue a background retry
+    // so the seller row still lands in the admin dashboard.
+    let supabaseStatus = 'unsaved';
+    const saved = await upsertUserProfile(cred, userData);
+    if (saved.ok) {
+      supabaseStatus = 'saved';
+    } else if (isSupabaseConfigured) {
+      supabaseStatus = 'syncing';
+      queueProfileWrite({
+        uid: cred.user.uid,
+        email: cred.user.email,
+        displayName: cred.user.displayName || '',
+        data: userData,
+      });
+      setTimeout(() => { flushPendingProfileWrite().catch(() => {}); }, 2000);
+      setTimeout(() => { flushPendingProfileWrite().catch(() => {}); }, 10000);
+    }
 
-    setUser({ uid: cred.user.uid, ...userData });
+    setUser({ uid: cred.user.uid, ...userData, supabaseStatus });
     setTimeout(() => { handledRef.current = false; }, 200);
+    return { uid: cred.user.uid, email, role, supabaseStatus };
   }, []);
 
   const logout = useCallback(async () => {

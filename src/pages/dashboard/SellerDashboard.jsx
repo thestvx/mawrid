@@ -809,9 +809,31 @@ export default function SellerDashboard() {
     </div>
   ) : null;
 
+  const syncBanner = user?.supabaseStatus === 'syncing' ? (
+    <div className="d-card" style={{ marginBottom: 20, border: '1px solid #93C5FD', background: 'linear-gradient(135deg,#eff6ff,#ffffff)', borderRadius: 20 }}>
+      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(59,130,246,0.14)', color: '#1D4ED8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <DashIcon name="warn" size={22} />
+        </div>
+        <div>
+          <h3 style={{ margin: '0 0 6px', fontSize: '1rem', fontWeight: 700, color: 'var(--color-on-surface)' }}>
+            {dir === 'rtl' ? 'جارٍ مزامنة طلب انتسابك مع الإدارة' : 'Syncing your supplier application with the admin'}
+          </h3>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-secondary)' }}>
+            {dir === 'rtl'
+              ? 'تم إنشاء حسابك بنجاح وتعمل المزامنة الآن تلقائياً. إذا لم تصل للإدارة خلال دقيقة، افتح الإعدادات واحفظ بياناتك مجدداً.'
+              : 'Your account was created and we are syncing it automatically. If it does not reach the admin within a minute, open Settings and re-save your data.'}
+          </p>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  const topBanner = pendingBanner || syncBanner;
+
   if (profileLoading) {
-    return <div className="d-content">{pendingBanner}<p className="d-empty" style={{ padding: '60px 0', textAlign: 'center', fontSize: '0.875rem', color: 'var(--color-secondary)' }}>{dir === 'rtl' ? 'جارٍ التحميل…' : 'Loading…'}</p></div>;
+    return <div className="d-content">{topBanner}<p className="d-empty" style={{ padding: '60px 0', textAlign: 'center', fontSize: '0.875rem', color: 'var(--color-secondary)' }}>{dir === 'rtl' ? 'جارٍ التحميل…' : 'Loading…'}</p></div>;
   }
 
-  return <div className="d-content">{pendingBanner}{renderContent()}</div>;
+  return <div className="d-content">{topBanner}{renderContent()}</div>;
 }
