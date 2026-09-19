@@ -25,6 +25,7 @@ function getAvatarColor(name) {
 const NAV_ITEMS = [
   { key: 'nav.home', href: '/' },
   { key: 'nav.marketplace', href: '/marketplace' },
+  { key: 'nav.sellers', href: '/sellers' },
 ];
 
 function CurrencyPill({ lang }) {

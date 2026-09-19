@@ -70,6 +70,7 @@ export default function App() {
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/storefront" element={<Storefront />} />
               <Route path="/sellers" element={<SellersPage />} />
+              <Route path="/sellers/:specialty" element={<SellersPage />} />
               <Route path="/product/:id" element={<Details />} />
               <Route path="/category/:groupKey" element={<SubscriptionGroupPage />} />
               <Route path="/subscription/:subKey" element={<SubscriptionPage />} />

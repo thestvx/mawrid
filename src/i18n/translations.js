@@ -1,6 +1,7 @@
 export const ar = {
   'nav.home': 'الرئيسية',
   'nav.marketplace': 'السوق',
+  'nav.sellers': 'سوق المورّدين',
   'nav.software': 'البرمجيات',
   'nav.design': 'التصميم',
   'nav.signIn': 'تسجيل الدخول',
@@ -306,6 +307,7 @@ export const ar = {
 export const en = {
   'nav.home': 'Home',
   'nav.marketplace': 'Marketplace',
+  'nav.sellers': 'Sellers Market',
   'nav.software': 'Software',
   'nav.design': 'Design',
   'nav.signIn': 'Sign In',

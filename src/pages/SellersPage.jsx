@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 import SplitText from '../components/ui/SplitText';
@@ -8,18 +9,31 @@ import { SELLER_SPECIALTIES, SHOWCASE_SELLERS, SHOWCASE_BRANDS } from '../data/s
 import { fetchSellers } from '../lib/supabase';
 import './SellersPage.css';
 
+const EASE = [0.16, 1, 0.3, 1];
+
 const itemVariants = {
   hidden: { opacity: 0, y: 26 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
 };
+
+function Chevron({ isRtl }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isRtl ? 'scaleX(-1)' : undefined }}>
+      <path d="M9 18l6-6-6-6" />
+    </svg>
+  );
+}
 
 export default function SellersPage() {
   const { dir } = useLanguage();
+  const { specialty } = useParams();
   const isRtl = dir === 'rtl';
   const scrollerRef = useRef(null);
   const [realSellers, setRealSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState(null);
+
+  const activeSpecialty = SELLER_SPECIALTIES.find((s) => s.key === specialty) || null;
 
   useEffect(() => {
     let activeFlag = true;
@@ -101,31 +115,49 @@ export default function SellersPage() {
   });
 
   const cards = [...realCards, ...SHOWCASE_SELLERS, ...SHOWCASE_BRANDS];
+  const filtered = activeSpecialty ? cards.filter((c) => c.specialtyKey === activeSpecialty.key) : cards;
+  const specialtyLabel = activeSpecialty ? (isRtl ? activeSpecialty.name_ar : activeSpecialty.name_en) : null;
 
   return (
     <main className="sellers-page">
-      <section className="sellers-hero">
-        <div className="sellers-hero__glow" />
-        <div className="container sellers-hero__inner">
-          <SplitText
-            text={isRtl ? 'سوق المورّدين' : 'Sellers Marketplace'}
-            tag="h1"
-            className="sellers-hero__title"
-            textAlign={isRtl ? 'right' : 'left'}
-            delay={18}
-            duration={0.9}
-            splitType="chars"
-            threshold={0.2}
-            from={{ opacity: 0, y: 34 }}
-          />
-          <p className="sellers-hero__sub">
-            {isRtl
-              ? 'مورّدون ومبدعون موثّقون — كل واحد في تخصّصه، بأوقات عمل واضحة ومعرض للأعمال. اطلب منه مباشرة.'
-              : 'Verified suppliers and creators — each in their craft, with clear working hours and a live portfolio.'}
-          </p>
-          <div className="sellers-hero__stat">
-            <b>{loading ? '…' : realSellers.length}</b>
-            <span>{isRtl ? 'مورّد مسجّل في مَورد' : 'registered suppliers on Mawrid'}</span>
+      <section className="hero sellers-hero2">
+        <div className="hero__media">
+          <img src="/images/backgrounds/herobackground02.png" alt="" className="hero__img" loading="eager" />
+          <div className="hero__overlay" />
+          <div className="container hero__content">
+            <motion.div
+              className="sellers-hero__content"
+              initial={{ opacity: 0, y: 34 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.85, ease: EASE }}
+            >
+              <SplitText
+                text={isRtl ? 'سوق المورّدين' : 'Sellers Marketplace'}
+                tag="h1"
+                className="sellers-hero__title"
+                textAlign={isRtl ? 'right' : 'left'}
+                delay={18}
+                duration={0.9}
+                splitType="chars"
+                threshold={0.2}
+                from={{ opacity: 0, y: 34 }}
+              />
+              <p className="sellers-hero__sub">
+                {isRtl
+                  ? 'مورّدون ومبدعون موثّقون — كل واحد في تخصّصه، بأوقات عمل واضحة ومعرض للأعمال. اطلب منه مباشرة.'
+                  : 'Verified suppliers and creators — each in their craft, with clear working hours and a live portfolio.'}
+              </p>
+              <div className="sellers-hero__chips">
+                <span className="sellers-hero__chip">
+                  <b>{loading ? '…' : realSellers.length}</b>
+                  {isRtl ? 'مورّد مسجّل' : 'registered suppliers'}
+                </span>
+                <span className="sellers-hero__chip">
+                  <b>{SELLER_SPECIALTIES.length}</b>
+                  {isRtl ? 'تخصّص متاح' : 'specialties'}
+                </span>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -134,21 +166,37 @@ export default function SellersPage() {
         <div className="s-icons__track">
           <div className="s-icons__group">
             {SELLER_SPECIALTIES.map((t) => (
-              <div className="s-icon" key={t.key}>
+              <Link
+                to={`/sellers/${t.key}`}
+                className={`s-icon${activeSpecialty && activeSpecialty.key === t.key ? ' is-active' : ''}`}
+                key={t.key}
+              >
                 <span className="s-icon__bubble">
                   <img src={t.img} alt={isRtl ? t.name_ar : t.name_en} loading="lazy" />
                 </span>
                 <span className="s-icon__label">{isRtl ? t.name_ar : t.name_en}</span>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       </div>
 
       <div className="container">
+        <nav className="sellers-crumbs" aria-label="breadcrumb">
+          <Link to="/">{isRtl ? 'الرئيسية' : 'Home'}</Link>
+          <Chevron isRtl={isRtl} />
+          <Link to="/sellers">{isRtl ? 'سوق المورّدين' : 'Sellers'}</Link>
+          {activeSpecialty && (
+            <>
+              <Chevron isRtl={isRtl} />
+              <span className="is-current">{specialtyLabel}</span>
+            </>
+          )}
+        </nav>
+
         <div className="sellers-grid-head">
           <SplitText
-            text={isRtl ? 'مورّدونا المميّزون' : 'Featured suppliers'}
+            text={specialtyLabel || (isRtl ? 'مورّدونا المميّزون' : 'Featured suppliers')}
             tag="h2"
             className="sellers-grid__title"
             textAlign={isRtl ? 'right' : 'left'}
@@ -159,23 +207,33 @@ export default function SellersPage() {
             from={{ opacity: 0, y: 28 }}
           />
           <p className="sellers-grid__sub">
-            {isRtl ? 'اضغط "عرض الأعمال" لمعاينة ملفّ العمل، ولأصحاب البراندات لكي تطلب الموديل واللون' : 'Hit "View works" to preview the portfolio — brand owners accept model & color requests'}
+            {activeSpecialty
+              ? (isRtl ? 'تصفح ملفّات العمل واضغط "عرض الأعمال" لمعاينة أعمالهم' : 'Browse profiles and hit "View works" to preview their portfolio')
+              : (isRtl ? 'اضغط "عرض الأعمال" لمعاينة ملفّ العمل، ولأصحاب البراندات لكي تطلب الموديل واللون' : 'Hit "View works" to preview the portfolio — brand owners accept model & color requests')}
           </p>
         </div>
 
-        <motion.div
-          className="sellers-grid"
-          variants={{ show: { transition: { staggerChildren: 0.07 } } }}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: '-80px' }}
-        >
-          {cards.map((p, i) => (
-            <motion.div key={p.id} variants={itemVariants} style={{ zIndex: i }}>
-              <SellerCard profile={p} onOpen={setActive} />
-            </motion.div>
-          ))}
-        </motion.div>
+        {filtered.length > 0 ? (
+          <motion.div
+            key={activeSpecialty ? activeSpecialty.key : 'all'}
+            className="sellers-grid"
+            variants={{ show: { transition: { staggerChildren: 0.07 } } }}
+            initial="hidden"
+            animate="show"
+          >
+            {filtered.map((p, i) => (
+              <motion.div key={p.id} variants={itemVariants} style={{ zIndex: i }}>
+                <SellerCard profile={p} onOpen={setActive} />
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <div className="sellers-empty">
+            <img src="/sellers/icons/creators.png" alt="" />
+            <p>{isRtl ? 'ما فيه مورّدين في هذا التخصّص حاليًا' : 'No suppliers in this specialty yet'}</p>
+            <Link to="/sellers" className="sellers-empty__back">{isRtl ? 'عرض كل المورّدين' : 'View all suppliers'}</Link>
+          </div>
+        )}
       </div>
 
       <AnimatePresence>
