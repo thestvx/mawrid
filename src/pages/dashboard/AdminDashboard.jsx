@@ -5,6 +5,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import DashIcon from '../../components/dashboard/DashIcon';
 import ConfirmDialog from '../../components/dashboard/ConfirmDialog';
+import VerifiedBadge from '../../components/dashboard/VerifiedBadge';
 import { ImageField, MediaAddButton } from '../../components/dashboard/MediaUploader';
 import { supabase, isSupabaseConfigured, hasUserColumn } from '../../lib/supabase';
 import { mediaTypeFromUrl, cloudinaryThumb } from '../../lib/cloudinary';
@@ -1083,7 +1084,12 @@ export default function AdminDashboard() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <InitialsAvatar name={u.name} bg={'#8589ff20'} />
                     <div>
-                      <strong>{u.name || '—'}</strong>
+                      <div className="d-name-row">
+                        <strong>{u.name || '—'}</strong>
+                        {sellerStatusOf(u) === 'verified' && (
+                          <VerifiedBadge size={15} title={dir === 'rtl' ? 'مورّد موثّق' : 'Verified supplier'} />
+                        )}
+                      </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--color-secondary)' }}>{u.email}</div>
                             {u.website && (
                               <a
@@ -1282,7 +1288,12 @@ export default function AdminDashboard() {
                               ? <img src={u.avatar_url} alt={u.name} style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} onError={e => { e.currentTarget.style.display = 'none'; }} />
                               : <InitialsAvatar name={u.name} bg={i % 2 === 0 ? '#8589ff20' : '#2f2ebe20'} />}
                             <div>
-                              <strong>{u.name || '—'}</strong>
+                              <div className="d-name-row">
+                                <strong>{u.name || '—'}</strong>
+                                {status === 'verified' && (
+                                  <VerifiedBadge size={16} title={dir === 'rtl' ? 'مورّد موثّق' : 'Verified supplier'} />
+                                )}
+                              </div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--color-secondary)' }}>{u.email}</div>
                             {u.website && (
                               <a

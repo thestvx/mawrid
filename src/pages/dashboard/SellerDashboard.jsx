@@ -4,6 +4,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import DashIcon from '../../components/dashboard/DashIcon';
 import ConfirmDialog from '../../components/dashboard/ConfirmDialog';
+import VerificationCelebration from '../../components/dashboard/VerificationCelebration';
+import VerifiedBadge from '../../components/dashboard/VerifiedBadge';
 import { ImageField } from '../../components/dashboard/MediaUploader';
 import { supabase, isSupabaseConfigured, hasSellerColumns, hasUserColumn, fetchCategories } from '../../lib/supabase';
 import { SELLER_SPECIALTIES } from '../../data/sellers';
@@ -103,11 +105,9 @@ function mapProductRow(p) {
 
 export default function SellerDashboard() {
   const { t, dir } = useLanguage();
-  const { user, role } = useAuth();
+  const { user, role, refreshUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get('tab') || 'overview';
-  const sellerStatus = user?.seller_status;
-  const isPending = role === 'seller' && !!sellerStatus && sellerStatus !== 'verified';
 
   const [profile, setProfile] = useState(EMPTY_PROFILE);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -124,8 +124,30 @@ export default function SellerDashboard() {
   const [prdErr, setPrdErr] = useState('');
   const [confirmPrd, setConfirmPrd] = useState(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
 
   const uid = user?.uid;
+  const celebrationKey = uid ? 'mawrid_verified_celebrated_' + uid : '';
+  const sellerStatus = profile.seller_status || user?.seller_status;
+  const isPending = role === 'seller' && !!sellerStatus && sellerStatus !== 'verified';
+
+  useEffect(() => {
+    if (!uid || role !== 'seller') return;
+    if (sellerStatus !== 'verified') return;
+    try {
+      if (localStorage.getItem(celebrationKey)) return;
+    } catch {}
+    setCelebrate(true);
+  }, [uid, role, sellerStatus, celebrationKey]);
+
+  useEffect(() => {
+    if (uid && role === 'seller' && refreshUser) refreshUser();
+  }, [uid, role, refreshUser]);
+
+  const dismissCelebration = () => {
+    try { localStorage.setItem(celebrationKey, '1'); } catch {}
+    setCelebrate(false);
+  };
   useEffect(() => {
     if (uid) {
       try {
@@ -490,7 +512,10 @@ export default function SellerDashboard() {
             {profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : initials}
           </span>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <h3 className="sel-header__title">{profile.store_name || profile.name || (dir === 'rtl' ? 'متجرك' : 'Your store')}</h3>
+            <h3 className="sel-header__title">
+              {profile.store_name || profile.name || (dir === 'rtl' ? 'متجرك' : 'Your store')}
+              {sellerStatus === 'verified' && <VerifiedBadge size={17} title={dir === 'rtl' ? 'بائع موثّق' : 'Verified seller'} />}
+            </h3>
             <p className="sel-header__meta">
               {specialtyLabel(profile.specialty)} · {availabilityLabel(profile.availability)}
             </p>
@@ -847,13 +872,16 @@ export default function SellerDashboard() {
   const topBanner = pendingBanner || syncBanner;
 
   if (profileLoading) {
-    return <div className="d-content">{topBanner}<p className="d-empty" style={{ padding: '60px 0', textAlign: 'center', fontSize: '0.875rem', color: 'var(--color-secondary)' }}>{dir === 'rtl' ? 'جارٍ التحميل…' : 'Loading…'}</p></div>;
+    return <div className="d-content">{topBanner}<p className="d-empty" style={{ padding: '60px 0', textAlign: 'center', fontSize: '0.875rem', color: 'var(--color-secondary)' }}>{dir === 'rtl' ? 'جارٍ التحميل…' : 'Loading…'}</p>
+      <VerificationCelebration open={celebrate} storeName={profile.store_name || profile.name} dir={dir} onClose={dismissCelebration} />
+    </div>;
   }
 
   return (
     <div className="d-content">
       {topBanner}
       {renderContent()}
+      <VerificationCelebration open={celebrate} storeName={profile.store_name || profile.name} dir={dir} onClose={dismissCelebration} />
       <ConfirmDialog
         open={!!confirmPrd}
         title={dir === 'rtl' ? 'حذف المنتج نهائياً؟' : 'Delete this product?'}
