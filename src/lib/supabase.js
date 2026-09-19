@@ -88,6 +88,21 @@ export function hasSellerColumns() {
   return sellerColumnsPromise;
 }
 
+const userColumnCache = new Map();
+
+export function hasUserColumn(name) {
+  if (!supabase) return Promise.resolve(false);
+  if (userColumnCache.has(name)) return userColumnCache.get(name);
+  const p = supabase
+    .from('users')
+    .select(name)
+    .limit(1)
+    .then(({ error }) => !(error && (error.message || '').includes(name)))
+    .catch(() => false);
+  userColumnCache.set(name, p);
+  return p;
+}
+
 export async function fetchSellers() {
   if (!supabase) return emptyResult();
   const ready = await hasSellerColumns();

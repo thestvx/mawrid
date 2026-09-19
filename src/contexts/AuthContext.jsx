@@ -6,7 +6,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { supabase, isSupabaseConfigured, getUserProfile, hasSellerColumns } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, getUserProfile, hasSellerColumns, hasUserColumn } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
@@ -41,10 +41,14 @@ async function upsertUserProfile(cred, data) {
       store_name: data.storeName || '',
       created_at: data.createdAt || new Date().toISOString(),
     };
-    if (data.role === 'seller' && (await hasSellerColumns())) {
-      row.seller_status = data.sellerStatus || 'pending';
-      row.specialty = data.specialty || '';
-      row.website = data.website || '';
+    if (data.role === 'seller') {
+      if (await hasSellerColumns()) {
+        row.seller_status = data.sellerStatus || 'pending';
+        row.specialty = data.specialty || '';
+      }
+      if (await hasUserColumn('website')) {
+        row.website = data.website || '';
+      }
     }
     const { error } = await supabase.from('users').upsert(row, { onConflict: 'firebase_uid' });
     if (error) console.warn('Supabase profile write skipped:', error.message);

@@ -1073,7 +1073,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {suppliersReady && pendingSellers.length > 0 && (
+        {pendingSellers.length > 0 && (
           <div className="d-card" style={{ marginBottom: 20, border: '1px solid #FCD34D', background: 'linear-gradient(135deg,#fffbeb,#ffffff)' }}>
             <div className="d-card__header">
               <div>
