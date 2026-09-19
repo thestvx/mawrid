@@ -7,6 +7,43 @@ export const SELLER_SPECIALTIES = [
   { key: 'brands', img: '/sellers/icons/brands.png', name_ar: 'أصحاب براندات', name_en: 'Brand Owners' },
 ];
 
+export function mapRealSeller(u, i = 0) {
+  const key = SELLER_SPECIALTIES[i % SELLER_SPECIALTIES.length].key;
+  const name = u.name || 'بائع مَورد';
+  const store = u.store_name || '';
+  return {
+    id: `real-${u.id}`,
+    kind: 'seller',
+    specialtyKey: key,
+    name,
+    name_en: name,
+    role_ar: store ? `متجر ${store}` : 'مورّد على مَورد',
+    role_en: store || 'Supplier on Mawrid',
+    cover: 'linear-gradient(135deg,#ffb199,#a53c00)',
+    avatarGradient: 'linear-gradient(135deg,#ff8a3d,#7e2c00)',
+    verified: false,
+    bio_ar: u.email || '',
+    bio_en: u.email || '',
+    availability: 'full',
+    hours: { from: '09:00', to: '18:00', zone: 'GST' },
+    stats: { projects: 0, products: 0, rating: 0 },
+    works: [],
+  };
+}
+
+export function findStoreById(id, realSellers = []) {
+  return (
+    SHOWCASE_SELLERS.find((s) => s.id === id) ||
+    SHOWCASE_BRANDS.find((b) => b.id === id) ||
+    (id && id.startsWith('real-')
+      ? (() => {
+          const idx = realSellers.findIndex((u) => `real-${u.id}` === id);
+          return idx === -1 ? null : mapRealSeller(realSellers[idx], idx);
+        })()
+      : null)
+  );
+}
+
 const V = {
   bigbuck: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
   elephants: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',

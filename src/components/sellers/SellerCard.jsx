@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import '../../pages/SellersPage.css';
 
@@ -15,7 +17,7 @@ const initials = (name) => (name || '?').trim().split(/\s+/).slice(0, 2).map((w)
 function VerifiedBadge() {
   return (
     <span className="seller-card__verify" aria-label="verified">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 6 9 17l-5-5" />
       </svg>
     </span>
@@ -49,68 +51,95 @@ function Stars({ rating }) {
   );
 }
 
-export default function SellerCard({ profile, onOpen }) {
+export default function SellerCard({ profile }) {
   const { dir } = useLanguage();
   const isRtl = dir === 'rtl';
   const isBrand = profile.kind === 'brand';
   const name = isBrand ? profile.brand : profile.name;
   const role = isRtl ? profile.role_ar : profile.role_en;
-  const bio = isRtl ? profile.bio_ar : profile.bio_en;
   const av = AVAIL[profile.availability] || AVAIL.full;
-  const hoursLabel = `${profile.hours.from} – ${profile.hours.to} · ${profile.hours.zone}`;
+  const hoursLabel = `${profile.hours.from} – ${profile.hours.to}`;
   const starRating = profile.stats ? profile.stats.rating : 0;
+  const href = `/sellers/${profile.specialtyKey}/${profile.id}`;
+
+  const shots = useMemo(() => {
+    const all = [];
+    if (Array.isArray(profile.models)) profile.models.forEach((m) => all.push({ id: m.id, src: m.image }));
+    (profile.works || []).forEach((w) => {
+      if (w.type === 'image') all.push({ id: w.id, src: w.src });
+      else if (w.poster) all.push({ id: w.id, src: w.poster });
+    });
+    const seen = new Set();
+    return all.filter((s) => {
+      if (seen.has(s.src)) return false;
+      seen.add(s.src);
+      return true;
+    });
+  }, [profile]);
+
+  const shown = shots.slice(0, 3);
+  let pad = 0;
+  while (shown.length && shown.length < 3) {
+    shown.push(shots[pad % shots.length]);
+    pad += 1;
+  }
+  const extra = Math.max(0, shots.length - 3);
+  const cta = isRtl
+    ? (isBrand ? 'زيارة المتجر والطلب' : 'عرض الأعمال')
+    : (isBrand ? 'Visit store & order' : 'View works');
 
   return (
-    <article className="seller-card">
-      <div className="seller-card__cover" style={{ background: profile.cover }}>
+    <article className={`seller-card${isBrand ? ' seller-card--brand' : ''}`}>
+      <div className="seller-card__cover">
+        <span className="seller-card__cover-fill" style={{ background: profile.cover }} />
         <img className="seller-card__watermark" src={SPECIALTY_ICON[profile.specialtyKey]} alt="" loading="lazy" />
+        <span className={`seller-card__avail seller-card__avail--${profile.availability}`}>
+          {isRtl ? av.ar : av.en}
+        </span>
         <span className="seller-card__kind">
           {isRtl ? (isBrand ? 'براند مؤثّق' : 'مورّد موثّق') : (isBrand ? 'Verified brand' : 'Verified supplier')}
         </span>
+        <Link className="seller-card__peek" to={href} aria-label={cta}>
+          <span>{cta}</span>
+        </Link>
       </div>
 
-      <div className="seller-card__body">
-        <div className="seller-card__avatar-wrap">
-          <span className="seller-card__avatar" style={{ background: profile.avatarGradient }}>
-            {initials(name)}
-          </span>
+      <div className="seller-card__head">
+        <span className="seller-card__avatar" style={{ background: profile.avatarGradient }}>
+          {initials(name)}
           {profile.verified && <VerifiedBadge />}
+        </span>
+        <div className="seller-card__id">
+          <h3 className="seller-card__name">{name}</h3>
+          <p className="seller-card__role">{role}</p>
         </div>
+        <div className="seller-card__rating">
+          <Stars rating={starRating} />
+        </div>
+      </div>
 
-        <h3 className="seller-card__name">{name}</h3>
-        <p className="seller-card__role">{role}</p>
-        <p className="seller-card__bio">{bio}</p>
-
-        <div className="seller-card__facts">
-          <span className="seller-card__fact">
-            <ClockIcon />
-            {hoursLabel}
+      <div className="seller-card__gallery">
+        {shown.map((s, i) => (
+          <span className="seller-card__shot" key={`${s.id}-${i}`}>
+            <img src={s.src} alt="" loading="lazy" />
+            {extra > 0 && i === shown.length - 1 && (
+              <i className="seller-card__more">+{extra}</i>
+            )}
           </span>
-          <span className={`seller-card__avail seller-card__avail--${profile.availability}`}>
-            {isRtl ? av.ar : av.en}
-          </span>
-        </div>
+        ))}
+      </div>
 
-        <div className="seller-card__stats">
-          <div className="seller-card__stat">
-            <b>{profile.stats.projects}</b>
-            <span>{isRtl ? 'عمل/مشروع' : 'works'}</span>
-          </div>
-          <div className="seller-card__stat">
-            <b>{profile.stats.products}</b>
-            <span>{isRtl ? 'منتج' : 'products'}</span>
-          </div>
-          <div className="seller-card__stat seller-card__stat--rating">
-            <Stars rating={starRating} />
-          </div>
-        </div>
-
-        <button className="seller-card__open" onClick={() => onOpen(profile)}>
-          {isRtl ? (isBrand ? 'عرض الأعمال والطلب' : 'عرض الأعمال') : (isBrand ? 'View works & request' : 'View works')}
+      <div className="seller-card__foot">
+        <span className="seller-card__hours">
+          <ClockIcon />
+          {hoursLabel}
+        </span>
+        <Link className="seller-card__open" to={href}>
+          {cta}
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isRtl ? 'scaleX(-1)' : undefined }}>
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
-        </button>
+        </Link>
       </div>
     </article>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { AudioWaves, PlayIcon, MediaStage } from './media';
 import '../../pages/SellersPage.css';
 
 const FILTERS = [
@@ -22,25 +23,6 @@ function VerifiedBadge({ size = 13 }) {
   );
 }
 
-function AudioWaves() {
-  const bars = useMemo(() => Array.from({ length: 28 }, (_, i) => 0.25 + Math.abs(Math.sin(i * 1.7)) * 0.75), []);
-  return (
-    <span className="wm-waves" aria-hidden="true">
-      {bars.map((h, i) => (
-        <i key={i} style={{ height: `${Math.round(h * 100)}%`, animationDelay: `${(i % 6) * 90}ms` }} />
-      ))}
-    </span>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M8 5v14l11-7z" />
-    </svg>
-  );
-}
-
 function ClockIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -50,41 +32,7 @@ function ClockIcon() {
   );
 }
 
-function MediaStage({ work, isRtl }) {
-  if (!work) return null;
-  return (
-    <motion.div
-      key={work.id}
-      className="wm-stage"
-      initial={{ opacity: 0, scale: 0.985 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-    >
-      {work.type === 'image' && (
-        <div className="wm-stage__img">
-          <img src={work.src} alt={isRtl ? work.title_ar : work.title_en} />
-        </div>
-      )}
-      {work.type === 'video' && (
-        <div className="wm-stage__media">
-          <video key={work.id} src={work.src} poster={work.poster} controls autoPlay preload="metadata" />
-        </div>
-      )}
-      {work.type === 'audio' && (
-        <div className="wm-stage__audio">
-          <div className="wm-stage__audio-visual">
-            <AudioWaves />
-            <strong>{work.duration}</strong>
-          </div>
-          <audio key={work.id} src={work.src} controls autoPlay preload="metadata" />
-        </div>
-      )}
-      <p className="wm-stage__caption">{isRtl ? work.title_ar : work.title_en}</p>
-    </motion.div>
-  );
-}
-
-export default function WorksModal({ profile, onClose }) {
+export default function WorksModal({ profile, onClose, initialTab = 'works', initialModelId = null }) {
   const { dir } = useLanguage();
   const isRtl = dir === 'rtl';
   const isBrand = profile.kind === 'brand';
@@ -92,11 +40,15 @@ export default function WorksModal({ profile, onClose }) {
   const role = isRtl ? profile.role_ar : profile.role_en;
   const works = useMemo(() => profile.works || [], [profile]);
 
-  const [tab, setTab] = useState('works');
+  const firstModel = profile.models
+    ? (profile.models.find((m) => m.id === initialModelId) || profile.models[0])
+    : null;
+
+  const [tab, setTab] = useState(initialTab);
   const [filter, setFilter] = useState('all');
   const [active, setActive] = useState(null);
-  const [modelId, setModelId] = useState(profile.models ? profile.models[0].id : null);
-  const [activeColor, setActiveColor] = useState(profile.models ? profile.models[0].colors[0].hex : null);
+  const [modelId, setModelId] = useState(firstModel ? firstModel.id : null);
+  const [activeColor, setActiveColor] = useState(firstModel ? firstModel.colors[0].hex : null);
   const [qty, setQty] = useState(1);
   const [sent, setSent] = useState(false);
 

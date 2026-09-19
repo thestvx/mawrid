@@ -4,16 +4,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 import SplitText from '../components/ui/SplitText';
 import SellerCard from '../components/sellers/SellerCard';
-import WorksModal from '../components/sellers/WorksModal';
-import { SELLER_SPECIALTIES, SHOWCASE_SELLERS, SHOWCASE_BRANDS } from '../data/sellers';
+import { SELLER_SPECIALTIES, SHOWCASE_SELLERS, SHOWCASE_BRANDS, mapRealSeller } from '../data/sellers';
 import { fetchSellers } from '../lib/supabase';
 import './SellersPage.css';
 
 const EASE = [0.16, 1, 0.3, 1];
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 26 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+  hidden: { opacity: 0, y: 30, scale: 0.97 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 110, damping: 17, mass: 0.75 },
+  },
+};
+
+const gridVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+
+const gridExit = {
+  opacity: 0,
+  y: -12,
+  transition: { duration: 0.22, ease: EASE },
 };
 
 function Chevron({ isRtl }) {
@@ -30,8 +45,6 @@ export default function SellersPage() {
   const isRtl = dir === 'rtl';
   const scrollerRef = useRef(null);
   const [realSellers, setRealSellers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [active, setActive] = useState(null);
 
   const activeSpecialty = SELLER_SPECIALTIES.find((s) => s.key === specialty) || null;
 
@@ -40,7 +53,6 @@ export default function SellersPage() {
     fetchSellers().then((s) => {
       if (!activeFlag) return;
       setRealSellers(s.data || []);
-      setLoading(false);
     });
     return () => { activeFlag = false; };
   }, []);
@@ -91,28 +103,7 @@ export default function SellersPage() {
     };
   }, []);
 
-  const realCards = realSellers.map((u, i) => {
-    const key = SELLER_SPECIALTIES[i % SELLER_SPECIALTIES.length].key;
-    const name = u.name || (isRtl ? 'بائع مَورد' : 'Mawrid seller');
-    return {
-      id: `real-${u.id}`,
-      kind: 'seller',
-      specialtyKey: key,
-      name,
-      name_en: name,
-      role_ar: u.store_name ? `متجر ${u.store_name}` : 'مورّد على مَورد',
-      role_en: u.store_name || 'Supplier on Mawrid',
-      cover: 'linear-gradient(135deg,#ffb199,#a53c00)',
-      avatarGradient: 'linear-gradient(135deg,#ff8a3d,#7e2c00)',
-      verified: false,
-      bio_ar: u.email || '',
-      bio_en: u.email || '',
-      availability: 'full',
-      hours: { from: '09:00', to: '18:00', zone: 'GST' },
-      stats: { projects: 0, products: 0, rating: 0 },
-      works: [],
-    };
-  });
+  const realCards = realSellers.map((u, i) => mapRealSeller(u, i));
 
   const cards = [...realCards, ...SHOWCASE_SELLERS, ...SHOWCASE_BRANDS];
   const filtered = activeSpecialty ? cards.filter((c) => c.specialtyKey === activeSpecialty.key) : cards;
@@ -124,41 +115,6 @@ export default function SellersPage() {
         <div className="hero__media">
           <img src="/images/backgrounds/herobackground02.png" alt="" className="hero__img" loading="eager" />
           <div className="hero__overlay" />
-          <div className="container hero__content">
-            <motion.div
-              className="sellers-hero__content"
-              initial={{ opacity: 0, y: 34 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.85, ease: EASE }}
-            >
-              <SplitText
-                text={isRtl ? 'سوق المورّدين' : 'Sellers Marketplace'}
-                tag="h1"
-                className="sellers-hero__title"
-                textAlign={isRtl ? 'right' : 'left'}
-                delay={18}
-                duration={0.9}
-                splitType="chars"
-                threshold={0.2}
-                from={{ opacity: 0, y: 34 }}
-              />
-              <p className="sellers-hero__sub">
-                {isRtl
-                  ? 'مورّدون ومبدعون موثّقون — كل واحد في تخصّصه، بأوقات عمل واضحة ومعرض للأعمال. اطلب منه مباشرة.'
-                  : 'Verified suppliers and creators — each in their craft, with clear working hours and a live portfolio.'}
-              </p>
-              <div className="sellers-hero__chips">
-                <span className="sellers-hero__chip">
-                  <b>{loading ? '…' : realSellers.length}</b>
-                  {isRtl ? 'مورّد مسجّل' : 'registered suppliers'}
-                </span>
-                <span className="sellers-hero__chip">
-                  <b>{SELLER_SPECIALTIES.length}</b>
-                  {isRtl ? 'تخصّص متاح' : 'specialties'}
-                </span>
-              </div>
-            </motion.div>
-          </div>
         </div>
       </section>
 
@@ -214,19 +170,22 @@ export default function SellersPage() {
         </div>
 
         {filtered.length > 0 ? (
-          <motion.div
-            key={activeSpecialty ? activeSpecialty.key : 'all'}
-            className="sellers-grid"
-            variants={{ show: { transition: { staggerChildren: 0.07 } } }}
-            initial="hidden"
-            animate="show"
-          >
-            {filtered.map((p, i) => (
-              <motion.div key={p.id} variants={itemVariants} style={{ zIndex: i }}>
-                <SellerCard profile={p} onOpen={setActive} />
-              </motion.div>
-            ))}
-          </motion.div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSpecialty ? activeSpecialty.key : 'all'}
+              className="sellers-grid"
+              variants={gridVariants}
+              initial="hidden"
+              animate="show"
+              exit={gridExit}
+            >
+              {filtered.map((p) => (
+                <motion.div key={p.id} variants={itemVariants} style={{ height: '100%' }}>
+                  <SellerCard profile={p} />
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
         ) : (
           <div className="sellers-empty">
             <img src="/sellers/icons/creators.png" alt="" />
@@ -235,10 +194,6 @@ export default function SellersPage() {
           </div>
         )}
       </div>
-
-      <AnimatePresence>
-        {active && <WorksModal profile={active} onClose={() => setActive(null)} />}
-      </AnimatePresence>
     </main>
   );
 }
