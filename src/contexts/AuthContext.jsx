@@ -6,7 +6,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { supabase, isSupabaseConfigured, getUserProfile } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, getUserProfile, hasSellerColumns } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
@@ -41,7 +41,11 @@ async function upsertUserProfile(cred, data) {
       store_name: data.storeName || '',
       created_at: data.createdAt || new Date().toISOString(),
     };
-    await supabase.from('users').upsert(row, { onConflict: 'firebase_uid' });
+    if (data.role === 'seller' && (await hasSellerColumns())) {
+      row.seller_status = data.sellerStatus || 'pending';
+    }
+    const { error } = await supabase.from('users').upsert(row, { onConflict: 'firebase_uid' });
+    if (error) console.warn('Supabase profile write skipped:', error.message);
   } catch (err) {
     console.warn('Supabase profile write skipped:', err.message);
   }
@@ -165,12 +169,14 @@ export function AuthProvider({ children }) {
   const signup = useCallback(async ({ email, password, name, role, phone, storeName }) => {
     handledRef.current = true;
     const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const sellersReady = role === 'seller' ? await hasSellerColumns() : false;
     const userData = {
       name,
       email,
       role,
       phone: phone || '',
       storeName: storeName || '',
+      ...(sellersReady ? { sellerStatus: 'pending', seller_status: 'pending' } : {}),
       createdAt: new Date().toISOString(),
     };
 

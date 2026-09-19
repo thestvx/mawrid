@@ -82,6 +82,8 @@ export default function SellerDashboard() {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const tab = new URLSearchParams(window.location.search).get('tab') || 'overview';
+  const sellerStatus = user?.seller_status;
+  const isPending = role === 'seller' && !!sellerStatus && sellerStatus !== 'verified';
 
   useEffect(() => {
     if (role !== 'seller' && user) {
@@ -96,7 +98,7 @@ export default function SellerDashboard() {
           <div className="d-card" style={{ borderRadius: 20 }}>
             <div className="d-card__header">
               <h3 className="d-card__title">{t('dashboard.products')}</h3>
-              <button className="btn btn--primary">{t('dashboard.addProduct')}</button>
+              <button className="btn btn--primary" disabled={isPending}>{t('dashboard.addProduct')}</button>
             </div>
             <div className="d-table-wrap">
               <table className="d-table">
@@ -125,8 +127,8 @@ export default function SellerDashboard() {
                       <td><span className={`d-badge d-badge--${p.status}`}>{t(`dashboard.status${p.status.charAt(0).toUpperCase() + p.status.slice(1)}`)}</span></td>
                       <td>
                         <div className="d-actions">
-                          <button className="d-actions__btn">{t('dashboard.editProduct')}</button>
-                          <button className="d-actions__btn d-actions__btn--danger">{t('dashboard.deleteProduct')}</button>
+                          <button className="d-actions__btn" disabled={isPending}>{t('dashboard.editProduct')}</button>
+                          <button className="d-actions__btn d-actions__btn--danger" disabled={isPending}>{t('dashboard.deleteProduct')}</button>
                         </div>
                       </td>
                     </tr>
@@ -221,27 +223,29 @@ export default function SellerDashboard() {
           <div className="d-card" style={{ borderRadius: 20 }}>
             <h3 className="d-card__title">{t('dashboard.settings')}</h3>
             <form className="d-form" onSubmit={(e) => e.preventDefault()}>
-              <div className="d-form__group">
-                <label>{t('auth.storeName')}</label>
-                <input type="text" defaultValue="Creative Studio X" className="d-form__input" />
-              </div>
-              <div className="d-form__group">
-                <label>{t('auth.storeDesc')}</label>
-                <textarea className="d-form__input d-form__textarea" rows={3} defaultValue="Premium UI Kits & Digital Assets" />
-              </div>
-              <div className="d-form__row">
+              <fieldset disabled={isPending} style={{ border: 0, padding: 0, margin: 0, display: 'contents' }}>
                 <div className="d-form__group">
-                  <label>{t('auth.email')}</label>
-                  <input type="email" defaultValue="store@creativestudio.com" className="d-form__input" />
+                  <label>{t('auth.storeName')}</label>
+                  <input type="text" defaultValue="Creative Studio X" className="d-form__input" />
                 </div>
                 <div className="d-form__group">
-                  <label>{t('auth.phone')}</label>
-                  <input type="tel" defaultValue="+1 555 123 4567" className="d-form__input" />
+                  <label>{t('auth.storeDesc')}</label>
+                  <textarea className="d-form__input d-form__textarea" rows={3} defaultValue="Premium UI Kits & Digital Assets" />
                 </div>
-              </div>
-              <button type="submit" className="btn btn--primary" style={{ alignSelf: 'flex-start' }}>
-                {dir === 'rtl' ? 'حفظ التغييرات' : 'Save Changes'}
-              </button>
+                <div className="d-form__row">
+                  <div className="d-form__group">
+                    <label>{t('auth.email')}</label>
+                    <input type="email" defaultValue="store@creativestudio.com" className="d-form__input" />
+                  </div>
+                  <div className="d-form__group">
+                    <label>{t('auth.phone')}</label>
+                    <input type="tel" defaultValue="+1 555 123 4567" className="d-form__input" />
+                  </div>
+                </div>
+                <button type="submit" className="btn btn--primary" style={{ alignSelf: 'flex-start' }}>
+                  {dir === 'rtl' ? 'حفظ التغييرات' : 'Save Changes'}
+                </button>
+              </fieldset>
             </form>
           </div>
         );
@@ -390,5 +394,25 @@ export default function SellerDashboard() {
     }
   };
 
-  return <div className="d-content">{renderContent()}</div>;
+  const pendingBanner = isPending ? (
+    <div className="d-card" style={{ marginBottom: 20, border: '1px solid #FCD34D', background: 'linear-gradient(135deg,#fffbeb,#ffffff)', borderRadius: 20 }}>
+      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(245,158,11,0.14)', color: '#B45309', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <DashIcon name="warn" size={22} />
+        </div>
+        <div>
+          <h3 style={{ margin: '0 0 6px', fontSize: '1rem', fontWeight: 700, color: 'var(--color-on-surface)' }}>
+            {dir === 'rtl' ? 'حسابك قيد المراجعة' : 'Your account is pending review'}
+          </h3>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-secondary)' }}>
+            {dir === 'rtl'
+              ? 'تم استلام طلب انتسابك كمورّد. يمكنك تصفّح الأقسام والطلب كالمعتاد، لكن تعديل المتجر والمنتجات يُفتح بعد توثيق حسابك من الإدارة.'
+              : 'Your supplier application was received. You can browse and order as usual, but store & product editing unlocks once an admin verifies your account.'}
+          </p>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  return <div className="d-content">{pendingBanner}{renderContent()}</div>;
 }

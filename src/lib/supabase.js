@@ -73,13 +73,27 @@ export async function fetchProductById(id) {
   return { data, error: null };
 }
 
+let sellerColumnsPromise = null;
+
+export function hasSellerColumns() {
+  if (!supabase) return Promise.resolve(false);
+  if (!sellerColumnsPromise) {
+    sellerColumnsPromise = supabase
+      .from('users')
+      .select('seller_status')
+      .limit(1)
+      .then(({ error }) => !(error && /seller_status/.test(error.message || '')))
+      .catch(() => false);
+  }
+  return sellerColumnsPromise;
+}
+
 export async function fetchSellers() {
   if (!supabase) return emptyResult();
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('role', 'seller')
-    .order('created_at', { ascending: true });
+  const ready = await hasSellerColumns();
+  let q = supabase.from('users').select('*').eq('role', 'seller');
+  if (ready) q = q.eq('seller_status', 'verified');
+  const { data, error } = await q.order('created_at', { ascending: true });
   if (error) { console.warn('sellers load failed:', error.message); return emptyResult(); }
   return { data: data || [], error: null };
 }

@@ -36,6 +36,7 @@ function ClockIcon() {
 const AVAIL = {
   full: { ar: 'متفرّغ للعمل', en: 'Full-time' },
   part: { ar: 'متفرّغ جزئياً', en: 'Part-time' },
+  busy: { ar: 'مشغول حالياً', en: 'Busy' },
 };
 
 function Stars({ rating }) {
@@ -61,6 +62,9 @@ export default function SellerCard({ profile }) {
   const hoursLabel = `${profile.hours.from} – ${profile.hours.to}`;
   const starRating = profile.stats ? profile.stats.rating : 0;
   const href = `/sellers/${profile.specialtyKey}/${profile.id}`;
+  const coverBg = /^(https?:|data:|\/)/.test(profile.cover || '')
+    ? `url(${profile.cover}) center/cover no-repeat`
+    : profile.cover;
 
   const shots = useMemo(() => {
     const all = [];
@@ -91,7 +95,7 @@ export default function SellerCard({ profile }) {
   return (
     <article className={`seller-card${isBrand ? ' seller-card--brand' : ''}`}>
       <div className="seller-card__cover">
-        <span className="seller-card__cover-fill" style={{ background: profile.cover }} />
+        <span className="seller-card__cover-fill" style={{ background: coverBg }} />
         <img className="seller-card__watermark" src={SPECIALTY_ICON[profile.specialtyKey]} alt="" loading="lazy" />
         <span className={`seller-card__avail seller-card__avail--${profile.availability}`}>
           {isRtl ? av.ar : av.en}
@@ -105,8 +109,10 @@ export default function SellerCard({ profile }) {
       </div>
 
       <div className="seller-card__head">
-        <span className="seller-card__avatar" style={{ background: profile.avatarGradient }}>
-          {initials(name)}
+        <span className="seller-card__avatar" style={profile.avatar_url ? undefined : { background: profile.avatarGradient }}>
+          {profile.avatar_url
+            ? <img src={profile.avatar_url} alt={name} style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover' }} />
+            : initials(name)}
           {profile.verified && <VerifiedBadge />}
         </span>
         <div className="seller-card__id">

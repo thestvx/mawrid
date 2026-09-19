@@ -1993,3 +1993,73 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ── Admin modals ── */
+.d-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  overflow-y: auto;
+  animation: dModalFade 0.2s ease;
+}
+
+.d-modal__card {
+  width: 100%;
+  max-width: 640px;
+  margin: auto;
+  background: #fff;
+  border-radius: 22px;
+  border: 1px solid var(--color-outline-variant);
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.28);
+  padding: 26px;
+  animation: dModalRise 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.d-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.d-modal__header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--color-on-surface);
+}
+
+.d-modal__close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--color-outline-variant);
+  background: var(--color-surface-container-low);
+  color: var(--color-on-surface);
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.d-modal__close:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+@keyframes dModalFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dModalRise {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+

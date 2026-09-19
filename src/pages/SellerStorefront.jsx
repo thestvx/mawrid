@@ -30,6 +30,7 @@ const FILTERS = [
 const AVAIL = {
   full: { ar: 'متفرّغ للعمل', en: 'Full-time' },
   part: { ar: 'متفرّغ جزئياً', en: 'Part-time' },
+  busy: { ar: 'مشغول حالياً', en: 'Busy' },
 };
 
 const initials = (name) => (name || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('');
@@ -175,8 +176,13 @@ export default function SellerStorefront() {
   const specialtyLabel = isRtl ? specialtyMeta.name_ar : specialtyMeta.name_en;
   const hoursLabel = `${profile.hours.from} – ${profile.hours.to} · ${profile.hours.zone}`;
   const palette = isBrand
-    ? Array.from(new Map((profile.models || []).flatMap((m) => m.colors).map((c) => [c.hex, c])).values())
+    ? Array.from(new Map((profile.models || []).flatMap((m) => (m.colors || [])).map((c) => [c.hex, c])).values())
     : [];
+
+  const isUrl = (v) => typeof v === 'string' && /^(https?:|data:|\/)/.test(v);
+  const coverStyle = isUrl(profile.cover)
+    ? { backgroundImage: `url(${profile.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { background: profile.cover };
 
   const tabs = isBrand
     ? [
@@ -217,7 +223,7 @@ export default function SellerStorefront() {
   return (
     <main className="store-page">
       <section className="store-hero">
-        <div className="store-hero__bg" style={{ background: profile.cover }}>
+        <div className="store-hero__bg" style={coverStyle}>
           <img className="store-hero__mark" src={SPECIALTY_ICON[profile.specialtyKey]} alt="" />
         </div>
         <div className="store-hero__veil" />
@@ -247,10 +253,10 @@ export default function SellerStorefront() {
           >
             <motion.span
               className="store-hero__avatar"
-              style={{ background: profile.avatarGradient }}
+              style={profile.avatar_url ? undefined : { background: profile.avatarGradient }}
               variants={rise}
             >
-              {initials(name)}
+              {profile.avatar_url ? <img src={profile.avatar_url} alt={name} /> : initials(name)}
               {profile.verified && <Verified size={24} />}
             </motion.span>
 
@@ -334,13 +340,17 @@ export default function SellerStorefront() {
                   {profile.models.map((m) => (
                     <motion.article className="store-model" key={m.id} variants={rise}>
                       <div className="store-model__media">
-                        <img src={m.image} alt={isRtl ? m.name_ar : m.name_en} loading="lazy" />
-                        <span className="store-model__colors">
-                          {m.colors.map((c) => <i key={c.hex} style={{ background: c.hex }} title={c.name_ar} />)}
-                        </span>
+                        {m.image
+                          ? <img src={m.image} alt={isRtl ? m.name_ar : m.name_en} loading="lazy" />
+                          : <img src={SPECIALTY_ICON[profile.specialtyKey]} alt="" className="store-model__ph" />}
+                        {(m.colors || []).length > 0 && (
+                          <span className="store-model__colors">
+                            {(m.colors || []).map((c) => <i key={c.hex} style={{ background: c.hex }} title={c.name_ar} />)}
+                          </span>
+                        )}
                       </div>
                       <div className="store-model__body">
-                        <h3>{isRtl ? m.name_ar : m.name_en}</h3>
+                        <h3>{(isRtl ? m.name_ar : m.name_en) || (isRtl ? 'موديل' : 'Model')}</h3>
                         <button className="store-model__cta" onClick={() => setRequest({ tab: 'request', modelId: m.id })}>
                           {isRtl ? 'اطلب موديل ولون' : 'Request model & color'}
                         </button>

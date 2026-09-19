@@ -8,26 +8,33 @@ export const SELLER_SPECIALTIES = [
 ];
 
 export function mapRealSeller(u, i = 0) {
-  const key = SELLER_SPECIALTIES[i % SELLER_SPECIALTIES.length].key;
-  const name = u.name || 'بائع مَورد';
+  const key = u.specialty && SELLER_SPECIALTIES.some((s) => s.key === u.specialty)
+    ? u.specialty
+    : SELLER_SPECIALTIES[i % SELLER_SPECIALTIES.length].key;
+  const name = u.name || 'مورّد مَورد';
   const store = u.store_name || '';
+  const works = Array.isArray(u.works) ? u.works : [];
+  const models = Array.isArray(u.models) ? u.models : [];
+  const rating = Number(u.rating) || 0;
   return {
     id: `real-${u.id}`,
-    kind: 'seller',
+    kind: models.length ? 'brand' : 'seller',
     specialtyKey: key,
     name,
     name_en: name,
     role_ar: store ? `متجر ${store}` : 'مورّد على مَورد',
     role_en: store || 'Supplier on Mawrid',
-    cover: 'linear-gradient(135deg,#ffb199,#a53c00)',
+    cover: u.cover || 'linear-gradient(135deg,#ffb199,#a53c00)',
     avatarGradient: 'linear-gradient(135deg,#ff8a3d,#7e2c00)',
-    verified: false,
-    bio_ar: u.email || '',
-    bio_en: u.email || '',
-    availability: 'full',
-    hours: { from: '09:00', to: '18:00', zone: 'GST' },
-    stats: { projects: 0, products: 0, rating: 0 },
-    works: [],
+    avatar_url: u.avatar_url || '',
+    verified: u.seller_status ? u.seller_status === 'verified' : true,
+    bio_ar: u.bio || store || '',
+    bio_en: u.bio_en || u.bio || store || '',
+    availability: u.availability || 'full',
+    hours: { from: u.hours_from || '09:00', to: u.hours_to || '18:00', zone: u.hours_zone || 'GST' },
+    stats: { projects: works.length, products: models.length, rating },
+    works,
+    models,
   };
 }
 

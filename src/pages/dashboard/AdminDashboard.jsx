@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import DashIcon from '../../components/dashboard/DashIcon';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { subscriptionGroups } from '../../data/subscriptions';
+import { SELLER_SPECIALTIES } from '../../data/sellers';
 import { matchPlanProduct } from '../../lib/plans';
 
 const EMPTY_PRODUCT = {
@@ -34,6 +35,48 @@ const PRICING_MIGRATION_SQL = `ALTER TABLE products
   ADD COLUMN IF NOT EXISTS sale_price_eur numeric,
   ADD COLUMN IF NOT EXISTS price_dzd numeric,
   ADD COLUMN IF NOT EXISTS sale_price_dzd numeric;`;
+
+const SUPPLIERS_MIGRATION_SQL = `ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS seller_status text NOT NULL DEFAULT 'pending',
+  ADD COLUMN IF NOT EXISTS specialty text,
+  ADD COLUMN IF NOT EXISTS bio text,
+  ADD COLUMN IF NOT EXISTS bio_en text,
+  ADD COLUMN IF NOT EXISTS avatar_url text,
+  ADD COLUMN IF NOT EXISTS cover text,
+  ADD COLUMN IF NOT EXISTS hours_from text,
+  ADD COLUMN IF NOT EXISTS hours_to text,
+  ADD COLUMN IF NOT EXISTS hours_zone text,
+  ADD COLUMN IF NOT EXISTS availability text DEFAULT 'full',
+  ADD COLUMN IF NOT EXISTS rating numeric DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS works jsonb DEFAULT '[]'::jsonb,
+  ADD COLUMN IF NOT EXISTS models jsonb DEFAULT '[]'::jsonb;`;
+
+const EMPTY_SUPPLIER = {
+  id: '',
+  name: '',
+  email: '',
+  phone: '',
+  store_name: '',
+  specialty: 'designers',
+  bio: '',
+  bio_en: '',
+  avatar_url: '',
+  cover: '',
+  hours_from: '09:00',
+  hours_to: '18:00',
+  hours_zone: 'GST',
+  availability: 'full',
+  rating: '',
+  seller_status: 'verified',
+  works: '',
+  models: '',
+};
+
+const AVAILABILITY_OPTIONS = [
+  { value: 'full', ar: 'متفرّغ للعمل', en: 'Full-time' },
+  { value: 'part', ar: 'متفرّغ جزئياً', en: 'Part-time' },
+  { value: 'busy', ar: 'مشغول حالياً', en: 'Currently busy' },
+];
 
 function useAnimatedNumber(target, duration = 2500, prefix = '', suffix = '') {
   const [display, setDisplay] = useState(prefix + '0' + suffix);
@@ -99,7 +142,7 @@ function getStatusLabel(status, dir) {
     visible: dir === 'rtl' ? 'ظاهر' : 'Visible',
     suspended: dir === 'rtl' ? 'محظور' : 'Suspended',
     buyer: dir === 'rtl' ? 'مشتري' : 'Buyer',
-    seller: dir === 'rtl' ? 'بائع' : 'Seller',
+    seller: dir === 'rtl' ? 'مورّد' : 'Supplier',
     admin: dir === 'rtl' ? 'مدير' : 'Admin',
   };
   return map[status] || status;
@@ -261,6 +304,12 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   const [catForm, setCatForm] = useState({ id: '', name: '', name_en: '', slug: '', icon: '', sort_order: 0, enabled: true });
   const [toast, setToast] = useState(null);
+  const [suppliersReady, setSuppliersReady] = useState(true);
+  const [showSupplierForm, setShowSupplierForm] = useState(false);
+  const [editingSupplier, setEditingSupplier] = useState(null);
+  const [supplierForm, setSupplierForm] = useState(EMPTY_SUPPLIER);
+  const [savingSupplier, setSavingSupplier] = useState(false);
+  const [supplierFilter, setSupplierFilter] = useState('all');
 
   const notify = useCallback((msg) => {
     setToast(msg);
@@ -451,9 +500,30 @@ export default function AdminDashboard() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    supabase
+      .from('users')
+      .select('seller_status')
+      .limit(1)
+      .then((res) => {
+        if (res.error && /seller_status/.test(res.error.message || '')) setSuppliersReady(false);
+      })
+      .catch(() => {});
+  }, []);
+
   const copyMigrationSql = async () => {
     try {
       await navigator.clipboard.writeText(PRICING_MIGRATION_SQL);
+      notify(dir === 'rtl' ? 'تم نسخ كود SQL — ألصقه في محرر SQL في Supabase' : 'SQL copied — paste it into the Supabase SQL editor');
+    } catch {
+      notify(dir === 'rtl' ? 'تعذّر النسخ' : 'Copy failed');
+    }
+  };
+
+  const copySuppliersSql = async () => {
+    try {
+      await navigator.clipboard.writeText(SUPPLIERS_MIGRATION_SQL);
       notify(dir === 'rtl' ? 'تم نسخ كود SQL — ألصقه في محرر SQL في Supabase' : 'SQL copied — paste it into the Supabase SQL editor');
     } catch {
       notify(dir === 'rtl' ? 'تعذّر النسخ' : 'Copy failed');
@@ -631,9 +701,131 @@ export default function AdminDashboard() {
     loadAll();
   };
 
+  const parseUrlList = (text) => (text || '').split('\n').map(s => s.trim()).filter(Boolean);
+
+  const specLabel = useCallback((key) => {
+    const s = SELLER_SPECIALTIES.find(x => x.key === key);
+    if (!s) return '—';
+    return dir === 'rtl' ? s.name_ar : s.name_en;
+  }, [dir]);
+
+  const openAddSupplier = () => {
+    setEditingSupplier(null);
+    setSupplierForm(EMPTY_SUPPLIER);
+    setShowSupplierForm(true);
+  };
+
+  const openEditSupplier = (u) => {
+    setEditingSupplier(u);
+    setSupplierForm({
+      id: u.id,
+      name: u.name || '',
+      email: u.email || '',
+      phone: u.phone || '',
+      store_name: u.store_name || '',
+      specialty: u.specialty || 'designers',
+      bio: u.bio || '',
+      bio_en: u.bio_en || '',
+      avatar_url: u.avatar_url || '',
+      cover: u.cover || '',
+      hours_from: u.hours_from || '09:00',
+      hours_to: u.hours_to || '18:00',
+      hours_zone: u.hours_zone || 'GST',
+      availability: u.availability || 'full',
+      rating: u.rating != null ? String(u.rating) : '',
+      seller_status: u.seller_status || 'pending',
+      works: Array.isArray(u.works)
+        ? u.works.map(w => (typeof w === 'string' ? w : (w.src || w.url || ''))).filter(Boolean).join('\n')
+        : '',
+      models: Array.isArray(u.models)
+        ? u.models.map(m => (typeof m === 'string' ? m : (m.image || m.src || ''))).filter(Boolean).join('\n')
+        : '',
+    });
+    setShowSupplierForm(true);
+  };
+
+  const setSupplierField = (key, value) => setSupplierForm(f => ({ ...f, [key]: value }));
+
+  const saveSupplier = async (e) => {
+    e.preventDefault();
+    if (!supplierForm.name.trim()) return;
+    if (!suppliersReady) {
+      notify(dir === 'rtl' ? 'شغّل كود SQL أولاً لتفعيل حقول المورّدين' : 'Run the SQL first to enable supplier fields');
+      return;
+    }
+    setSavingSupplier(true);
+    const payload = {
+      name: supplierForm.name.trim(),
+      email: supplierForm.email.trim(),
+      phone: supplierForm.phone.trim(),
+      store_name: supplierForm.store_name.trim(),
+      role: 'seller',
+      seller_status: supplierForm.seller_status,
+      specialty: supplierForm.specialty,
+      bio: supplierForm.bio.trim(),
+      bio_en: supplierForm.bio_en.trim(),
+      avatar_url: supplierForm.avatar_url.trim(),
+      cover: supplierForm.cover.trim(),
+      hours_from: supplierForm.hours_from,
+      hours_to: supplierForm.hours_to,
+      hours_zone: supplierForm.hours_zone,
+      availability: supplierForm.availability,
+      rating: supplierForm.rating === '' ? 0 : (parseFloat(supplierForm.rating) || 0),
+      works: parseUrlList(supplierForm.works).map((src, i) => ({ id: `w${i}`, type: 'image', src, title_ar: '', title_en: '' })),
+      models: parseUrlList(supplierForm.models).map((src, i) => ({ id: `m${i}`, image: src, name_ar: '', name_en: '', colors: [] })),
+    };
+    let res;
+    if (editingSupplier) {
+      res = await supabase.from('users').update(payload).eq('id', editingSupplier.id);
+    } else {
+      res = await supabase.from('users').insert({
+        ...payload,
+        firebase_uid: `manual-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        created_at: new Date().toISOString(),
+      });
+    }
+    setSavingSupplier(false);
+    if (res.error) {
+      notify(dir === 'rtl' ? 'فشل الحفظ: ' + res.error.message : 'Save failed: ' + res.error.message);
+      return;
+    }
+    notify(editingSupplier
+      ? (dir === 'rtl' ? 'تم تحديث المورّد' : 'Supplier updated')
+      : (dir === 'rtl' ? 'تمت إضافة المورّد' : 'Supplier added'));
+    setShowSupplierForm(false);
+    loadAll();
+  };
+
+  const setSellerStatus = async (u, status) => {
+    if (!suppliersReady) {
+      notify(dir === 'rtl' ? 'شغّل كود SQL أولاً لتفعيل حالة المورّد' : 'Run the SQL first to enable supplier status');
+      return;
+    }
+    const res = await supabase.from('users').update({ seller_status: status }).eq('id', u.id);
+    if (res.error) { notify(dir === 'rtl' ? 'فشل التحديث' : 'Update failed'); return; }
+    const msg = status === 'verified'
+      ? (dir === 'rtl' ? 'تم توثيق المورّد' : 'Supplier verified')
+      : status === 'rejected'
+        ? (dir === 'rtl' ? 'تم رفض المورّد' : 'Supplier rejected')
+        : (dir === 'rtl' ? 'تم تحديث حالة المورّد' : 'Supplier status updated');
+    notify(msg);
+    loadAll();
+  };
+
+  const removeSupplier = async (u) => {
+    if (!window.confirm(dir === 'rtl' ? `حذف المورّد "${u.name || u.email}"؟` : `Delete supplier "${u.name || u.email}"?`)) return;
+    const res = await supabase.from('users').delete().eq('id', u.id);
+    if (res.error) { notify(dir === 'rtl' ? 'فشل الحذف' : 'Delete failed'); return; }
+    notify(dir === 'rtl' ? 'تم حذف المورّد' : 'Supplier deleted');
+    loadAll();
+  };
+
   const pendingProducts = products.filter(p => p.status === 'pending');
   const activeProducts = products.filter(p => p.status === 'active');
   const sellers = users.filter(u => u.role === 'seller');
+  const sellerStatusOf = (u) => u.seller_status || 'pending';
+  const pendingSellers = sellers.filter(u => sellerStatusOf(u) === 'pending');
+  const verifiedSellers = sellers.filter(u => sellerStatusOf(u) === 'verified');
 
   const filteredProducts = useMemo(() => {
     const q = search.toLowerCase();
@@ -680,8 +872,8 @@ export default function AdminDashboard() {
           <StatCard label={dir === 'rtl' ? 'المنتجات' : 'Products'} value={products.length} spark={salesSeries} sparkColor="#FF8A45" icon="products" iconBg="rgba(255, 98, 1, 0.14)" glowColor="rgba(255, 98, 1, 0.18)" trend={pendingProducts.length > 0 ? `${pendingProducts.length} ${dir === 'rtl' ? 'بانتظار المراجعة' : 'pending'}` : null} trendColor="#FBBF24" delay={100} />
           <StatCard label={dir === 'rtl' ? 'المنتجات النشطة' : 'Active Products'} value={activeProducts.length} spark={activeSeries} sparkColor="#34D399" icon="bag" iconBg="rgba(16, 185, 129, 0.14)" glowColor="rgba(16, 185, 129, 0.18)" trend={activeProducts.length ? `${Math.min(100, Math.round((activeProducts.length / (products.length || 1)) * 100))}% ${dir === 'rtl' ? 'من الإجمالي' : 'of total'}` : null} trendColor="#6EE7B7" delay={200} />
           <StatCard label={dir === 'rtl' ? 'التصنيفات' : 'Categories'} value={categories.filter(c => c.enabled).length} spark={catSeries} sparkColor="#A78BFA" icon="layers" iconBg="rgba(139, 92, 246, 0.14)" glowColor="rgba(139, 92, 246, 0.2)" trend={dir === 'rtl' ? 'مفعّلة' : 'Enabled'} delay={300} />
-          <StatCard label={dir === 'rtl' ? 'المستخدمون' : 'Users'} value={users.length} spark={userSeries} sparkColor="#5B7CFA" icon="users" iconBg="rgba(73, 75, 214, 0.16)" glowColor="rgba(73, 75, 214, 0.2)" trend={users.length ? `${sellers.length} ${dir === 'rtl' ? 'بائعين' : 'sellers'}` : null} trendColor="#94A3B8" delay={400} />
-          <StatCard label={dir === 'rtl' ? 'البائعون' : 'Sellers'} value={sellers.length} spark={sellerSeries} sparkColor="#B6B9FF" icon="stores" iconBg="rgba(133, 137, 255, 0.16)" glowColor="rgba(133, 137, 255, 0.2)" trend={dir === 'rtl' ? 'نشط' : 'Active'} delay={500} />
+          <StatCard label={dir === 'rtl' ? 'المستخدمون' : 'Users'} value={users.length} spark={userSeries} sparkColor="#5B7CFA" icon="users" iconBg="rgba(73, 75, 214, 0.16)" glowColor="rgba(73, 75, 214, 0.2)" trend={users.length ? `${sellers.length} ${dir === 'rtl' ? 'مورّدين' : 'suppliers'}` : null} trendColor="#94A3B8" delay={400} />
+          <StatCard label={dir === 'rtl' ? 'المورّدون' : 'Suppliers'} value={sellers.length} spark={sellerSeries} sparkColor="#B6B9FF" icon="stores" iconBg="rgba(133, 137, 255, 0.16)" glowColor="rgba(133, 137, 255, 0.2)" trend={pendingSellers.length ? `${pendingSellers.length} ${dir === 'rtl' ? 'بانتظار المراجعة' : 'pending'}` : (dir === 'rtl' ? 'نشط' : 'Active')} trendColor={pendingSellers.length ? '#FBBF24' : undefined} delay={500} />
           <StatCard label={dir === 'rtl' ? 'إجمالي المبيعات' : 'Total Sales'} value={totalSales} spark={cumSales} sparkColor="#FBBF24" icon="analytics" iconBg="rgba(245, 158, 11, 0.14)" glowColor="rgba(245, 158, 11, 0.2)" trend={dir === 'rtl' ? 'تراكمي' : 'Cumulative'} delay={600} />
         </div>
 
@@ -694,9 +886,9 @@ export default function AdminDashboard() {
             <span className="d-quick-card__icon" style={{ color: '#494bd6' }}><DashIcon name="users" size={24} /></span>
             <span>{dir === 'rtl' ? 'إدارة المستخدمين' : 'User Management'}</span>
           </a>
-          <a href="?tab=sellers" className="d-quick-card" onClick={(e) => { e.preventDefault(); setTab('sellers'); }}>
+            <a href="?tab=sellers" className="d-quick-card" onClick={(e) => { e.preventDefault(); setTab('sellers'); }}>
             <span className="d-quick-card__icon" style={{ color: '#494bd6' }}><DashIcon name="stores" size={24} /></span>
-            <span>{dir === 'rtl' ? 'إدارة البائعين' : 'Seller Management'}</span>
+            <span>{dir === 'rtl' ? 'إدارة المورّدين' : 'Supplier Management'}</span>
           </a>
           <a href="?tab=products" className="d-quick-card" onClick={(e) => { e.preventDefault(); setTab('products'); }}>
             <span className="d-quick-card__icon" style={{ color: '#10b981' }}><DashIcon name="products" size={24} /></span>
@@ -803,7 +995,7 @@ export default function AdminDashboard() {
                     style={{ padding: '6px 10px', fontSize: '0.8125rem' }}
                   >
                     <option value="buyer">{dir === 'rtl' ? 'مشتري' : 'Buyer'}</option>
-                    <option value="seller">{dir === 'rtl' ? 'بائع' : 'Seller'}</option>
+                    <option value="seller">{dir === 'rtl' ? 'مورّد' : 'Supplier'}</option>
                     <option value="admin">{dir === 'rtl' ? 'مدير' : 'Admin'}</option>
                   </select>
                 </td>
@@ -820,45 +1012,187 @@ export default function AdminDashboard() {
     </div>
   );
 
-  const renderSellers = () => (
-    <div className="d-card">
-      <h3 className="d-card__title">{dir === 'rtl' ? 'إدارة البائعين' : 'Seller Management'}</h3>
-      {sellers.length === 0 ? (
-        <p className="d-empty">{dir === 'rtl' ? 'لا يوجد بائعون بعد' : 'No sellers yet'}</p>
-      ) : (
-        <div className="d-table-wrap">
-          <table className="d-table">
-            <thead>
-              <tr>
-                <th>{dir === 'rtl' ? 'البائع' : 'Seller'}</th>
-                <th>{dir === 'rtl' ? 'المتجر' : 'Store'}</th>
-                <th>{dir === 'rtl' ? 'منتجات المخزن' : 'Products'}</th>
-                <th>{dir === 'rtl' ? 'البريد' : 'Email'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sellers.map((u, i) => {
-                const sellerProducts = products.filter(p => p.seller_name === u.name || p.seller_id === u.firebase_uid).length;
-                return (
-                  <tr key={u.id}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <InitialsAvatar name={u.name} bg={i % 2 === 0 ? '#8589ff20' : '#2f2ebe20'} />
-                        <strong>{u.name}</strong>
-                      </div>
-                    </td>
-                    <td>{u.store_name || '—'}</td>
-                    <td>{sellerProducts}</td>
-                    <td>{u.email}</td>
+  const renderSellers = () => {
+    const q = search.trim().toLowerCase();
+    const list = sellers.filter((u) => {
+      if (supplierFilter !== 'all' && sellerStatusOf(u) !== supplierFilter) return false;
+      if (!q) return true;
+      return (u.name || '').toLowerCase().includes(q)
+        || (u.email || '').toLowerCase().includes(q)
+        || (u.store_name || '').toLowerCase().includes(q);
+    });
+    const filters = [
+      { key: 'all', label: dir === 'rtl' ? 'الكل' : 'All', count: sellers.length },
+      { key: 'pending', label: dir === 'rtl' ? 'قيد المراجعة' : 'Pending', count: pendingSellers.length },
+      { key: 'verified', label: dir === 'rtl' ? 'موثّق' : 'Verified', count: verifiedSellers.length },
+      { key: 'rejected', label: dir === 'rtl' ? 'مرفوض' : 'Rejected', count: sellers.filter(u => sellerStatusOf(u) === 'rejected').length },
+      { key: 'suspended', label: dir === 'rtl' ? 'محظور' : 'Suspended', count: sellers.filter(u => sellerStatusOf(u) === 'suspended').length },
+    ];
+
+    return (
+      <>
+        {!suppliersReady && (
+          <div className="d-card d-card--notice" style={{ marginBottom: 20 }}>
+            <h3 className="d-card__title">{dir === 'rtl' ? 'حقول المورّدين غير مضبوطة بعد' : 'Supplier fields not set up yet'}</h3>
+            <p style={{ color: 'var(--color-secondary)', fontSize: '0.875rem', margin: '0 0 12px' }}>
+              {dir === 'rtl'
+                ? 'حالة التوثيق وتفاصيل المورّدين تحتاج أعمدة جديدة. شغّل كود SQL التالي مرة واحدة في محرر SQL في Supabase لتفعيل إضافة المورّدين وتوثيقهم:'
+                : 'Supplier verification and details need new columns. Run this SQL once in the Supabase SQL editor to enable adding and verifying suppliers:'}
+            </p>
+            <pre className="d-migrate-sql" style={{ background: '#0f172a', color: '#cbd5e1', borderRadius: 12, padding: 14, fontSize: '0.8125rem', overflowX: 'auto', margin: '0 0 12px' }}>{SUPPLIERS_MIGRATION_SQL}</pre>
+            <button className="d-actions__btn d-actions__btn--approve" onClick={copySuppliersSql}>
+              {dir === 'rtl' ? 'نسخ كود SQL' : 'Copy SQL'}
+            </button>
+          </div>
+        )}
+
+        {suppliersReady && pendingSellers.length > 0 && (
+          <div className="d-card" style={{ marginBottom: 20, border: '1px solid #FCD34D', background: 'linear-gradient(135deg,#fffbeb,#ffffff)' }}>
+            <div className="d-card__header">
+              <div>
+                <h3 className="d-card__title" style={{ marginBottom: 8 }}>{dir === 'rtl' ? 'طلبات انتساب بانتظار المراجعة' : 'Applications pending review'}</h3>
+                <span className="d-badge d-badge--pending">{pendingSellers.length} {dir === 'rtl' ? 'بانتظار التوثيق' : 'awaiting verification'}</span>
+              </div>
+            </div>
+            <div className="d-table-wrap">
+              <table className="d-table">
+                <thead>
+                  <tr>
+                    <th>{dir === 'rtl' ? 'المورّد' : 'Supplier'}</th>
+                    <th>{dir === 'rtl' ? 'المتجر' : 'Store'}</th>
+                    <th>{dir === 'rtl' ? 'التخصّص' : 'Specialty'}</th>
+                    <th>{dir === 'rtl' ? 'التسجيل' : 'Joined'}</th>
+                    <th>{dir === 'rtl' ? 'إجراءات' : 'Actions'}</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {pendingSellers.map((u) => (
+                    <tr key={u.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <InitialsAvatar name={u.name} bg="#fef3c7" />
+                          <div>
+                            <strong>{u.name || '—'}</strong>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-secondary)' }}>{u.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{u.store_name || '—'}</td>
+                      <td>{specLabel(u.specialty)}</td>
+                      <td>{fmtDate(u.created_at)}</td>
+                      <td>
+                        <div className="d-actions">
+                          <button className="d-actions__btn d-actions__btn--approve" onClick={() => setSellerStatus(u, 'verified')}>{dir === 'rtl' ? 'توثيق كمورّد' : 'Verify supplier'}</button>
+                          <button className="d-actions__btn d-actions__btn--danger" onClick={() => setSellerStatus(u, 'rejected')}>{dir === 'rtl' ? 'رفض' : 'Reject'}</button>
+                          <button className="d-actions__btn" onClick={() => openEditSupplier(u)}>{dir === 'rtl' ? 'تعديل' : 'Edit'}</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <div className="d-card">
+          <div className="d-card__header">
+            <div>
+              <h3 className="d-card__title" style={{ marginBottom: 8 }}>{dir === 'rtl' ? 'إدارة المورّدين' : 'Supplier Management'}</h3>
+              <span style={{ fontSize: '0.8125rem', color: 'var(--color-secondary)' }}>
+                {verifiedSellers.length} {dir === 'rtl' ? 'موثّق · ' : 'verified · '}{sellers.length} {dir === 'rtl' ? 'إجمالي' : 'total'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                placeholder={dir === 'rtl' ? 'بحث بالاسم أو المتجر أو البريد...' : 'Search by name, store or email...'}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="d-form__input"
+                style={{ maxWidth: 260, padding: '10px 14px' }}
+              />
+              <button className="btn btn--primary" onClick={openAddSupplier} style={{ whiteSpace: 'nowrap' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: '1rem', lineHeight: 1 }}>+</span>
+                  {dir === 'rtl' ? 'إضافة مورّد' : 'Add supplier'}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+            {filters.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setSupplierFilter(f.key)}
+                className={`d-actions__btn${supplierFilter === f.key ? ' d-actions__btn--approve' : ''}`}
+              >
+                {f.label} <span style={{ opacity: 0.7 }}>{f.count}</span>
+              </button>
+            ))}
+          </div>
+
+          {list.length === 0 ? (
+            <p className="d-empty">{dir === 'rtl' ? 'لا يوجد مورّدون مطابقون' : 'No matching suppliers'}</p>
+          ) : (
+            <div className="d-table-wrap">
+              <table className="d-table">
+                <thead>
+                  <tr>
+                    <th>{dir === 'rtl' ? 'المورّد' : 'Supplier'}</th>
+                    <th>{dir === 'rtl' ? 'المتجر' : 'Store'}</th>
+                    <th>{dir === 'rtl' ? 'التخصّص' : 'Specialty'}</th>
+                    <th>{dir === 'rtl' ? 'المنتجات' : 'Products'}</th>
+                    <th>{dir === 'rtl' ? 'التقييم' : 'Rating'}</th>
+                    <th>{dir === 'rtl' ? 'الحالة' : 'Status'}</th>
+                    <th>{dir === 'rtl' ? 'التحكم' : 'Controls'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {list.map((u, i) => {
+                    const status = sellerStatusOf(u);
+                    const sellerProducts = products.filter(p => p.seller_name === u.name || p.seller_id === u.firebase_uid).length;
+                    return (
+                      <tr key={u.id}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            {u.avatar_url
+                              ? <img src={u.avatar_url} alt={u.name} style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} onError={e => { e.currentTarget.style.display = 'none'; }} />
+                              : <InitialsAvatar name={u.name} bg={i % 2 === 0 ? '#8589ff20' : '#2f2ebe20'} />}
+                            <div>
+                              <strong>{u.name || '—'}</strong>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--color-secondary)' }}>{u.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>{u.store_name || '—'}</td>
+                        <td>{specLabel(u.specialty)}</td>
+                        <td>{sellerProducts}</td>
+                        <td>{u.rating ? Number(u.rating).toFixed(1) : '—'}</td>
+                        <td><StatusPill status={status} dir={dir} /></td>
+                        <td>
+                          <div className="d-actions">
+                            {status === 'verified' ? (
+                              <button className="d-actions__btn" onClick={() => setSellerStatus(u, 'pending')}>{dir === 'rtl' ? 'إلغاء التوثيق' : 'Unverify'}</button>
+                            ) : (
+                              <button className="d-actions__btn d-actions__btn--approve" onClick={() => setSellerStatus(u, 'verified')}>{dir === 'rtl' ? 'توثيق' : 'Verify'}</button>
+                            )}
+                            <button className="d-actions__btn" onClick={() => openEditSupplier(u)}>{dir === 'rtl' ? 'تعديل' : 'Edit'}</button>
+                            <button className="d-actions__btn d-actions__btn--danger" onClick={() => removeSupplier(u)}>{dir === 'rtl' ? 'حذف' : 'Delete'}</button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
-      )}
-    </div>
-  );
+      </>
+    );
+  };
 
   const renderProducts = () => (
     <>
@@ -1358,7 +1692,7 @@ export default function AdminDashboard() {
       overview: dir === 'rtl' ? 'نظرة عامة' : 'Overview',
       subscriptions: dir === 'rtl' ? 'الاشتراكات والأسعار' : 'Subscriptions & Pricing',
       users: dir === 'rtl' ? 'إدارة المستخدمين' : 'User Management',
-      sellers: dir === 'rtl' ? 'إدارة البائعين' : 'Seller Management',
+      sellers: dir === 'rtl' ? 'إدارة المورّدين' : 'Supplier Management',
       products: dir === 'rtl' ? 'مراجعة المنتجات' : 'Product Moderation',
       orders: dir === 'rtl' ? 'إدارة الطلبات' : 'Order Management',
       payouts: dir === 'rtl' ? 'التسويات والارباح' : 'Payouts & Earnings',
@@ -1371,7 +1705,7 @@ export default function AdminDashboard() {
       overview: dir === 'rtl' ? 'متابعة أداء المنصة لحظياً' : 'Monitor platform performance in real time',
       subscriptions: dir === 'rtl' ? 'اضبط أسعار الأقسام والفروع والمنتجات' : 'Set prices for sections, branches & products',
       users: dir === 'rtl' ? 'إدارة حسابات المشترين والبائعين' : 'Manage buyer & seller accounts',
-      sellers: dir === 'rtl' ? 'مراقبة أداء البائعين وأعمالهم' : 'Track seller activity and stores',
+      sellers: dir === 'rtl' ? 'اعتماد المورّدين ومراقبة أعمالهم' : 'Verify suppliers and track their stores',
       products: dir === 'rtl' ? 'اعتماد المنتجات ومراجعة الجودة' : 'Approve and review products',
       orders: dir === 'rtl' ? 'تتبع الطلبات وحالاتها' : 'Track orders and their status',
       payouts: dir === 'rtl' ? 'تسوية الأرباح والمدفوعات' : 'Settle earnings and payouts',
@@ -1575,6 +1909,144 @@ export default function AdminDashboard() {
                   {saving ? (dir === 'rtl' ? 'جارٍ الحفظ...' : 'Saving...') : (editing ? (dir === 'rtl' ? 'حفظ التعديلات' : 'Save Changes') : (dir === 'rtl' ? 'إضافة المنتج' : 'Add Product'))}
                 </button>
                 <button type="button" className="btn" onClick={() => setShowForm(false)}>{dir === 'rtl' ? 'إلغاء' : 'Cancel'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {showSupplierForm && (
+        <div className="d-modal">
+          <div className="d-modal__card" style={{ maxWidth: 780 }}>
+            <div className="d-modal__header">
+              <h3>{editingSupplier ? (dir === 'rtl' ? 'تعديل بيانات المورّد' : 'Edit supplier') : (dir === 'rtl' ? 'إضافة مورّد جديد' : 'Add new supplier')}</h3>
+              <button className="d-modal__close" onClick={() => setShowSupplierForm(false)}>✕</button>
+            </div>
+            {!suppliersReady && (
+              <p style={{ color: 'var(--color-error)', fontSize: '0.8125rem', margin: '0 0 12px' }}>
+                {dir === 'rtl'
+                  ? 'لن يُحفظ المورّد قبل تشغيل كود SQL الخاص بأعمدة المورّدين.'
+                  : 'The supplier cannot be saved until the supplier-columns SQL is run.'}
+              </p>
+            )}
+            <form className="d-form" onSubmit={saveSupplier} style={{ maxWidth: '100%' }}>
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'اسم المورّد' : 'Supplier name'} *</label>
+                  <input value={supplierForm.name} onChange={e => setSupplierField('name', e.target.value)} className="d-form__input" required />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'البريد الإلكتروني' : 'Email'}</label>
+                  <input type="email" value={supplierForm.email} onChange={e => setSupplierField('email', e.target.value)} className="d-form__input" />
+                </div>
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'رقم الهاتف' : 'Phone'}</label>
+                  <input value={supplierForm.phone} onChange={e => setSupplierField('phone', e.target.value)} className="d-form__input" />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'اسم المتجر' : 'Store name'}</label>
+                  <input value={supplierForm.store_name} onChange={e => setSupplierField('store_name', e.target.value)} className="d-form__input" />
+                </div>
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'التخصّص' : 'Specialty'}</label>
+                  <select value={supplierForm.specialty} onChange={e => setSupplierField('specialty', e.target.value)} className="d-form__input">
+                    {SELLER_SPECIALTIES.map(s => (
+                      <option key={s.key} value={s.key}>{dir === 'rtl' ? s.name_ar : s.name_en}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'حالة العمل' : 'Availability'}</label>
+                  <select value={supplierForm.availability} onChange={e => setSupplierField('availability', e.target.value)} className="d-form__input">
+                    {AVAILABILITY_OPTIONS.map(o => (
+                      <option key={o.value} value={o.value}>{dir === 'rtl' ? o.ar : o.en}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'من الساعة' : 'From'}</label>
+                  <input value={supplierForm.hours_from} onChange={e => setSupplierField('hours_from', e.target.value)} className="d-form__input" placeholder="09:00" />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'إلى الساعة' : 'To'}</label>
+                  <input value={supplierForm.hours_to} onChange={e => setSupplierField('hours_to', e.target.value)} className="d-form__input" placeholder="18:00" />
+                </div>
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'المنطقة الزمنية' : 'Timezone'}</label>
+                  <input value={supplierForm.hours_zone} onChange={e => setSupplierField('hours_zone', e.target.value)} className="d-form__input" placeholder="GST" />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'التقييم (من 5)' : 'Rating (out of 5)'}</label>
+                  <input value={supplierForm.rating} onChange={e => setSupplierField('rating', e.target.value)} type="number" step="0.1" min="0" max="5" className="d-form__input" placeholder="4.9" />
+                </div>
+              </div>
+
+              <div className="d-form__group">
+                <label>{dir === 'rtl' ? 'نبذة (عربي)' : 'Bio (Arabic)'}</label>
+                <textarea value={supplierForm.bio} onChange={e => setSupplierField('bio', e.target.value)} className="d-form__input d-form__textarea" rows={2} />
+              </div>
+
+              <div className="d-form__group">
+                <label>{dir === 'rtl' ? 'نبذة (إنجليزي)' : 'Bio (English)'}</label>
+                <textarea value={supplierForm.bio_en} onChange={e => setSupplierField('bio_en', e.target.value)} className="d-form__input d-form__textarea" rows={2} />
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'رابط صورة الحساب' : 'Avatar URL'}</label>
+                  <input value={supplierForm.avatar_url} onChange={e => setSupplierField('avatar_url', e.target.value)} className="d-form__input" placeholder="https://..." />
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'رابط صورة الغلاف' : 'Cover URL'}</label>
+                  <input value={supplierForm.cover} onChange={e => setSupplierField('cover', e.target.value)} className="d-form__input" placeholder="https://..." />
+                </div>
+              </div>
+
+              <div className="d-form__row">
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'حالة التوثيق' : 'Verification status'}</label>
+                  <select value={supplierForm.seller_status} onChange={e => setSupplierField('seller_status', e.target.value)} className="d-form__input">
+                    <option value="pending">{dir === 'rtl' ? 'قيد المراجعة' : 'Pending'}</option>
+                    <option value="verified">{dir === 'rtl' ? 'موثّق' : 'Verified'}</option>
+                    <option value="rejected">{dir === 'rtl' ? 'مرفوض' : 'Rejected'}</option>
+                    <option value="suspended">{dir === 'rtl' ? 'محظور' : 'Suspended'}</option>
+                  </select>
+                </div>
+                <div className="d-form__group" style={{ alignSelf: 'end' }}>
+                  <label style={{ color: 'var(--color-secondary)' }}>{dir === 'rtl' ? 'مورّد مضاف يدوياً من الأدمن' : 'Manually added by admin'}</label>
+                </div>
+              </div>
+
+              <div className="d-form__group">
+                <label>{dir === 'rtl' ? 'روابط الأعمال / الصور (سطر لكل رابط)' : 'Works / image URLs (one per line)'}</label>
+                <textarea value={supplierForm.works} onChange={e => setSupplierField('works', e.target.value)} className="d-form__input d-form__textarea" rows={3} placeholder="https://..." />
+              </div>
+
+              <div className="d-form__group">
+                <label>{dir === 'rtl' ? 'روابط الموديلات (سطر لكل رابط)' : 'Model image URLs (one per line)'}</label>
+                <textarea value={supplierForm.models} onChange={e => setSupplierField('models', e.target.value)} className="d-form__input d-form__textarea" rows={3} placeholder="https://..." />
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
+                <button type="submit" className="btn btn--primary" disabled={savingSupplier || !suppliersReady}>
+                  {savingSupplier
+                    ? (dir === 'rtl' ? 'جارٍ الحفظ...' : 'Saving...')
+                    : editingSupplier
+                      ? (dir === 'rtl' ? 'حفظ التعديلات' : 'Save Changes')
+                      : (dir === 'rtl' ? 'إضافة المورّد' : 'Add supplier')}
+                </button>
+                <button type="button" className="btn" onClick={() => setShowSupplierForm(false)}>{dir === 'rtl' ? 'إلغاء' : 'Cancel'}</button>
               </div>
             </form>
           </div>
