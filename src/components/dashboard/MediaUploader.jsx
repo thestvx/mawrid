@@ -132,20 +132,18 @@ function ImageCropModal({ src, aspect, output, onCancel, onSave }) {
             onWheel={onWheel}
           >
             {!metrics && <span className="crop-box__load">{dir === 'rtl' ? 'جارٍ التحميل…' : 'Loading…'}</span>}
-            {metrics && (
-              <img
-                ref={imgRef}
-                src={src}
-                alt=""
-                draggable={false}
-                onLoad={onImgLoad}
-                style={{
-                  width: scaledW,
-                  height: scaledH,
-                  transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px)`,
-                }}
-              />
-            )}
+            <img
+              ref={imgRef}
+              src={src}
+              alt=""
+              draggable={false}
+              onLoad={onImgLoad}
+              style={{
+                width: scaledW,
+                height: scaledH,
+                transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px)`,
+              }}
+            />
             <div className="crop-grid" />
           </div>
         </div>
