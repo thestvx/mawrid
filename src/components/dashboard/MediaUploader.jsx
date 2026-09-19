@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { uploadToCloudinary, isCloudinaryConfigured } from '../../lib/cloudinary';
 
@@ -22,11 +23,194 @@ function errLabel(message, dir) {
   return message;
 }
 
-export function ImageField({ label, value, onChange }) {
+const BOX_W = 520;
+
+function ImageCropModal({ src, aspect, output, onCancel, onSave }) {
+  const { dir } = useLanguage();
+  const imgRef = useRef(null);
+  const [metrics, setMetrics] = useState(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0, px: 0, py: 0 });
+  const savingRef = useRef(false);
+
+  const boxH = Math.round(BOX_W / aspect);
+  const scaledW = metrics ? metrics.iw * metrics.base * zoom : BOX_W;
+  const scaledH = metrics ? metrics.ih * metrics.base * zoom : boxH;
+
+  const clampPan = (z, p) => {
+    if (!metrics) return { x: 0, y: 0 };
+    const sw = metrics.iw * metrics.base * z;
+    const sh = metrics.ih * metrics.base * z;
+    const mx = Math.max(0, (sw - BOX_W) / 2);
+    const my = Math.max(0, (sh - boxH) / 2);
+    return { x: Math.max(-mx, Math.min(mx, p.x)), y: Math.max(-my, Math.min(my, p.y)) };
+  };
+
+  const setZoomClamped = (z) => {
+    const nz = Math.max(1, Math.min(4, z));
+    setZoom(nz);
+    setPan((p) => clampPan(nz, p));
+  };
+
+  const onImgLoad = () => {
+    const el = imgRef.current;
+    if (!el) return;
+    const iw = el.naturalWidth;
+    const ih = el.naturalHeight;
+    const base = Math.max(BOX_W / iw, boxH / ih);
+    setMetrics({ iw, ih, base });
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
+  const onDown = (e) => {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    dragStart.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y };
+    setDragging(true);
+  };
+
+  const onMove = (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - dragStart.current.x;
+    const dy = e.clientY - dragStart.current.y;
+    setPan(() => clampPan(zoom, { x: dragStart.current.px + dx, y: dragStart.current.py + dy }));
+  };
+
+  const onUp = (e) => {
+    setDragging(false);
+    e.currentTarget.releasePointerCapture?.(e.pointerId);
+  };
+
+  const onWheel = (e) => {
+    e.preventDefault();
+    setZoomClamped(zoom - Math.sign(e.deltaY) * 0.08);
+  };
+
+  const save = () => {
+    if (!metrics || savingRef.current) return;
+    savingRef.current = true;
+    const { iw, ih, base } = metrics;
+    const swScaled = iw * base * zoom;
+    const shScaled = ih * base * zoom;
+    const ox = (swScaled - BOX_W) / 2 - pan.x;
+    const oy = (shScaled - boxH) / 2 - pan.y;
+    const sx = Math.max(0, ox) * (iw / swScaled);
+    const sy = Math.max(0, oy) * (ih / shScaled);
+    const sw = Math.max(1, BOX_W * (iw / swScaled));
+    const sh = Math.max(1, boxH * (ih / shScaled));
+    const canvas = document.createElement('canvas');
+    canvas.width = output.w;
+    canvas.height = output.h;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(imgRef.current, sx, sy, sw, sh, 0, 0, output.w, output.h);
+    canvas.toBlob((blob) => {
+      savingRef.current = false;
+      if (blob) onSave(blob);
+      else onCancel();
+    }, 'image/jpeg', 0.92);
+  };
+
+  return createPortal(
+    <div className="crop-ovl" onPointerDown={(e) => e.stopPropagation()}>
+      <div className="crop-modal">
+        <div className="crop-modal__head">
+          <h4>{dir === 'rtl' ? 'قصّ الصورة واضبطها' : 'Crop & adjust'}</h4>
+          <button className="d-modal__close" onClick={onCancel} >✕</button>
+        </div>
+        <div className="crop-stage">
+          <div
+            className="crop-box"
+            style={{ aspectRatio: `${aspect} / 1` }}
+            onPointerDown={onDown}
+            onPointerMove={onMove}
+            onPointerUp={onUp}
+            onPointerCancel={onUp}
+            onWheel={onWheel}
+          >
+            {!metrics && <span className="crop-box__load">{dir === 'rtl' ? 'جارٍ التحميل…' : 'Loading…'}</span>}
+            {metrics && (
+              <img
+                ref={imgRef}
+                src={src}
+                alt=""
+                draggable={false}
+                onLoad={onImgLoad}
+                style={{
+                  width: scaledW,
+                  height: scaledH,
+                  transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px)`,
+                }}
+              />
+            )}
+            <div className="crop-grid" />
+          </div>
+        </div>
+        <div className="crop-tools">
+          <span className="crop-tools__label">{dir === 'rtl' ? 'تقريب' : 'Zoom'}</span>
+          <input
+            type="range"
+            min="1"
+            max="4"
+            step="0.01"
+            value={zoom}
+            onChange={(e) => setZoomClamped(parseFloat(e.target.value))}
+            aria-label={dir === 'rtl' ? 'التقريب' : 'Zoom'}
+          />
+          <button type="button" className="crop-reset" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>
+            {dir === 'rtl' ? 'إعادة' : 'Reset'}
+          </button>
+        </div>
+        <p className="crop-hint">
+          {dir === 'rtl' ? 'اسحب الصورة للمعاينة، واستخدم شريط التقريب للتكبير ثم اضغط تطبيق.' : 'Drag to reposition, use the slider to zoom, then apply.'}
+        </p>
+        <div className="crop-modal__foot">
+          <button type="button" className="d-actions__btn" onClick={onCancel}>
+            {dir === 'rtl' ? 'إلغاء' : 'Cancel'}
+          </button>
+          <button type="button" className="btn btn--primary" onClick={save}>
+            {dir === 'rtl' ? 'تطبيق القصّ' : 'Apply crop'}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+export function ImageField({ label, value, onChange, crop }) {
   const { dir } = useLanguage();
   const [progress, setProgress] = useState(null);
   const [error, setError] = useState('');
+  const [cropSrc, setCropSrc] = useState(null);
   const inputRef = useRef(null);
+  const previewUrlRef = useRef(null);
+
+  const closeCrop = () => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+    setCropSrc(null);
+  };
+
+  const uploadCropped = async (blob) => {
+    setError('');
+    setProgress(0);
+    try {
+      const file = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
+      const { url } = await uploadToCloudinary(file, { onProgress: setProgress });
+      onChange(url);
+    } catch (e) {
+      setError(errLabel(e.message, dir));
+    } finally {
+      setProgress(null);
+      closeCrop();
+    }
+  };
 
   const handleFiles = async (files) => {
     const file = files?.[0];
@@ -36,6 +220,12 @@ export function ImageField({ label, value, onChange }) {
       return;
     }
     setError('');
+    if (crop) {
+      const url = URL.createObjectURL(file);
+      previewUrlRef.current = url;
+      setCropSrc(url);
+      return;
+    }
     setProgress(0);
     try {
       const { url } = await uploadToCloudinary(file, { onProgress: setProgress });
@@ -46,6 +236,8 @@ export function ImageField({ label, value, onChange }) {
       setProgress(null);
     }
   };
+
+  const cropProps = crop || { aspect: 1, output: { w: 800, h: 800 } };
 
   return (
     <div className="d-form__group">
@@ -76,6 +268,11 @@ export function ImageField({ label, value, onChange }) {
               ? (dir === 'rtl' ? 'تغيير الصورة' : 'Change image')
               : (dir === 'rtl' ? 'اختيار صورة' : 'Choose image')}
           </button>
+          {crop && value && (
+            <button type="button" className="d-upload__crop" onClick={() => setCropSrc(value)}>
+              {dir === 'rtl' ? 'قصّ / ضبط' : 'Crop / adjust'}
+            </button>
+          )}
           {value && (
             <button type="button" className="d-upload__clear" onClick={() => onChange('')}>
               {dir === 'rtl' ? 'إزالة' : 'Remove'}
@@ -87,6 +284,15 @@ export function ImageField({ label, value, onChange }) {
         <span className="d-upload__progress">{dir === 'rtl' ? 'جارٍ الرفع' : 'Uploading'}… {progress}%</span>
       )}
       {error && <span className="d-upload__error">{error}</span>}
+      {cropSrc && (
+        <ImageCropModal
+          src={cropSrc}
+          aspect={cropProps.aspect}
+          output={cropProps.output}
+          onCancel={closeCrop}
+          onSave={uploadCropped}
+        />
+      )}
     </div>
   );
 }

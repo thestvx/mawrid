@@ -43,6 +43,9 @@ const AVAILABILITY = [
 
 const HOURS_ZONES = ['GST', 'AST', 'EET/PALESTINE +2', 'CET', 'GMT', 'EST', 'PST'];
 
+const AVATAR_CROP = { aspect: 1, output: { w: 800, h: 800 } };
+const COVER_CROP = { aspect: 1920 / 635, output: { w: 1920, h: 635 } };
+
 const EMPTY_PROFILE = {
   name: '',
   store_name: '',
@@ -420,22 +423,23 @@ export default function SellerDashboard() {
   const renderSettings = () => (
     <form className="sel-form" onSubmit={saveProfile}>
       <div className="sel-header">
-        <div className="sel-header__info">
+        <div className="sel-cover" style={profile.cover ? { backgroundImage: `url(${profile.cover})` } : undefined} />
+        <div className="sel-header__row">
           <span className="sel-header__avatar">
             {profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : initials}
           </span>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <h3 className="sel-header__title">{profile.store_name || profile.name || (dir === 'rtl' ? 'متجرك' : 'Your store')}</h3>
             <p className="sel-header__meta">
               {specialtyLabel(profile.specialty)} · {availabilityLabel(profile.availability)}
             </p>
           </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          {savedMsg && <span className="sel-saved">✓ {savedMsg}</span>}
-          <button type="submit" className="btn btn--primary" disabled={saving || isPending}>
-            {saving ? (dir === 'rtl' ? 'جارٍ الحفظ…' : 'Saving…') : (dir === 'rtl' ? 'حفظ التغييرات' : 'Save Changes')}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            {savedMsg && <span className="sel-saved">✓ {savedMsg}</span>}
+            <button type="submit" className="btn btn--primary" disabled={saving || isPending}>
+              {saving ? (dir === 'rtl' ? 'جارٍ الحفظ…' : 'Saving…') : (dir === 'rtl' ? 'حفظ التغييرات' : 'Save Changes')}
+            </button>
+          </div>
         </div>
       </div>
       {saveErr && (
@@ -446,11 +450,13 @@ export default function SellerDashboard() {
         <div className="sel-col">
           <div className="sel-media">
             <h4>{dir === 'rtl' ? 'الصورة الشخصية' : 'Profile photo'}</h4>
-            <ImageField value={profile.avatar_url} onChange={(v) => setField('avatar_url', v)} />
+            <ImageField crop={AVATAR_CROP} value={profile.avatar_url} onChange={(v) => setField('avatar_url', v)} />
+            <p className="sel-note">{dir === 'rtl' ? 'تُعرض بشكل دائري في ملفك — قصّها وضبّط التقريب قبل الرفع.' : 'Shown as a circle on your profile — crop and zoom before uploading.'}</p>
           </div>
           <div className="sel-media">
             <h4>{dir === 'rtl' ? 'صورة الغلاف' : 'Cover image'}</h4>
-            <ImageField value={profile.cover} onChange={(v) => setField('cover', v)} />
+            <ImageField crop={COVER_CROP} value={profile.cover} onChange={(v) => setField('cover', v)} />
+            <p className="sel-note">{dir === 'rtl' ? 'تظهر كبانر في أعلى المتجر — الابعاد المثالية 1920×635.' : 'Shown as a banner atop your store. Ideal size 1920×635.'}</p>
           </div>
         </div>
 
@@ -636,6 +642,7 @@ export default function SellerDashboard() {
       default:
         return (
           <>
+            <div className="sell-line" aria-hidden="true" />
             <div className="d-welcome">
               <h2 className="d-welcome__title">{t('dashboard.welcome')}</h2>
               <p className="d-welcome__sub">{dir === 'rtl' ? 'إدارة متجرك ومنتجاتك بكل سهولة' : 'Manage your store and products with ease'}</p>

@@ -2059,11 +2059,11 @@ export default function AdminDashboard() {
               <div className="d-form__row">
                 <div className="d-form__group">
                   <label>{dir === 'rtl' ? 'صورة الحساب (أفاتار)' : 'Profile photo (avatar)'}</label>
-                  <ImageField value={supplierForm.avatar_url} onChange={(v) => setSupplierField('avatar_url', v)} />
+                  <ImageField crop={{ aspect: 1, output: { w: 800, h: 800 } }} value={supplierForm.avatar_url} onChange={(v) => setSupplierField('avatar_url', v)} />
                 </div>
                 <div className="d-form__group">
                   <label>{dir === 'rtl' ? 'صورة الغلاف' : 'Cover image'}</label>
-                  <ImageField value={supplierForm.cover} onChange={(v) => setSupplierField('cover', v)} />
+                  <ImageField crop={{ aspect: 1920 / 635, output: { w: 1920, h: 635 } }} value={supplierForm.cover} onChange={(v) => setSupplierField('cover', v)} />
                 </div>
               </div>
 

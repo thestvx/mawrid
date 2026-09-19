@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 import SplitText from '../components/ui/SplitText';
 import SellerCard from '../components/sellers/SellerCard';
-import { SELLER_SPECIALTIES, SHOWCASE_SELLERS, SHOWCASE_BRANDS, mapRealSeller } from '../data/sellers';
+import { SELLER_SPECIALTIES, mapRealSeller } from '../data/sellers';
 import { fetchSellers } from '../lib/supabase';
 import './SellersPage.css';
 
@@ -105,7 +105,7 @@ export default function SellersPage() {
 
   const realCards = realSellers.map((u, i) => mapRealSeller(u, i));
 
-  const cards = [...realCards, ...SHOWCASE_SELLERS, ...SHOWCASE_BRANDS];
+  const cards = realCards;
   const filtered = activeSpecialty ? cards.filter((c) => c.specialtyKey === activeSpecialty.key) : cards;
   const specialtyLabel = activeSpecialty ? (isRtl ? activeSpecialty.name_ar : activeSpecialty.name_en) : null;
 
