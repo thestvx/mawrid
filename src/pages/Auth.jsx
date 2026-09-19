@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { SELLER_SPECIALTIES } from '../data/sellers';
 import './Auth.css';
 
 const pageVariants = {
@@ -96,13 +97,15 @@ export default function Auth() {
         const name = form.name.value;
         const phone = form.phone?.value || '';
         const storeName = form.store?.value || '';
+        const specialty = form.specialty?.value || '';
+        const website = form.website?.value || '';
         const confirmPassword = form.confirm?.value;
         if (confirmPassword && password !== confirmPassword) {
           setError(t('auth.errorPasswordMismatch') || 'Passwords do not match');
           setSubmitting(false);
           return;
         }
-        await signup({ email, password, name, role, phone, storeName });
+        await signup({ email, password, name, role, phone, storeName, specialty, website });
       }
     } catch (err) {
       const code = err.code;
@@ -269,6 +272,37 @@ export default function Auth() {
                         placeholder={t('auth.placeholderStore')}
                         required
                         onFocus={() => setFocusedField('store')}
+                        onBlur={() => setFocusedField(null)}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+
+                {mode === 'signup' && role === 'seller' && (
+                  <motion.div className={`auth__field ${focusedField === 'specialty' ? 'auth__field--focused' : ''}`} variants={staggerItem}>
+                    <label>{t('auth.specialty')}</label>
+                    <div className="auth__input-wrap">
+                      <svg className="auth__field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                      <select name="specialty" defaultValue="" required onFocus={() => setFocusedField('specialty')} onBlur={() => setFocusedField(null)}>
+                        <option value="" disabled>{dir === 'rtl' ? 'اختر مجال عملك' : 'Select your field'}</option>
+                        {SELLER_SPECIALTIES.map((s) => (
+                          <option key={s.key} value={s.key}>{dir === 'rtl' ? s.name_ar : s.name_en}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </motion.div>
+                )}
+
+                {mode === 'signup' && role === 'seller' && (
+                  <motion.div className={`auth__field ${focusedField === 'website' ? 'auth__field--focused' : ''}`} variants={staggerItem}>
+                    <label>{t('auth.website')}</label>
+                    <div className="auth__input-wrap">
+                      <svg className="auth__field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      <input
+                        type="url"
+                        name="website"
+                        placeholder={t('auth.placeholderWebsite')}
+                        onFocus={() => setFocusedField('website')}
                         onBlur={() => setFocusedField(null)}
                       />
                     </div>

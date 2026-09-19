@@ -232,7 +232,8 @@
   color: var(--color-primary-container);
 }
 
-.auth__input-wrap input {
+.auth__input-wrap input,
+.auth__input-wrap select {
   width: 100%;
   padding: 12px 16px 12px 42px;
   border-radius: 12px;
@@ -244,11 +245,19 @@
   color: var(--color-on-surface);
 }
 
-[dir="rtl"] .auth__input-wrap input {
+[dir="rtl"] .auth__input-wrap input,
+[dir="rtl"] .auth__input-wrap select {
   padding: 12px 42px 12px 16px;
 }
 
-.auth__input-wrap input:focus {
+.auth__input-wrap select {
+  appearance: auto;
+  cursor: pointer;
+  background-image: none;
+}
+
+.auth__input-wrap input:focus,
+.auth__input-wrap select:focus {
   border-color: var(--color-primary-container);
   box-shadow: 0 0 0 3px rgba(255, 98, 1, 0.08);
 }

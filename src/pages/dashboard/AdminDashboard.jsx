@@ -41,6 +41,7 @@ const PRICING_MIGRATION_SQL = `ALTER TABLE products
 const SUPPLIERS_MIGRATION_SQL = `ALTER TABLE users
   ADD COLUMN IF NOT EXISTS seller_status text NOT NULL DEFAULT 'pending',
   ADD COLUMN IF NOT EXISTS specialty text,
+  ADD COLUMN IF NOT EXISTS website text,
   ADD COLUMN IF NOT EXISTS bio text,
   ADD COLUMN IF NOT EXISTS bio_en text,
   ADD COLUMN IF NOT EXISTS avatar_url text,
@@ -60,6 +61,7 @@ const EMPTY_SUPPLIER = {
   phone: '',
   store_name: '',
   specialty: 'designers',
+  website: '',
   bio: '',
   bio_en: '',
   avatar_url: '',
@@ -711,6 +713,12 @@ export default function AdminDashboard() {
     return dir === 'rtl' ? s.name_ar : s.name_en;
   }, [dir]);
 
+  const siteHref = useCallback((url) => {
+    const u = (url || '').trim();
+    if (!u) return '';
+    return /^https?:\/\//i.test(u) ? u : `https://${u}`;
+  }, []);
+
   const openAddSupplier = () => {
     setEditingSupplier(null);
     setSupplierForm(EMPTY_SUPPLIER);
@@ -726,6 +734,7 @@ export default function AdminDashboard() {
       phone: u.phone || '',
       store_name: u.store_name || '',
       specialty: u.specialty || 'designers',
+      website: u.website || '',
       bio: u.bio || '',
       bio_en: u.bio_en || '',
       avatar_url: u.avatar_url || '',
@@ -764,6 +773,7 @@ export default function AdminDashboard() {
       role: 'seller',
       seller_status: supplierForm.seller_status,
       specialty: supplierForm.specialty,
+      website: (supplierForm.website || '').trim(),
       bio: supplierForm.bio.trim(),
       bio_en: supplierForm.bio_en.trim(),
       avatar_url: supplierForm.avatar_url.trim(),
@@ -991,6 +1001,16 @@ export default function AdminDashboard() {
                     <div>
                       <strong>{u.name || '—'}</strong>
                       <div style={{ fontSize: '0.75rem', color: 'var(--color-secondary)' }}>{u.email}</div>
+                            {u.website && (
+                              <a
+                                href={siteHref(u.website)}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 600, textDecoration: 'underline' }}
+                              >
+                                {dir === 'rtl' ? 'رابط الموقع' : 'Website'}
+                              </a>
+                            )}
                     </div>
                   </div>
                 </td>
@@ -1081,6 +1101,16 @@ export default function AdminDashboard() {
                           <div>
                             <strong>{u.name || '—'}</strong>
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-secondary)' }}>{u.email}</div>
+                            {u.website && (
+                              <a
+                                href={siteHref(u.website)}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 600, textDecoration: 'underline' }}
+                              >
+                                {dir === 'rtl' ? 'رابط الموقع' : 'Website'}
+                              </a>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -1170,6 +1200,16 @@ export default function AdminDashboard() {
                             <div>
                               <strong>{u.name || '—'}</strong>
                               <div style={{ fontSize: '0.75rem', color: 'var(--color-secondary)' }}>{u.email}</div>
+                            {u.website && (
+                              <a
+                                href={siteHref(u.website)}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 600, textDecoration: 'underline' }}
+                              >
+                                {dir === 'rtl' ? 'رابط الموقع' : 'Website'}
+                              </a>
+                            )}
                             </div>
                           </div>
                         </td>
@@ -1960,6 +2000,10 @@ export default function AdminDashboard() {
 
               <div className="d-form__row">
                 <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'رابط صفحة المورّد أو موقعه' : 'Supplier page / website link'}</label>
+                  <input value={supplierForm.website} onChange={e => setSupplierField('website', e.target.value)} className="d-form__input" placeholder="https://..." />
+                </div>
+                <div className="d-form__group">
                   <label>{dir === 'rtl' ? 'التخصّص' : 'Specialty'}</label>
                   <select value={supplierForm.specialty} onChange={e => setSupplierField('specialty', e.target.value)} className="d-form__input">
                     {SELLER_SPECIALTIES.map(s => (
@@ -1967,6 +2011,9 @@ export default function AdminDashboard() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div className="d-form__row">
                 <div className="d-form__group">
                   <label>{dir === 'rtl' ? 'حالة العمل' : 'Availability'}</label>
                   <select value={supplierForm.availability} onChange={e => setSupplierField('availability', e.target.value)} className="d-form__input">
@@ -1974,6 +2021,10 @@ export default function AdminDashboard() {
                       <option key={o.value} value={o.value}>{dir === 'rtl' ? o.ar : o.en}</option>
                     ))}
                   </select>
+                </div>
+                <div className="d-form__group">
+                  <label>{dir === 'rtl' ? 'التقييم (من 5)' : 'Rating (out of 5)'}</label>
+                  <input value={supplierForm.rating} onChange={e => setSupplierField('rating', e.target.value)} type="number" step="0.1" min="0" max="5" className="d-form__input" placeholder="4.9" />
                 </div>
               </div>
 
@@ -1992,10 +2043,6 @@ export default function AdminDashboard() {
                 <div className="d-form__group">
                   <label>{dir === 'rtl' ? 'المنطقة الزمنية' : 'Timezone'}</label>
                   <input value={supplierForm.hours_zone} onChange={e => setSupplierField('hours_zone', e.target.value)} className="d-form__input" placeholder="GST" />
-                </div>
-                <div className="d-form__group">
-                  <label>{dir === 'rtl' ? 'التقييم (من 5)' : 'Rating (out of 5)'}</label>
-                  <input value={supplierForm.rating} onChange={e => setSupplierField('rating', e.target.value)} type="number" step="0.1" min="0" max="5" className="d-form__input" placeholder="4.9" />
                 </div>
               </div>
 

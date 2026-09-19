@@ -102,6 +102,16 @@ function BoltIcon({ size = 15 }) {
   );
 }
 
+function LinkIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <path d="M15 3h6v6" />
+      <path d="M10 14 21 3" />
+    </svg>
+  );
+}
+
 export default function SellerStorefront() {
   const { dir } = useLanguage();
   const { id } = useParams();
@@ -435,6 +445,20 @@ export default function SellerStorefront() {
                   <span>{isRtl ? 'التخصّص' : 'Specialty'}</span>
                   <b>{specialtyLabel}</b>
                 </li>
+                {profile.website && (
+                  <li>
+                    <LinkIcon />
+                    <span>{isRtl ? 'الموقع الإلكتروني' : 'Website'}</span>
+                    <a
+                      href={/^https?:\/\//i.test(profile.website) ? profile.website : `https://${profile.website}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ color: 'var(--sf-brand)', fontWeight: 600, textDecoration: 'underline' }}
+                    >
+                      {profile.website.replace(/^https?:\/\//i, '').slice(0, 24)}
+                    </a>
+                  </li>
+                )}
               </ul>
             </div>
 

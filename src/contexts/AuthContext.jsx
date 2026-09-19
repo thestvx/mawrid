@@ -43,6 +43,8 @@ async function upsertUserProfile(cred, data) {
     };
     if (data.role === 'seller' && (await hasSellerColumns())) {
       row.seller_status = data.sellerStatus || 'pending';
+      row.specialty = data.specialty || '';
+      row.website = data.website || '';
     }
     const { error } = await supabase.from('users').upsert(row, { onConflict: 'firebase_uid' });
     if (error) console.warn('Supabase profile write skipped:', error.message);
@@ -166,7 +168,7 @@ export function AuthProvider({ children }) {
     return profile;
   }, []);
 
-  const signup = useCallback(async ({ email, password, name, role, phone, storeName }) => {
+  const signup = useCallback(async ({ email, password, name, role, phone, storeName, specialty, website }) => {
     handledRef.current = true;
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const sellersReady = role === 'seller' ? await hasSellerColumns() : false;
@@ -177,6 +179,7 @@ export function AuthProvider({ children }) {
       phone: phone || '',
       storeName: storeName || '',
       ...(sellersReady ? { sellerStatus: 'pending', seller_status: 'pending' } : {}),
+      ...(role === 'seller' ? { specialty: specialty || '', website: website || '' } : {}),
       createdAt: new Date().toISOString(),
     };
 

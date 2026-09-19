@@ -27,6 +27,7 @@ export function mapRealSeller(u, i = 0) {
     cover: u.cover || 'linear-gradient(135deg,#ffb199,#a53c00)',
     avatarGradient: 'linear-gradient(135deg,#ff8a3d,#7e2c00)',
     avatar_url: u.avatar_url || '',
+    website: u.website || '',
     verified: u.seller_status ? u.seller_status === 'verified' : true,
     bio_ar: u.bio || store || '',
     bio_en: u.bio_en || u.bio || store || '',
