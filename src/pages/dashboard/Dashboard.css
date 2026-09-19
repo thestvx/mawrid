@@ -2912,7 +2912,8 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   padding: 24px;
   overflow: hidden;
   background: radial-gradient(130% 130% at 50% 8%, #ffab66 0%, #ff6a12 44%, #d94500 100%);
-  animation: vcelIn 0.5s ease-out both;
+  animation: vcelIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform;
 }
 
 .vcel__bg {
@@ -2945,7 +2946,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   width: min(460px, 100%);
   text-align: center;
   color: #fff;
-  animation: vcelCard 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: vcelCard 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
 }
 
 .vcel__stage {
@@ -3012,7 +3013,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   align-items: center;
   justify-content: center;
   box-shadow: 0 20px 52px rgba(120, 45, 0, 0.42), 0 0 0 12px rgba(255, 255, 255, 0.18);
-  animation: vcelDiscFloat 3.8s ease-in-out 1.15s infinite;
+  animation: vcelDiscFloat 3.8s ease-in-out 1.5s infinite;
 }
 
 .vcel__discInner {
@@ -3024,7 +3025,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: vcelDiscIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: vcelDiscIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.42s both;
 }
 
 .vcel__shine {
@@ -3035,7 +3036,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   height: 220%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.92), transparent);
   transform: rotate(22deg);
-  animation: vcelShine 3.6s ease-in-out 1.4s infinite;
+  animation: vcelShine 3.6s ease-in-out 1.8s infinite;
 }
 
 .vcel__icon {
@@ -3044,7 +3045,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   object-fit: contain;
   padding: 12%;
   filter: drop-shadow(0 8px 14px rgba(255, 98, 1, 0.25));
-  animation: vcelIconTilt 6s ease-in-out 1.3s infinite;
+  animation: vcelIconTilt 6s ease-in-out 1.7s infinite;
 }
 
 .vcel__check {
@@ -3053,7 +3054,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   bottom: 4px;
   width: 62px;
   height: 62px;
-  animation: vcelCheckIn 0.65s cubic-bezier(0.2, 0.9, 0.3, 1.6) 1s both;
+  animation: vcelCheckIn 0.65s cubic-bezier(0.2, 0.9, 0.3, 1.6) 1.4s both;
   filter: drop-shadow(0 8px 18px rgba(120, 45, 0, 0.42));
 }
 .vcel__check::after {
@@ -3062,7 +3063,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   inset: 0;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.85);
-  animation: vcelCheckPulse 2s ease-out 1.9s infinite;
+  animation: vcelCheckPulse 2s ease-out 2.3s infinite;
 }
 .vcel__check-circle {
   fill: #fff;
@@ -3070,7 +3071,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   stroke-width: 2.5;
   stroke-dasharray: 160;
   stroke-dashoffset: 160;
-  animation: vcelDraw 0.6s ease-out 1.15s forwards;
+  animation: vcelDraw 0.6s ease-out 1.55s forwards;
 }
 .vcel__check-mark {
   fill: none;
@@ -3080,7 +3081,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   stroke-linejoin: round;
   stroke-dasharray: 44;
   stroke-dashoffset: 44;
-  animation: vcelDraw 0.5s ease-out 1.65s forwards;
+  animation: vcelDraw 0.5s ease-out 2.05s forwards;
 }
 
 .vcel__eyebrow {
@@ -3094,7 +3095,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   font-weight: 700;
   letter-spacing: 0.02em;
   backdrop-filter: blur(4px);
-  animation: vcelUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both;
+  animation: vcelUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1.1s both;
 }
 
 .vcel__title {
@@ -3104,7 +3105,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   line-height: 1.35;
   letter-spacing: -0.01em;
   text-shadow: 0 4px 22px rgba(120, 45, 0, 0.3);
-  animation: vcelUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.85s both;
+  animation: vcelUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1.2s both;
 }
 
 .vcel__text {
@@ -3113,7 +3114,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   font-size: 1rem;
   line-height: 1.9;
   color: rgba(255, 255, 255, 0.95);
-  animation: vcelUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.95s both;
+  animation: vcelUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1.3s both;
 }
 
 .vcel__btn {
@@ -3127,7 +3128,7 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   border-radius: 999px;
   box-shadow: 0 16px 36px rgba(120, 45, 0, 0.34);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
-  animation: vcelUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1.05s both;
+  animation: vcelUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1.4s both;
 }
 .vcel__btn:hover { transform: translateY(-2px); box-shadow: 0 22px 46px rgba(120, 45, 0, 0.45); }
 .vcel__btn:active { transform: translateY(0) scale(0.98); }
@@ -3145,7 +3146,11 @@ border-left: 1px solid rgba(227, 191, 177, 0.9);
   50% { opacity: 0.85; transform: scale(1.2); }
 }
 
-@keyframes vcelIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes vcelIn {
+  0% { opacity: 0.35; transform: translateY(-100%); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0); }
+}
 @keyframes vcelCard {
   from { opacity: 0; transform: translateY(30px) scale(0.93); }
   to { opacity: 1; transform: none; }

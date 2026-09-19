@@ -15,7 +15,7 @@ export default function VerificationCelebration({ open, storeName, dir = 'rtl', 
           ty: `${Math.sin(angle) * distance}px`,
           size: 6 + (i % 4) * 3,
           color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-          delay: 0.45 + (i % 7) * 0.05,
+          delay: 0.6 + (i % 7) * 0.05,
           duration: 0.95 + (i % 4) * 0.2,
           rotate: `${(i % 2 ? 1 : -1) * (140 + i * 14)}deg`,
         };
