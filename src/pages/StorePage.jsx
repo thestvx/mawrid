@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getStorefrontBySlug } from '../lib/storefront';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import StoreRenderer from '../components/store/StoreRenderer';
+import StoreStudio from '../components/store/StoreStudio';
 import './StorePage.css';
 
 function fetchProducts(sellerId) {
@@ -33,7 +34,10 @@ export default function StorePage() {
   const { slug } = useParams();
   const { dir } = useLanguage();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [state, setState] = useState({ loading: true, store: null, seller: null, products: [] });
+  const [editStore, setEditStore] = useState(null);
+  const editing = searchParams.get('edit') === '1';
 
   useEffect(() => {
     let alive = true;
@@ -55,13 +59,30 @@ export default function StorePage() {
   const { loading, store, seller, products } = state;
   const isOwner = user && store && (user.uid === store.seller_id || user.firebase_uid === store.seller_id);
   const isPublished = store?.status === 'published';
+  const pending = !!user?.seller_status && user.seller_status !== 'verified';
+
+  const liveStore = editing && editStore ? editStore : store;
 
   useEffect(() => {
-    if (store?.seo?.title || seller?.store_name) {
-      document.title = `${store?.seo?.title || seller?.store_name} — مَورد`;
+    if (store) setEditStore(store);
+  }, [store]);
+
+  useEffect(() => {
+    if (liveStore?.seo?.title || seller?.store_name) {
+      document.title = `${liveStore?.seo?.title || seller?.store_name} — مَورد`;
     }
     return () => { document.title = 'مَورد'; };
-  }, [store, seller]);
+  }, [liveStore, seller]);
+
+  const startEdit = () => setSearchParams({ edit: '1' });
+  const stopEdit = () => setSearchParams({});
+
+  const guardStageClick = (e) => {
+    if (!editing) return;
+    if (e.defaultPrevented) return;
+    const el = e.target.closest && e.target.closest('a[href], button[data-ss-guard]');
+    if (el) e.preventDefault();
+  };
 
   if (loading) {
     return (
@@ -89,20 +110,50 @@ export default function StorePage() {
   }
 
   return (
-    <div className="storepage">
-      {!isPublished && isOwner && (
-        <div className="storepage__draft">
-          {dir === 'rtl' ? 'معاينة — هذا المتجر مسودة غير منشورة' : 'Preview — this store is an unpublished draft'}
-          <Link to="/dashboard/seller?tab=store">{dir === 'rtl' ? 'فتح الاستوديو' : 'Open studio'}</Link>
-        </div>
+    <div className={`storepage${editing ? ' storepage--editing' : ''}`}>
+      {editing ? (
+        <>
+          <div className="storepage__stage" onClickCapture={guardStageClick}>
+            <StoreRenderer
+              key={`${slug}-${liveStore.slug}`}
+              store={liveStore}
+              seller={seller}
+              products={products}
+              dir={dir}
+              mode="preview"
+            />
+          </div>
+          <StoreStudio
+            uid={isOwner ? (user.uid || store.seller_id) : store.seller_id}
+            store={liveStore}
+            onChange={setEditStore}
+            seller={seller}
+            products={products}
+            dir={dir}
+            isPending={pending}
+            onExit={stopEdit}
+          />
+        </>
+      ) : (
+        <>
+          {!isPublished && isOwner && (
+            <div className="storepage__draft">
+              {dir === 'rtl' ? 'معاينة — هذا المتجر مسودة غير منشورة' : 'Preview — this store is an unpublished draft'}
+              <button type="button" onClick={startEdit}>{dir === 'rtl' ? 'تعديل الآن' : 'Edit now'}</button>
+            </div>
+          )}
+          <StoreRenderer
+            store={store}
+            seller={seller}
+            products={products}
+            dir={dir}
+            mode={isOwner && !isPublished ? 'preview' : 'public'}
+          />
+          {isOwner && (
+            <button type="button" className="storepage__fab" onClick={startEdit}>✎</button>
+          )}
+        </>
       )}
-      <StoreRenderer
-        store={store}
-        seller={seller}
-        products={products}
-        dir={dir}
-        mode={isOwner && !isPublished ? 'preview' : 'public'}
-      />
     </div>
   );
 }

@@ -25,4 +25,45 @@
   flex-wrap: wrap;
   background: #1f2937; color: #fff; padding: 10px 18px; font-size: 0.88rem; font-weight: 600;
 }
-.storepage__draft a { color: #ffbd9a; text-decoration: underline; }
+.storepage__draft button {
+  background: var(--color-primary-container, #ff6201); color: #fff;
+  border: none; border-radius: 999px; padding: 7px 18px;
+  font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+}
+.storepage__draft button:hover { filter: brightness(1.06); }
+
+.storepage__fab {
+  position: fixed;
+  inset-inline-end: 18px;
+  bottom: 88px;
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-primary-container, #ff6201);
+  color: #fff;
+  font-size: 1.25rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(165, 60, 0, 0.35);
+  transition: transform 0.18s var(--ease-expo, ease), box-shadow 0.18s var(--ease-expo, ease);
+  z-index: 500;
+}
+.storepage__fab:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 14px 30px rgba(165, 60, 0, 0.42); }
+.storepage__fab:active { transform: scale(0.97); }
+
+.storepage--editing .storepage__stage { min-height: 100vh; }
+
+.storepage--editing .storepage__stage::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  inset-inline-end: 420px;
+  background: linear-gradient(90deg, rgba(36, 26, 18, 0.06), rgba(36, 26, 18, 0));
+  pointer-events: none;
+  z-index: 850;
+}
+
+@media (max-width: 640px) {
+  .storepage__fab { inset-inline-end: 12px; bottom: 80px; width: 48px; height: 48px; }
+}

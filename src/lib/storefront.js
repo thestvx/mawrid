@@ -255,10 +255,23 @@ export function normalizeStorefront(row) {
 }
 
 export async function getStorefrontBySlug(slug) {
-  if (!isSupabaseConfigured || !slug) return null;
-  const { data, error } = await supabase.from(TABLE).select('*').eq('slug', slug).maybeSingle();
-  if (error) return null;
-  return normalizeStorefront(data);
+  if (!slug) return null;
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase.from(TABLE).select('*').eq('slug', slug).maybeSingle();
+    if (!error && data) return normalizeStorefront(data);
+  }
+  const wanted = slugify(slug);
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith('mawrid_storefront_')) continue;
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const row = JSON.parse(raw);
+      if (row && slugify(row.slug || '') === wanted) return normalizeStorefront(row);
+    }
+  } catch {}
+  return null;
 }
 
 export async function getStorefrontBySeller(sellerId) {

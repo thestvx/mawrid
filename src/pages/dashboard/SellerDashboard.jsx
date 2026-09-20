@@ -7,7 +7,7 @@ import ConfirmDialog from '../../components/dashboard/ConfirmDialog';
 import VerificationCelebration from '../../components/dashboard/VerificationCelebration';
 import VerifiedBadge from '../../components/dashboard/VerifiedBadge';
 import { ImageField } from '../../components/dashboard/MediaUploader';
-import StoreStudio from '../../components/store/StoreStudio';
+import StoreLaunchPad from '../../components/store/StoreLaunchPad';
 import { supabase, isSupabaseConfigured, hasSellerColumns, hasUserColumn, fetchCategories } from '../../lib/supabase';
 import { SELLER_SPECIALTIES } from '../../data/sellers';
 import './Dashboard.css';
@@ -652,15 +652,7 @@ export default function SellerDashboard() {
     switch (tab) {
       case 'store':
         return (
-          <StoreStudio
-            uid={uid}
-            seller={profile}
-            user={user}
-            products={products}
-            categories={categories}
-            dir={dir}
-            isPending={isPending}
-          />
+          <StoreLaunchPad uid={uid} seller={profile} />
         );
 
       case 'products':
