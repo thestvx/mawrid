@@ -234,8 +234,8 @@ export default function GooeyNavBar() {
                 {t('nav.dashboard')}
               </Link>
               {role === 'seller' && (
-                <Link className="pill-auth__item" to="/storefront" onClick={() => setUserMenuOpen(false)}>
-                  {t('nav.openShop')}
+                <Link className="pill-auth__item" to={browseMyStoreHref || '/storefront'} onClick={() => setUserMenuOpen(false)}>
+                  {t('nav.browseMyStore')}
                 </Link>
               )}
               <div className="pill-auth__divider" />
@@ -333,8 +333,8 @@ export default function GooeyNavBar() {
           {isAuthenticated && (
             <>
               <li>
-                <Link to="/storefront" className="mobile-menu-link" onClick={() => setIsMobileMenuOpen(false)}>
-                  {t('nav.openShop')}
+                <Link to={browseMyStoreHref || '/storefront'} className="mobile-menu-link" onClick={() => setIsMobileMenuOpen(false)}>
+                  {t('nav.browseMyStore')}
                 </Link>
               </li>
               <li>

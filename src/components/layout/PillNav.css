@@ -471,6 +471,19 @@
   font-size: 0.875rem;
 }
 
+.pill-avatar__img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+
+.pill-avatar__face {
+  overflow: hidden;
+}
+
 .pill-auth__dropdown {
   position: absolute;
   top: calc(100% + 12px);

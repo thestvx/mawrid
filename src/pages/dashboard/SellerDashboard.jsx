@@ -257,6 +257,7 @@ export default function SellerDashboard() {
         } else {
           setSavedMsg(dir === 'rtl' ? 'تم حفظ تغييراتك بنجاح' : 'Your changes were saved');
         }
+        if (refreshUser) refreshUser();
       } else {
         setSavedMsg(dir === 'rtl' ? 'تم الحفظ محلياً' : 'Saved locally');
       }
