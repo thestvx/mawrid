@@ -198,7 +198,6 @@ export default function SellerStorefront() {
   const tabs = isBrand
     ? [
         { key: 'store', ar: 'المتجر', en: 'Store' },
-        { key: 'works', ar: 'الأعمال', en: 'Works' },
         { key: 'about', ar: 'نبذة', en: 'About' },
       ]
     : [

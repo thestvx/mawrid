@@ -7,6 +7,7 @@ import ConfirmDialog from '../../components/dashboard/ConfirmDialog';
 import VerificationCelebration from '../../components/dashboard/VerificationCelebration';
 import VerifiedBadge from '../../components/dashboard/VerifiedBadge';
 import { ImageField } from '../../components/dashboard/MediaUploader';
+import StoreStudio from '../../components/store/StoreStudio';
 import { supabase, isSupabaseConfigured, hasSellerColumns, hasUserColumn, fetchCategories } from '../../lib/supabase';
 import { SELLER_SPECIALTIES } from '../../data/sellers';
 import './Dashboard.css';
@@ -649,6 +650,19 @@ export default function SellerDashboard() {
 
   const renderContent = () => {
     switch (tab) {
+      case 'store':
+        return (
+          <StoreStudio
+            uid={uid}
+            seller={profile}
+            user={user}
+            products={products}
+            categories={categories}
+            dir={dir}
+            isPending={isPending}
+          />
+        );
+
       case 'products':
         return renderProducts();
 

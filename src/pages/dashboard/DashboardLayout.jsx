@@ -7,6 +7,7 @@ import './Dashboard.css';
 
 const SELLER_SIDEBAR = [
   { key: 'dashboard.overview', path: '/dashboard/seller', icon: 'overview' },
+  { key: 'dashboard.store', path: '/dashboard/seller?tab=store', icon: 'stores' },
   { key: 'dashboard.products', path: '/dashboard/seller?tab=products', icon: 'products' },
   { key: 'dashboard.orders', path: '/dashboard/seller?tab=orders', icon: 'orders' },
   { key: 'dashboard.analytics', path: '/dashboard/seller?tab=analytics', icon: 'analytics' },

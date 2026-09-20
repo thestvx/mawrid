@@ -9,6 +9,7 @@
   --sf-brand2: var(--fp-accent-soft);
   background: var(--fp-bg);
   min-height: 100vh;
+  padding-top: 84px;
   padding-bottom: 88px;
 }
 
@@ -140,9 +141,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: var(--fp-accent);
+  background: var(--color-primary-container, #ff6201);
   color: #fff;
-  box-shadow: 0 0 0 3px #fff, 0 6px 14px rgba(161, 98, 7, 0.4);
+  box-shadow: 0 0 0 3px #fff, 0 6px 14px rgba(255, 98, 1, 0.4);
 }
 
 .store-head__info {

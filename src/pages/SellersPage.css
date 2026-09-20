@@ -493,10 +493,10 @@
   width: 21px;
   height: 21px;
   border-radius: 50%;
-  background: var(--fp-accent);
+  background: var(--color-primary-container, #ff6201);
   color: #fff;
   border: 2.5px solid var(--fp-surface);
-  box-shadow: 0 4px 10px rgba(161, 98, 7, 0.4);
+  box-shadow: 0 4px 10px rgba(255, 98, 1, 0.4);
 }
 
 .seller-card__id {
@@ -744,7 +744,7 @@
   display: inline-grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--fp-accent);
+  background: var(--color-primary-container, #ff6201);
   color: #fff;
   flex-shrink: 0;
 }
