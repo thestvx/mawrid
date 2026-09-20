@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { ImageField } from '../dashboard/MediaUploader';
-import { hasStorefrontTable, saveStorefront, slugify, isSlugAvailable, PALETTES, FONT_PRESETS, DEFAULT_THEME, getPalette, extractPalette } from '../../lib/storefront';
+import { saveStorefront, slugify, isSlugAvailable, PALETTES, FONT_PRESETS, DEFAULT_THEME, getPalette, extractPalette } from '../../lib/storefront';
 import { SECTION_TYPES, SECTION_GROUPS, sectionLabel, makeSection } from './sectionSchema';
 import './StoreStudio.css';
 
@@ -215,15 +215,11 @@ export default function StoreStudio({ uid, store, onChange, seller, dir, isPendi
     setSaving(true);
     let localOnly = true;
     try {
-      const ok = await hasStorefrontTable();
-      if (ok && next.seller_id) {
+      if (next.seller_id) {
         const res = await saveStorefront(next);
-        if (res.ok) localOnly = false;
+        localOnly = res.localOnly || !res.ok;
       }
     } catch {}
-    if (KEY) {
-      try { localStorage.setItem(KEY, JSON.stringify(next)); } catch {}
-    }
     setSaving(false);
     if (!silent) {
       setSavedMsg(localOnly ? L('حُفظ محلياً', 'Saved locally') : L('تم الحفظ', 'Saved'));
@@ -236,10 +232,9 @@ export default function StoreStudio({ uid, store, onChange, seller, dir, isPendi
     onChange(next);
     setSaving(true);
     try {
-      const ok = await hasStorefrontTable();
-      if (ok && next.seller_id) {
+      if (next.seller_id) {
         const res = await saveStorefront(next);
-        if (res.ok) {
+        if (res.ok && !res.localOnly) {
           setSaving(false);
           setSavedMsg(L('تم النشر — صار المتجر متاحاً للجميع', 'Published — your store is now live'));
           setTimeout(() => setSavedMsg(''), 3000);

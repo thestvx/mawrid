@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getStorefrontBySeller, defaultStorefront, saveStorefront, hasStorefrontTable, slugify } from '../../lib/storefront';
+import { getStorefrontBySeller, defaultStorefront, saveStorefront, slugify } from '../../lib/storefront';
 import { useLanguage } from '../../contexts/LanguageContext';
 import './StoreLaunchPad.css';
 
@@ -21,13 +21,7 @@ export default function StoreLaunchPad({ uid, seller }) {
       seeded.slug = slugify(seeded.slug || '');
       seeded.seller_id = uid;
       if (alive) setLaunch({ loading: false, slug: seeded.slug, published: false });
-      try {
-        if (await hasStorefrontTable()) {
-          await saveStorefront(seeded);
-        } else {
-          try { localStorage.setItem(`mawrid_storefront_${uid}`, JSON.stringify(seeded)); } catch {}
-        }
-      } catch {}
+      try { await saveStorefront(seeded); } catch {}
     })();
     return () => { alive = false; };
   }, [uid, seller]);

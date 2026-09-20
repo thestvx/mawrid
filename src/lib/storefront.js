@@ -5,6 +5,20 @@ const TABLE = 'storefronts';
 export const STOREFRONT_READY_KEY = 'mawrid_storefronts_ready';
 let storefrontTablePromise = null;
 
+function isTableMissingError(error) {
+  if (!error) return false;
+  const msg = String(error.message || '');
+  const code = (error.code || '') + '';
+  return (
+    error.status === 404 ||
+    error.code === 404 ||
+    /PGRST205|42P01|UNDEFINED_TABLE/i.test(msg) ||
+    /could not find the table|schema cache/i.test(msg) ||
+    /404/i.test(code) ||
+    /PGRST2/i.test(code)
+  );
+}
+
 export function hasStorefrontTable() {
   if (!isSupabaseConfigured) return Promise.resolve(false);
   if (!storefrontTablePromise) {
@@ -13,13 +27,43 @@ export function hasStorefrontTable() {
       .select('id', { head: true, count: 'exact' })
       .limit(1)
       .then(({ error }) => {
-        const ok = !error || error.code !== 'PGRST205';
+        const ok = !error || !isTableMissingError(error);
         if (ok) { try { localStorage.setItem(STOREFRONT_READY_KEY, '1'); } catch {} }
+        else { try { localStorage.removeItem(STOREFRONT_READY_KEY); } catch {} }
         return ok;
       })
       .catch(() => false);
   }
   return storefrontTablePromise;
+}
+
+function storageKeys() {
+  const out = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('mawrid_storefront_')) out.push(key);
+    }
+  } catch {}
+  return out;
+}
+
+function findLocal(fn) {
+  try {
+    for (const key of storageKeys()) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const row = JSON.parse(raw);
+      if (row && fn(row)) return normalizeStorefront(row);
+    }
+  } catch {}
+  return null;
+}
+
+function mirrorLocal(store) {
+  try {
+    if (store.seller_id) localStorage.setItem(`mawrid_storefront_${store.seller_id}`, JSON.stringify(store));
+  } catch {}
 }
 
 export function slugify(value) {
@@ -256,29 +300,21 @@ export function normalizeStorefront(row) {
 
 export async function getStorefrontBySlug(slug) {
   if (!slug) return null;
-  if (isSupabaseConfigured) {
+  const wanted = slugify(slug);
+  if (isSupabaseConfigured && await hasStorefrontTable()) {
     const { data, error } = await supabase.from(TABLE).select('*').eq('slug', slug).maybeSingle();
     if (!error && data) return normalizeStorefront(data);
   }
-  const wanted = slugify(slug);
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key || !key.startsWith('mawrid_storefront_')) continue;
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-      const row = JSON.parse(raw);
-      if (row && slugify(row.slug || '') === wanted) return normalizeStorefront(row);
-    }
-  } catch {}
-  return null;
+  return findLocal((row) => row && slugify(row.slug || '') === wanted);
 }
 
 export async function getStorefrontBySeller(sellerId) {
-  if (!isSupabaseConfigured || !sellerId) return null;
-  const { data, error } = await supabase.from(TABLE).select('*').eq('seller_id', sellerId).maybeSingle();
-  if (error) return null;
-  return normalizeStorefront(data);
+  if (!sellerId) return null;
+  if (isSupabaseConfigured && await hasStorefrontTable()) {
+    const { data, error } = await supabase.from(TABLE).select('*').eq('seller_id', sellerId).maybeSingle();
+    if (!error && data) return normalizeStorefront(data);
+  }
+  return findLocal((row) => row && (row.seller_id === sellerId || row.firebase_uid === sellerId));
 }
 
 export async function saveStorefront(store) {
@@ -292,30 +328,48 @@ export async function saveStorefront(store) {
     seo: store.seo || {},
     updated_at: new Date().toISOString(),
   };
+  if (!isSupabaseConfigured || !(await hasStorefrontTable())) {
+    const local = normalizeStorefront({ ...store, ...payload, id: store.id || `local-${store.seller_id || Date.now()}` });
+    mirrorLocal(local);
+    return { ok: true, localOnly: true, store: local };
+  }
   const { data, error } = await supabase
     .from(TABLE)
     .upsert(payload, { onConflict: 'seller_id' })
     .select()
     .maybeSingle();
-  if (error) return { ok: false, error: error.message, code: error.code };
-  return { ok: true, store: normalizeStorefront(data) };
+  if (error) {
+    const local = normalizeStorefront({ ...store, ...payload, id: store.id || `local-${store.seller_id || Date.now()}` });
+    mirrorLocal(local);
+    return { ok: false, localOnly: true, error: error.message, code: error.code, store: local };
+  }
+  const saved = normalizeStorefront(data);
+  mirrorLocal(saved);
+  return { ok: true, store: saved };
 }
 
 export async function setStoreStatus(sellerId, status) {
-  if (!isSupabaseConfigured || !sellerId) return { ok: false, error: 'not-configured' };
+  if (!sellerId) return { ok: false, error: 'no-seller' };
   const patch = { status, updated_at: new Date().toISOString() };
   if (status === 'published') patch.published_at = new Date().toISOString();
-  const { error } = await supabase.from(TABLE).update(patch).eq('seller_id', sellerId);
-  if (error) return { ok: false, error: error.message, code: error.code };
-  return { ok: true };
+  if (isSupabaseConfigured && await hasStorefrontTable()) {
+    const { error } = await supabase.from(TABLE).update(patch).eq('seller_id', sellerId);
+    if (error) return { ok: false, error: error.message, code: error.code };
+  }
+  const local = findLocal((row) => row && (row.seller_id === sellerId || row.firebase_uid === sellerId));
+  if (local) mirrorLocal({ ...local, ...patch });
+  return { ok: true, localOnly: true };
 }
 
 export async function isSlugAvailable(slug, sellerId) {
-  if (!isSupabaseConfigured || !slug) return true;
-  const { data, error } = await supabase.from(TABLE).select('seller_id').eq('slug', slug).limit(1);
-  if (error) return true;
-  if (!data || !data.length) return true;
-  return data[0].seller_id === sellerId;
+  if (!slug) return true;
+  const wanted = slugify(slug);
+  if (isSupabaseConfigured && await hasStorefrontTable()) {
+    const { data, error } = await supabase.from(TABLE).select('seller_id').eq('slug', slug).limit(1);
+    if (!error && data && data.length) return data[0]?.seller_id === sellerId;
+  }
+  const clash = findLocal((row) => row && slugify(row.slug || '') === wanted && row.seller_id !== sellerId);
+  return !clash;
 }
 
 export async function extractPalette(url, count = 5) {
