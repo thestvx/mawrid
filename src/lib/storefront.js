@@ -97,10 +97,10 @@ export const PALETTES = [
 ];
 
 export const FONT_PRESETS = [
-  { id: 'modern', label_ar: 'عصري', label_en: 'Modern', head: "'Tajawal', 'Inter', system-ui, sans-serif", body: "'Tajawal', 'Inter', system-ui, sans-serif" },
-  { id: 'editorial', label_ar: 'تحريري', label_en: 'Editorial', head: "'Playfair Display', 'Amiri', Georgia, serif", body: "'Inter', 'Tajawal', system-ui, sans-serif" },
-  { id: 'classic', label_ar: 'كلاسيكي', label_en: 'Classic', head: "Georgia, 'Amiri', serif", body: "Georgia, 'Tajawal', serif" },
-  { id: 'display', label_ar: 'بارز', label_en: 'Display', head: "'Tajawal', 'Inter', sans-serif", body: "'Inter', 'Tajawal', system-ui, sans-serif" },
+  { id: 'modern', label_ar: 'عصري', label_en: 'Modern', head: "'Tajawal', 'SF Pro Display', system-ui, sans-serif", body: "'Tajawal', 'SF Pro Display', system-ui, sans-serif" },
+  { id: 'editorial', label_ar: 'تحريري', label_en: 'Editorial', head: "Georgia, 'GE SS', 'Tajawal', serif", body: "'Tajawal', 'SF Pro Display', Georgia, serif" },
+  { id: 'classic', label_ar: 'كلاسيكي', label_en: 'Classic', head: "Georgia, 'GE SS', serif", body: "'Tajawal', Georgia, serif" },
+  { id: 'display', label_ar: 'بارز', label_en: 'Display', head: "'Tajawal', 'SF Pro Display', sans-serif", body: "'Tajawal', 'SF Pro Display', system-ui, sans-serif" },
 ];
 
 export function getPalette(id) {

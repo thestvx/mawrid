@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useLanguage } from '../../contexts/LanguageContext';
 import { useCart } from '../../contexts/CartContext';
 import { themeToVars } from '../../lib/storefront';
 import { SECTIONS, StoreLink } from './StoreSections';
@@ -18,14 +17,62 @@ function buildCategories(products, provided) {
   return [...map.values()];
 }
 
-export default function StoreRenderer({ store, seller, products = [], categories, dir, mode = 'public' }) {
-  const { t } = useLanguage();
+const IMG_FIELD = { hero: 'image', about: 'image', cta: 'image', video: 'poster' };
+
+function EditBridge({ index, onAdd }) {
+  return (
+    <div className="st-bridge" data-i={index}>
+      <button type="button" className="st-bridge__btn" onClick={(e) => { e.preventDefault(); onAdd(index); }} aria-label="Add section here">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+        <span>أضف قسماً</span>
+      </button>
+    </div>
+  );
+}
+
+function EditSlot({ section, index, count, editing, selected, onSelect, onOp, onAdd, onImg, children }) {
+  const imgKey = IMG_FIELD[section.type];
+  return (
+    <div
+      className={`st-slot${selected ? ' is-selected' : ''}`}
+      data-section-id={section.id}
+      onClick={(e) => { if (e.target.closest('button, a')) return; onSelect(section.id); }}
+    >
+      {editing && <EditBridge index={index} onAdd={onAdd} />}
+      <div className={`st-slot__body${section.visible === false ? ' is-hidden' : ''}`}>
+        {editing && (
+          <div className="st-slot__bar" onClick={(e) => e.stopPropagation()}>
+            <span className="st-slot__name">
+              {section.visible === false ? '◐' : '●'}
+              {' '}
+              {section.type === 'featured' ? (section.props?.title_en || section.props?.title_ar || 'Products') : section.type}
+            </span>
+            <button type="button" className="st-slot__act" disabled={index === 0} onClick={() => onOp(section.id, 'up')} title="Up">↑</button>
+            <button type="button" className="st-slot__act" disabled={index === count - 1} onClick={() => onOp(section.id, 'down')} title="Down">↓</button>
+            {imgKey && onImg && (
+              <button type="button" className="st-slot__act" onClick={() => onImg(section.id, imgKey)} title="Image">🖼</button>
+            )}
+            <button type="button" className="st-slot__act" onClick={() => onOp(section.id, 'toggle')} title={section.visible === false ? 'Show' : 'Hide'}>
+              {section.visible === false ? '◐' : '👁'}
+            </button>
+            <button type="button" className="st-slot__act st-slot__act--danger" onClick={() => onOp(section.id, 'remove')} title="Delete">✕</button>
+          </div>
+        )}
+        <div className="st-slot__content">
+          {children}
+          {editing && section.visible === false && <div className="st-slot__veil">{section.type}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function StoreRenderer({ store, seller, products = [], categories, dir, mode = 'public', editing, selectedId, onSelectSection, onSectionOp, onAddSection, onPickImage }) {
   const { count } = useCart();
   const [activeCategory, setActiveCategory] = useState(null);
 
   const theme = store?.theme || {};
   const settings = store?.settings || {};
-  const sections = (store?.sections || []).filter((s) => s.visible !== false);
   const cats = useMemo(() => buildCategories(products, categories), [products, categories]);
   const vars = useMemo(() => themeToVars(theme), [theme]);
 
@@ -43,6 +90,8 @@ export default function StoreRenderer({ store, seller, products = [], categories
   ].filter(Boolean);
 
   const ctx = { dir, mode, theme, products, categories: cats, settings, seller, activeCategory, onSelectCategory: (c) => setActiveCategory((prev) => (prev === c.id || prev === c.name ? null : c.id || c.name)) };
+
+  const visibleSections = (store?.sections || []).filter((s) => editing || s.visible !== false);
 
   return (
     <div className="st-root" dir={dir} style={vars} data-density={theme.density || 'comfy'}>
@@ -80,16 +129,46 @@ export default function StoreRenderer({ store, seller, products = [], categories
       </header>
 
       <main className="st-main">
-        {sections.length === 0 && (
-          <div className="st-empty">
-            <p>{dir === 'rtl' ? 'لا توجد أقسام بعد.' : 'No sections yet.'}</p>
-          </div>
+        {visibleSections.length === 0 && (
+          editing ? (
+            <div className="st-empty" style={{ padding: '60px 20px', textAlign: 'center' }}>
+              <p style={{ fontWeight: 700, fontSize: '1rem' }}>المتجر فاضي — أضف أول قسم من الزر أدناه</p>
+              <div className="st-bridge" style={{ margin: '18px auto 0', maxWidth: 280 }}>
+                <button type="button" className="st-bridge__btn" onClick={() => onAddSection(0)} style={{ justifyContent: 'center' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                  <span>أضف أول قسم</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="st-empty">
+              <p>{dir === 'rtl' ? 'لا توجد أقسام بعد.' : 'No sections yet.'}</p>
+            </div>
+          )
         )}
-        {sections.map((section) => {
+        {visibleSections.map((section, i) => {
           const Comp = SECTIONS[section.type];
           if (!Comp) return null;
-          return <Comp key={section.id} props={section.props || {}} {...ctx} />;
+          return (
+            <EditSlot
+              key={section.id}
+              section={section}
+              index={i}
+              count={visibleSections.length}
+              editing={editing}
+              selected={selectedId === section.id}
+              onSelect={onSelectSection}
+              onOp={onSectionOp}
+              onAdd={onAddSection}
+              onImg={onPickImage}
+            >
+              <Comp key={section.id} props={section.props || {}} {...ctx} />
+            </EditSlot>
+          );
         })}
+        {editing && visibleSections.length > 0 && (
+          <EditBridge index={visibleSections.length} onAdd={onAddSection} />
+        )}
       </main>
 
       <footer className="st-footer">

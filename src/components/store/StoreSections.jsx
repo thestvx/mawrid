@@ -116,7 +116,7 @@ export const SECTIONS = {
     const layout = props.layout || 'full';
     const align = props.align || 'center';
     return (
-      <section className={`st-hero st-hero--${layout} st-hero--${props.height || 'tall'} st-hero--${align} ${theme.palette === 'noir' ? 'st-hero--dark' : ''}`}>
+      <section className={`st-hero st-hero--${layout} st-hero--${props.height || 'tall'} st-hero--${align} ${!hasImage ? 'st-hero--nobg' : ''} ${theme.palette === 'noir' ? 'st-hero--dark' : ''}`}>
         {hasImage && layout !== 'split' && (
           <div className="st-hero__bg">
             <img src={props.image} alt="" />
