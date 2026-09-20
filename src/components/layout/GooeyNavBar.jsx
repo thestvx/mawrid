@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { buildStoreSlugId } from '../../data/sellers';
 import { useCart } from '../../contexts/CartContext';
 import { CURRENCIES } from '../../lib/currency';
 import GooeyNav from './GooeyNav';
@@ -162,12 +163,8 @@ export default function GooeyNavBar() {
   };
 
   const browseMyStoreHref = role === 'seller' && user?.id
-    ? `/sellers/${encodeURIComponent(user?.specialtyKey || user?.specialty || '')}/${encodeURIComponent(`real-${user.id}`)}`
+    ? `/sellers/${encodeURIComponent(user?.specialtyKey || user?.specialty || '')}/${encodeURIComponent(buildStoreSlugId(user))}`
     : null;
-
-  const ownStoreHref = role === 'seller' && user?.specialty && user?.id
-    ? `/sellers/${encodeURIComponent(user.specialty)}/${encodeURIComponent('real-' + user.id)}`
-    : '/storefront';
 
   const userName = user?.name || user?.email?.split('@')[0] || 'User';
   const initials = getInitials(userName);

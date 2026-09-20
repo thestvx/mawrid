@@ -22,6 +22,7 @@ export function mapRealSeller(u, i = 0) {
     specialtyKey: key,
     name,
     name_en: name,
+    brand: store || name,
     role_ar: store ? `متجر ${store}` : 'مورّد على مَورد',
     role_en: store || 'Supplier on Mawrid',
     cover: u.cover || 'linear-gradient(135deg,#ffb199,#a53c00)',
@@ -39,8 +40,93 @@ export function mapRealSeller(u, i = 0) {
   };
 }
 
-export function findStoreById(id, realSellers = []) {
-  if (!id || !String(id).startsWith('real-')) return null;
-  const idx = realSellers.findIndex((u) => `real-${u.id}` === id);
-  return idx === -1 ? null : mapRealSeller(realSellers[idx], idx);
+export function buildStoreSlugId(u) {
+  const base = (u.store_name || u.name || '').toString().trim().replace(/\s+/g, '-');
+  const emoji = ['🇸🇦', '🇦🇪', '🇶🇦', '🇧🇭', '🇰🇼', '🇴🇲'];
+  const flag = u.store_country ? emoji[(u.store_country.charCodeAt(0) || 0) % emoji.length] : '';
+  if (!base) return `mawrid-${u.id}`;
+  return flag ? `mawrid-${flag}-${base}` : `mawrid-${base}`;
 }
+
+export function buildBrandCards() {
+  return DEMO_BRANDS.map((u, i) => ({ ...mapRealSeller(u, i), id: buildStoreSlugId(u) }));
+}
+
+export function findStoreById(id, realSellers = []) {
+  if (!id) return null;
+  const sid = String(id);
+  const realIdx = realSellers.findIndex((u) => sid === `real-${u.id}` || sid === buildStoreSlugId(u));
+  if (realIdx !== -1) return mapRealSeller(realSellers[realIdx], realIdx);
+  if (sid.startsWith('real-') || sid.startsWith('mawrid-')) {
+    const demoIdx = DEMO_BRANDS.findIndex((u) => sid === `real-${u.id}` || sid === buildStoreSlugId(u));
+    return demoIdx === -1 ? null : mapRealSeller(DEMO_BRANDS[demoIdx], demoIdx);
+  }
+  return null;
+}
+
+const DEMO_BRAND_IMG = '/images/cards/designcard.png';
+
+export const DEMO_BRANDS = [
+  {
+    id: 'ufuq-001',
+    name: 'Ufuq Wear',
+    store_name: 'أفق للملابس',
+    specialty: 'brands',
+    rating: 4.7,
+    verified: true,
+    manager: 'سارة العوضي',
+    bio: 'تصميم قِطع يومية عصرية بقِصّات مريحة وأقمشة تتنفس — تصنيع محلي بألوان هادئة تليق بكل الأوقات.',
+    bio_en: 'Modern everyday cuts in breathable fabrics, made locally in calm neutral shades that suit any occasion.',
+    bio_ar: 'تصميم قِطع يومية عصرية بقِصّات مريحة وأقمشة تتنفس — تصنيع محلي بألوان هادئة تليق بكل الأوقات.',
+    cover: DEMO_BRAND_IMG,
+    availability: 'full',
+    works: [
+      { id: 'ufuq-w1', type: 'image', title_ar: 'تشكيلة الصباح', title_en: 'Morning Edit', src: DEMO_BRAND_IMG, duration: '—' },
+      { id: 'ufuq-w2', type: 'image', title_ar: 'قِطع المساء', title_en: 'Evening Pieces', src: DEMO_BRAND_IMG, duration: '—' },
+    ],
+    models: [
+      { id: 'ufuq-m1', name_ar: 'الإطلالة اليومية', name_en: 'The Daily', image: DEMO_BRAND_IMG, colors: [
+        { hex: '#f4ede2', name_ar: 'بيج رملي', name_en: 'Sand Beige' },
+        { hex: '#b9aa94', name_ar: 'كاكي', name_en: 'Khaki' },
+        { hex: '#2f2a25', name_ar: 'قهوة داكنة', name_en: 'Dark Coffee' },
+        { hex: '#b0bec5', name_ar: 'رمادي فاتح', name_en: 'Light Grey' },
+      ]},
+      { id: 'ufuq-m2', name_ar: 'لمسة المكتب', name_en: 'Office Touch', image: DEMO_BRAND_IMG, colors: [
+        { hex: '#d5cfc3', name_ar: 'غبار زهري', name_en: 'Dusty Rose' },
+        { hex: '#415a77', name_ar: 'كحلي عميق', name_en: 'Deep Navy' },
+      ]},
+    ],
+    hours: { from: '09:00', to: '17:00', zone: 'GST' },
+  },
+  {
+    id: 'nasj-002',
+    name: 'Nasj Heritage',
+    store_name: 'نَسج للتراث',
+    specialty: 'brands',
+    rating: 4.9,
+    verified: true,
+    manager: 'عبدالله النعيمي',
+    bio: 'نُعيد إحياء الغرز التراثية بتطريز يدوي على عباءات ملوّنة بدرجات مستوحاة من الصحراء والخليج.',
+    bio_en: 'Hand embroidery reviving heritage stitches on colorful abayas inspired by desert and Gulf tones.',
+    bio_ar: 'نُعيد إحياء الغرز التراثية بتطريز يدوي على عباءات ملوّنة بدرجات مستوحاة من الصحراء والخليج.',
+    cover: DEMO_BRAND_IMG,
+    availability: 'full',
+    works: [
+      { id: 'nasj-w1', type: 'image', title_ar: 'عباءات الديوانية', title_en: 'Majlis Abayas', src: DEMO_BRAND_IMG, duration: '—' },
+      { id: 'nasj-w2', type: 'image', title_ar: 'قصة الغرزة', title_en: 'Stitch Story', src: DEMO_BRAND_IMG, duration: '—' },
+    ],
+    models: [
+      { id: 'nasj-m1', name_ar: 'عباءة الصحراء', name_en: 'Desert Abaya', image: DEMO_BRAND_IMG, colors: [
+        { hex: '#c2a77a', name_ar: 'ذهبي رملي', name_en: 'Sandy Gold' },
+        { hex: '#7d5a3a', name_ar: 'كراميل', name_en: 'Caramel' },
+        { hex: '#1e1e21', name_ar: 'فحمي', name_en: 'Charcoal' },
+        { hex: '#5b7c99', name_ar: 'سماوي داكن', name_en: 'Deep Sky' },
+      ]},
+      { id: 'nasj-m2', name_ar: 'عباءة الخليج', name_en: 'Gulf Abaya', image: DEMO_BRAND_IMG, colors: [
+        { hex: '#2c4e6e', name_ar: 'بحري فاخر', name_en: 'Luxury Sea' },
+        { hex: '#c9c0b3', name_ar: 'لؤلؤي', name_en: 'Pearl' },
+      ]},
+    ],
+    hours: { from: '10:00', to: '19:00', zone: 'GST' },
+  },
+];

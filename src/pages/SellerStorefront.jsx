@@ -118,7 +118,8 @@ export default function SellerStorefront() {
   const isRtl = dir === 'rtl';
 
   const [realSellers, setRealSellers] = useState([]);
-  const [ready, setReady] = useState(() => !id || !id.startsWith('real-'));
+  const needsStoreFetch = Boolean(id && (id.startsWith('real-') || id.startsWith('mawrid-')));
+  const [ready, setReady] = useState(() => !needsStoreFetch);
   const [tab, setTab] = useState('works');
   const [filter, setFilter] = useState('all');
   const [activeWork, setActiveWork] = useState(null);
@@ -126,7 +127,7 @@ export default function SellerStorefront() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!id || !id.startsWith('real-')) return;
+    if (!needsStoreFetch) return;
     let flag = true;
     fetchSellers().then((s) => {
       if (!flag) return;
@@ -134,7 +135,7 @@ export default function SellerStorefront() {
       setReady(true);
     });
     return () => { flag = false; };
-  }, [id]);
+  }, [needsStoreFetch, id]);
 
   const profile = useMemo(() => findStoreById(id, realSellers), [id, realSellers]);
   const isBrand = profile?.kind === 'brand';
