@@ -161,6 +161,14 @@ export default function GooeyNavBar() {
     return '/dashboard/buyer';
   };
 
+  const browseMyStoreHref = role === 'seller' && user?.id
+    ? `/sellers/${encodeURIComponent(user?.specialtyKey || user?.specialty || '')}/${encodeURIComponent(`real-${user.id}`)}`
+    : null;
+
+  const ownStoreHref = role === 'seller' && user?.specialty && user?.id
+    ? `/sellers/${encodeURIComponent(user.specialty)}/${encodeURIComponent('real-' + user.id)}`
+    : '/storefront';
+
   const userName = user?.name || user?.email?.split('@')[0] || 'User';
   const initials = getInitials(userName);
   const avatarColor = getAvatarColor(userName);
@@ -188,15 +196,33 @@ export default function GooeyNavBar() {
             aria-label={userName}
             aria-expanded={userMenuOpen}
           >
-            <span className="pill-avatar__face" style={{ background: avatarColor }}>
-              {initials}
-            </span>
+              <span className="pill-avatar__face" style={{ background: avatarColor }}>
+                {user?.avatar_url
+                  ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={userName}
+                      className="pill-avatar__img"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  )
+                  : initials}
+              </span>
           </button>
           {userMenuOpen && (
             <div className="pill-auth__dropdown">
               <div className="pill-auth__header">
                 <span className="pill-avatar__face pill-avatar__face--lg" style={{ background: avatarColor }}>
-                  {initials}
+                  {user?.avatar_url
+                    ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={userName}
+                        className="pill-avatar__img"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    )
+                    : initials}
                 </span>
                 <div>
                   <div className="pill-auth__name">{userName}</div>

@@ -1,0 +1,28 @@
+.storepage { min-height: 60vh; }
+.storepage--state { display: grid; place-items: center; min-height: 70vh; padding: 80px 22px; }
+
+.storepage__spinner {
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 3px solid rgba(165, 60, 0, 0.18);
+  border-top-color: var(--color-primary, #a53c00);
+  animation: storepage-spin 0.9s linear infinite;
+}
+@keyframes storepage-spin { to { transform: rotate(360deg); } }
+
+.storepage__empty { text-align: center; max-width: 460px; display: grid; gap: 14px; justify-items: center; }
+.storepage__empty span { font-size: 3rem; }
+.storepage__empty h1 { margin: 0; font-size: 1.7rem; }
+.storepage__empty p { color: var(--color-text-muted, #6b7280); margin: 0; }
+.storepage__empty a {
+  margin-top: 8px; background: var(--color-primary, #a53c00); color: #fff;
+  padding: 12px 26px; border-radius: 999px; font-weight: 700; text-decoration: none;
+  transition: transform 0.2s;
+}
+.storepage__empty a:hover { transform: translateY(-2px); }
+
+.storepage__draft {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  flex-wrap: wrap;
+  background: #1f2937; color: #fff; padding: 10px 18px; font-size: 0.88rem; font-weight: 600;
+}
+.storepage__draft a { color: #ffbd9a; text-decoration: underline; }

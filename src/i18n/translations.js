@@ -6,6 +6,7 @@ export const ar = {
   'nav.design': 'التصميم',
   'nav.signIn': 'تسجيل الدخول',
   'nav.openShop': 'فتح متجر',
+  'nav.browseMyStore': 'تصفح متجري',
   'nav.langSwitch': 'English',
   'nav.dashboard': 'لوحة التحكم',
 
@@ -315,6 +316,7 @@ export const en = {
   'nav.design': 'Design',
   'nav.signIn': 'Sign In',
   'nav.openShop': 'Open Shop',
+  'nav.browseMyStore': 'Browse My Store',
   'nav.langSwitch': 'العربية',
   'nav.dashboard': 'Dashboard',
 
