@@ -306,6 +306,72 @@ export default function SellerStorefront() {
           ))}
         </div>
 
+        <div className="sf-trust">
+          {[
+            { icon: 'shield', ar: 'جودة مضمونة', en: 'Certified quality' },
+            { icon: 'truck', ar: 'شحن سريع', en: 'Fast shipping' },
+            { icon: 'chat', ar: 'دعم خلال ٢٤س', en: 'Support in 24h' },
+          ].map((f) => (
+            <div className="sf-trust__item" key={f.icon}>
+              <span className={`sf-trust__ico sf-trust__ico--${f.icon}`}>
+                {f.icon === 'shield' ? (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10Z" />
+                  </svg>
+                ) : f.icon === 'truck' ? (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 18H3V5h13v13M16 9h4l3 4v5h-3M7 18a2 2 0 1 0 4 0 2 2 0 1 0-4 0ZM16 18a2 2 0 1 0 4 0 2 2 0 1 0-4 0Z" />
+                  </svg>
+                ) : (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.38 9 9 0 0 1-3.9-.9L3 20l1.02-5.6A8.38 8.38 0 1 1 21 11.5Z" />
+                  </svg>
+                )}
+              </span>
+              <b>{isRtl ? f.ar : f.en}</b>
+            </div>
+          ))}
+        </div>
+
+        {tab === 'store' && isBrand && palette.length > 0 && (
+          <motion.section
+            className="store-featured"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: EASE }}
+          >
+            <div className="store-featured__media">
+              {profile.models[0]?.image
+                ? <img src={profile.models[0].image} alt="" loading="lazy" />
+                : <img src={profile.models[0]?.image || SPECIALTY_ICON[profile.specialtyKey]} alt="" className="store-featured__ph" />}
+            </div>
+            <div className="store-featured__body">
+              <span className="store-featured__eyebrow">
+                {isRtl ? 'مجموعة مميزة' : 'Featured collection'}
+              </span>
+              <h2 className="store-featured__title">
+                {isRtl ? `توقيع ${name} بالألوان` : `${name}'s signature palette`}
+              </h2>
+              <p className="store-featured__desc">
+                {isRtl
+                  ? `اكتشف ${palette.length} لوناً من تشكيلة ${name} — اختر موديلك وألوانك، ويصلك تأكيد من المورّد خلال أقل من ٢٤ ساعة.`
+                  : `Explore ${palette.length} colors from ${name}'s collection — pick your model and shades, and the supplier confirms within 24 hours.`}
+              </p>
+              <div className="store-featured__swatches" aria-hidden="true">
+                {palette.slice(0, 7).map((c) => (
+                  <i key={c.hex} style={{ background: c.hex }} />
+                ))}
+              </div>
+              <button className="store-featured__cta" onClick={() => setRequest({ tab: 'request', modelId: profile.models[0]?.id || null })}>
+                {isRtl ? 'اطلب موديل ولون' : 'Request model & color'}
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isRtl ? 'scaleX(-1)' : undefined }}>
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </motion.section>
+        )}
+
         <div className="store-body">
           <div className="store-main">
             <div className="store-tabs" role="tablist">
