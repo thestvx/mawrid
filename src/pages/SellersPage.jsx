@@ -11,18 +11,18 @@ import './SellersPage.css';
 const EASE = [0.16, 1, 0.3, 1];
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.97 },
+  hidden: { opacity: 0, y: 34, scale: 0.97 },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { type: 'spring', stiffness: 110, damping: 17, mass: 0.75 },
+    transition: { type: 'spring', stiffness: 90, damping: 16, mass: 0.9 },
   },
 };
 
 const gridVariants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.06 } },
 };
 
 const gridExit = {

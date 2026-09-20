@@ -13,6 +13,7 @@ const SPECIALTY_ICON = {
 };
 
 const initials = (name) => (name || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('');
+const isImg = (v) => typeof v === 'string' && v.trim() && /^(https?:|data:|\/)/.test(v);
 
 function VerifiedBadge() {
   return (
@@ -68,10 +69,10 @@ export default function SellerCard({ profile }) {
 
   const shots = useMemo(() => {
     const all = [];
-    if (Array.isArray(profile.models)) profile.models.forEach((m) => all.push({ id: m.id, src: m.image }));
+    if (Array.isArray(profile.models)) profile.models.forEach((m) => { if (isImg(m.image)) all.push({ id: m.id, src: m.image }); });
     (profile.works || []).forEach((w) => {
-      if (w.type === 'image') all.push({ id: w.id, src: w.src });
-      else if (w.poster) all.push({ id: w.id, src: w.poster });
+      if (w.type === 'image' && isImg(w.src)) all.push({ id: w.id, src: w.src });
+      else if (isImg(w.poster)) all.push({ id: w.id, src: w.poster });
     });
     const seen = new Set();
     return all.filter((s) => {
@@ -82,10 +83,8 @@ export default function SellerCard({ profile }) {
   }, [profile]);
 
   const shown = shots.slice(0, 3);
-  let pad = 0;
-  while (shown.length && shown.length < 3) {
-    shown.push(shots[pad % shots.length]);
-    pad += 1;
+  while (shown.length < 3) {
+    shown.push({ id: `pad-${shown.length}`, pad: true });
   }
   const extra = Math.max(0, shots.length - 3);
   const cta = isRtl
@@ -126,9 +125,14 @@ export default function SellerCard({ profile }) {
 
       <div className="seller-card__gallery">
         {shown.map((s, i) => (
-          <span className="seller-card__shot" key={`${s.id}-${i}`}>
-            <img src={s.src} alt="" loading="lazy" />
-            {extra > 0 && i === shown.length - 1 && (
+          <span
+            className={`seller-card__shot${s.pad ? ' seller-card__shot--pad' : ''}`}
+            key={`${s.id}-${i}`}
+            style={s.pad ? { background: profile.avatarGradient } : undefined}
+          >
+            {!s.pad && <img src={s.src} alt="" loading="lazy" />}
+            {s.pad && <i className="seller-card__mono">{initials(name)}</i>}
+            {extra > 0 && !s.pad && i === shown.length - 1 && (
               <i className="seller-card__more">+{extra}</i>
             )}
           </span>

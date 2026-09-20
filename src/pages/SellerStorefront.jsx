@@ -260,7 +260,12 @@ export default function SellerStorefront() {
           <img className="store-banner__mark" src={SPECIALTY_ICON[profile.specialtyKey]} alt="" />
         </motion.section>
 
-        <header className="store-head">
+        <motion.header
+          className="store-head"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: EASE, delay: 0.08 }}
+        >
           <div className="store-head__left">
             <span className="store-avatar" style={profile.avatar_url ? undefined : { background: profile.avatarGradient }}>
               {profile.avatar_url ? <img src={profile.avatar_url} alt={name} /> : initials(name)}
@@ -296,24 +301,34 @@ export default function SellerStorefront() {
               {copied ? (isRtl ? 'تم النسخ' : 'Copied') : (isRtl ? 'مشاركة' : 'Share')}
             </button>
           </div>
-        </header>
+        </motion.header>
 
-        <div className="store-stats">
+        <motion.div
+          className="store-stats"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: EASE, delay: 0.14 }}
+        >
           {stats.map((s, i) => (
             <div className="store-stat" key={i}>
               <b>{s.star ? <Stars rating={s.value} /> : s.value}</b>
               <span>{isRtl ? s.ar : s.en}</span>
             </div>
           ))}
-        </div>
+        </motion.div>
 
-        <div className="sf-trust">
+        <motion.div
+          className="sf-trust"
+          initial="hidden"
+          animate="show"
+          variants={stagger}
+        >
           {[
             { icon: 'shield', ar: 'جودة مضمونة', en: 'Certified quality' },
             { icon: 'truck', ar: 'شحن سريع', en: 'Fast shipping' },
             { icon: 'chat', ar: 'دعم خلال ٢٤س', en: 'Support in 24h' },
           ].map((f) => (
-            <div className="sf-trust__item" key={f.icon}>
+            <motion.div className="sf-trust__item" key={f.icon} variants={rise}>
               <span className={`sf-trust__ico sf-trust__ico--${f.icon}`}>
                 {f.icon === 'shield' ? (
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -330,9 +345,9 @@ export default function SellerStorefront() {
                 )}
               </span>
               <b>{isRtl ? f.ar : f.en}</b>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {tab === 'store' && isBrand && palette.length > 0 && (
           <motion.section
