@@ -160,6 +160,26 @@ function Field({ field, value, onChange, dir, onPickImage, sectionId }) {
     );
   }
   if (field.type === 'number') {
+    const hasRange = field.min != null && field.max != null;
+    const safe = Number(value ?? 0);
+    if (hasRange) {
+      return (
+        <div className="ss-f">
+          <label>
+            <span>{label}</span>
+            <b className="ss-f__val">{Number.isNaN(safe) ? '0' : safe}</b>
+          </label>
+          <input
+            type="range"
+            min={field.min}
+            max={field.max}
+            step={field.step || 1}
+            value={Number.isNaN(safe) ? field.min : Math.min(Math.max(safe, field.min), field.max)}
+            onChange={(e) => onChange(Number(e.target.value))}
+          />
+        </div>
+      );
+    }
     return (
       <div className="ss-f">
         <label>{label}</label>

@@ -223,7 +223,10 @@
 /* --- Form fields --- */
 .ss-f { display: flex; flex-direction: column; gap: 5px; }
 
+.ss-f__val { margin-inline-start: auto; padding: 1px 8px; border-radius: 999px; background: var(--ss-accent); color: #fff; font-size: 0.7rem; font-variant-numeric: tabular-nums; }
 .ss-f label { font-size: 0.72rem; font-weight: 800; color: #5c4f44; }
+.ss-f--val { margin-inline-start: auto; padding: 2px 9px; border-radius: 999px; background: var(--ss-accent, #e27b3c); color: #fff; font-size: 0.68rem; font-variant-numeric: tabular-nums; }
+.ss-f label { display: flex; align-items: center; gap: 6px; }
 
 .ss-f input[type="text"], .ss-f input[type="number"], .ss-f select, .ss-f textarea {
   border: 1px solid var(--ss-line); background: var(--ss-card);
