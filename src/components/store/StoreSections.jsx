@@ -37,11 +37,13 @@ export function StoreLink({ href, className, children, onClick, mode = 'public' 
   return <Link to={href} className={className} onClick={handle}>{children}</Link>;
 }
 
-export function SectionHead({ title, subtitle, align = 'center', dir, action }) {
-  if (!title && !subtitle) return null;
+export function SectionHead({ title, subtitle, eyebrow, align = 'center', dir, action }) {
+  const tag = eyebrow;
+  if (!title && !subtitle && !tag) return null;
   return (
     <div className={`st-head st-head--${align}`}>
       <div>
+        {tag && <span className="st-head__eyebrow">{tag}</span>}
         {title && <h2 className="st-head__title">{title}</h2>}
         {subtitle && <p className="st-head__sub">{subtitle}</p>}
       </div>
@@ -133,8 +135,8 @@ export const SECTIONS = {
             {(props.badge_ar || props.badge_en) && (
               <span className="st-hero__badge">{pick(dir, props.badge_ar, props.badge_en)}</span>
             )}
-            {(props.eyebrow_ar || props.eyebrow_en) && (
-              <span className="st-hero__eyebrow">{pick(dir, props.eyebrow_ar, props.eyebrow_en)}</span>
+            {(props.eyebrow_ar || props.eyebrow_en || props.eyebrow) && (
+              <span className="st-hero__eyebrow">{pick(dir, props.eyebrow_ar, props.eyebrow_en, props.eyebrow)}</span>
             )}
             <h1 className="st-hero__title">{pick(dir, props.title_ar, props.title_en)}</h1>
             {(props.subtitle_ar || props.subtitle_en) && (
@@ -187,6 +189,7 @@ export const SECTIONS = {
       <section className="st-section" id="products">
         <SectionHead
           title={pick(dir, props.title_ar, props.title_en)}
+          eyebrow={pick(dir, props.eyebrow_ar, props.eyebrow_en)}
           subtitle={pick(dir, props.subtitle_ar, props.subtitle_en)}
           align="center"
           dir={dir}
@@ -207,7 +210,7 @@ export const SECTIONS = {
     if (!list.length) return null;
     return (
       <section className="st-section st-section--soft" id="categories">
-        <SectionHead title={pick(dir, props.title_ar, props.title_en)} dir={dir} align="center" />
+        <SectionHead title={pick(dir, props.title_ar, props.title_en)} eyebrow={pick(dir, props.eyebrow_ar, props.eyebrow_en)} dir={dir} align="center" />
         <div className={`st-cats st-cats--${props.layout || 'cards'}`}>
           {list.map((cat) => (
             <button
@@ -233,6 +236,7 @@ export const SECTIONS = {
       <section className="st-section">
         <SectionHead
           title={pick(dir, props.title_ar, props.title_en)}
+          eyebrow={pick(dir, props.eyebrow_ar, props.eyebrow_en)}
           subtitle={pick(dir, props.subtitle_ar, props.subtitle_en)}
           dir={dir}
           align="center"
@@ -259,6 +263,9 @@ export const SECTIONS = {
           {props.image ? <img src={props.image} alt="" loading="lazy" /> : <span className="st-hero__ph" />}
         </div>
         <div className="st-about__copy">
+          {(props.eyebrow_ar || props.eyebrow_en) && (
+            <span className="st-about__eyebrow">{pick(dir, props.eyebrow_ar, props.eyebrow_en)}</span>
+          )}
           <h2 className="st-head__title">{pick(dir, props.title_ar, props.title_en)}</h2>
           {(props.text_ar || props.text_en) && (
             <p className="st-about__text">{pick(dir, props.text_ar, props.text_en)}</p>
@@ -280,12 +287,12 @@ export const SECTIONS = {
     return (
       <section className="st-section st-stats">
         {pick(dir, props.title_ar, props.title_en) && (
-          <SectionHead title={pick(dir, props.title_ar, props.title_en)} dir={dir} align="center" />
+          <SectionHead title={pick(dir, props.title_ar, props.title_en)} eyebrow={pick(dir, props.eyebrow_ar, props.eyebrow_en)} dir={dir} align="center" />
         )}
         <div className="st-stats__grid">
           {items.map((it, i) => (
             <div key={i} className="st-stats__item">
-              <strong>{it.value}</strong>
+              <strong>{it.value}{it.suffix && <em>{it.suffix}</em>}</strong>
               <span>{pick(dir, it.label_ar, it.label_en)}</span>
             </div>
           ))}
@@ -299,7 +306,7 @@ export const SECTIONS = {
     if (!items.length) return null;
     return (
       <section className="st-section st-section--soft">
-        <SectionHead title={pick(dir, props.title_ar, props.title_en)} dir={dir} align="center" />
+        <SectionHead title={pick(dir, props.title_ar, props.title_en)} eyebrow={pick(dir, props.eyebrow_ar, props.eyebrow_en)} dir={dir} align="center" />
         <div className="st-quotes">
           {items.map((it, i) => (
             <blockquote key={i} className="st-quote">
@@ -324,7 +331,7 @@ export const SECTIONS = {
     if (!items.length) return null;
     return (
       <section className="st-section st-faq">
-        <SectionHead title={pick(dir, props.title_ar, props.title_en)} dir={dir} align="center" />
+        <SectionHead title={pick(dir, props.title_ar, props.title_en)} eyebrow={pick(dir, props.eyebrow_ar, props.eyebrow_en)} dir={dir} align="center" />
         <div className="st-faq__list">
           {items.map((it, i) => (
             <details key={i} className="st-faq__item">

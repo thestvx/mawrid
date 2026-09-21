@@ -18,22 +18,33 @@ export const DEMO_CATEGORIES = [
   { id: 'cat-misc', name_ar: 'إكسسوارات', name_en: 'Accessories' },
 ];
 
-export const DEMO_LOOKS = Array.from({ length: 6 }, (_, i) => ({ url: IMG(`look-${i + 1}`), caption_ar: `إطلالة ${i + 1}`, caption_en: `Look ${i + 1}` }));
+export const DEMO_LOOKS = [
+  { url: IMG('look-1'), caption_ar: 'إطلالة الصباح', caption_en: 'Morning look' },
+  { url: IMG('look-2'), caption_ar: 'سهرة الخميس', caption_en: 'Thursday night' },
+  { url: IMG('look-3'), caption_ar: 'ويكندا تريبة', caption_en: 'Trip weekend' },
+  { url: IMG('look-4'), caption_ar: 'إطلالة المكتب', caption_en: 'Office hour' },
+  { url: IMG('look-5'), caption_ar: 'ليل الشتاء', caption_en: 'Winter night' },
+  { url: IMG('look-6'), caption_ar: 'لقاء الأصدقاء', caption_en: 'Friends meetup' },
+];
 
 export const DEMO_TESTIMONIALS = [
-  { name: 'سارة', role_ar: 'عميلة منذ ٢٠٢٣', role_en: 'Client since 2023', text_ar: 'جودة غير متوقعة في كل طلب', text_en: 'Unexpected quality, every order', avatar: '' },
-  { name: 'نورة', role_ar: 'مصممة أزياء', role_en: 'Fashion designer', text_ar: 'قطع فريدة لا أجدها في أي مكان', text_en: 'Unique pieces found nowhere else', avatar: '' },
-  { name: 'ريم', role_ar: 'بلوجرة', role_en: 'Blogger', text_ar: 'الشحن سريع والتغليف فاخر', text_en: 'Fast shipping, luxurious packaging', avatar: '' },
+  { name: 'سارة', role_ar: 'عميلة منذ ٢٠٢٣', role_en: 'Client since 2023', text_ar: 'جودة غير متوقعة في كل طلب — القماش والخياطة فاقا توقعي.', text_en: 'Unexpected quality, every order — the fabric and tailoring exceeded my expectations.', avatar: 'https://i.pravatar.cc/96?u=sara' },
+  { name: 'نورة', role_ar: 'مصممة أزياء', role_en: 'Fashion designer', text_ar: 'قطع فريدة لا أجدها في أي مكان، والتغليف فخم من أول نظرة.', text_en: 'Unique pieces found nowhere else, with packaging that impresses at first sight.', avatar: 'https://i.pravatar.cc/96?u=noura' },
+  { name: 'ريم', role_ar: 'بلوجرة', role_en: 'Blogger', text_ar: 'الشحن سريع والتواصل مباشر، جرّبتهم في ثلاث مناسبات وطبعاً سأعود.', text_en: 'Fast shipping and direct contact — worn them three times and I will be back.', avatar: 'https://i.pravatar.cc/96?u=reem' },
+  { name: 'خولة', role_ar: 'أم لطفلين', role_en: 'Mom of two', text_ar: 'المقاسات مضبوطة وطلب خاص تم تنفيذه في يومين فقط.', text_en: 'Perfect sizing, and a custom request was done in just two days.', avatar: 'https://i.pravatar.cc/96?u=khawla' },
 ];
 
 export const DEMO_FAQ = [
-  { q_ar: 'كم يستغرق الشحن؟', q_en: 'How long does shipping take?', a_ar: '١-٣ أيام داخل السعودية', a_en: '1-3 days across KSA' },
-  { q_ar: 'هل يمكن الإرجاع؟', q_en: 'Can I return?', a_ar: 'نعم خلال ١٤ يوماً', a_en: 'Yes, within 14 days' },
-  { q_ar: 'هل الدفع عند الاستلام متاح؟', q_en: 'Is cash on delivery available?', a_ar: 'نعم لجميع المناطق', a_en: 'Yes, everywhere' },
+  { q_ar: 'كم يستغرق الشحن؟', q_en: 'How long does shipping take?', a_ar: '١-٣ أيام داخل السعودية، ويوم واحد في المدن الرئيسية.', a_en: '1-3 days across KSA, next-day in major cities.' },
+  { q_ar: 'هل يمكن الإرجاع؟', q_en: 'Can I return?', a_ar: 'نعم خلال ١٤ يوماً مع بقاء القطعة بحالتها الأصلية.', a_en: 'Yes, within 14 days as long as the item is unused.' },
+  { q_ar: 'هل الدفع عند الاستلام متاح؟', q_en: 'Is cash on delivery available?', a_ar: 'نعم لجميع المناطق بدون استثناء.', a_en: 'Yes, available everywhere.' },
+  { q_ar: 'هل تعملون بطلب خاص؟', q_en: 'Do you take custom orders?', a_ar: 'بالطبع — مقاسات مخصصة وخامات من اختيارك.', a_en: 'Of course — bespoke sizing and fabrics of your choice.' },
 ];
 
-export const DEMO_ABOUT_BULLETS = ['نختار الأقمشة يدوياً', 'خياطة بإتقان ١٠٠٪', 'قطعات محدودة الإصدار'];
+export const DEMO_ABOUT_BULLETS = ['نختار الأقمشة يدوياً', 'خياطة بإتقان ١٠٠٪', 'قطع محدودة الإصدار'];
 export const DEMO_STATS = [
-  { label_ar: 'عميل سعيد', label_en: 'Happy client', value: 1200, suffix_ar: '+', suffix_en: '+' },
-  { label_ar: 'منتج', label_en: 'Products', value: 48, suffix_ar: '', suffix_en: '' },
+  { label_ar: 'عميلة سعيدة', label_en: 'Happy clients', value: 1240, suffix_ar: '+', suffix_en: '+' },
+  { label_ar: 'تصميم فريد', label_en: 'Unique designs', value: 48, suffix_ar: '', suffix_en: '' },
+  { label_ar: 'تقييم العملاء', label_en: 'Client rating', value: 4.9, suffix_ar: '/5', suffix_en: '/5' },
+  { label_ar: 'سنة خبرة', label_en: 'Years of craft', value: 9, suffix_ar: '', suffix_en: '' },
 ];

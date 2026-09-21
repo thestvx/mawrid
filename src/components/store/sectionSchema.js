@@ -89,6 +89,8 @@ export const SECTION_TYPES = {
     fields: [
       txt('title_ar', 'العنوان (عربي)', 'Title (AR)'),
       txt('title_en', 'العنوان (إنجليزي)', 'Title (EN)'),
+      txt('eyebrow_ar', 'سطر علوي (عربي)', 'Eyebrow (AR)'),
+      txt('eyebrow_en', 'سطر علوي (إنجليزي)', 'Eyebrow (EN)'),
       txt('subtitle_ar', 'الوصف (عربي)', 'Subtitle (AR)'),
       txt('subtitle_en', 'الوصف (إنجليزي)', 'Subtitle (EN)'),
       sel('source', 'المصدر', 'Source', {
@@ -120,10 +122,12 @@ export const SECTION_TYPES = {
     label_en: 'Categories',
     icon: '◇',
     group: 'shop',
-    defaults: { title_ar: 'تسوّق حسب القسم', title_en: 'Shop by category', layout: 'cards', limit: 8 },
+    defaults: { title_ar: 'تسوّق حسب القسم', title_en: 'Shop by category', eyebrow_ar: '', eyebrow_en: '', layout: 'cards', limit: 8 },
     fields: [
       txt('title_ar', 'العنوان (عربي)', 'Title (AR)'),
       txt('title_en', 'العنوان (إنجليزي)', 'Title (EN)'),
+      txt('eyebrow_ar', 'سطر علوي (عربي)', 'Eyebrow (AR)'),
+      txt('eyebrow_en', 'سطر علوي (إنجليزي)', 'Eyebrow (EN)'),
       sel('layout', 'التخطيط', 'Layout', {
         options: [
           { value: 'cards', label_ar: 'بطاقات', label_en: 'Cards' },
@@ -139,12 +143,14 @@ export const SECTION_TYPES = {
     icon: '▣',
     group: 'content',
     defaults: {
-      title_ar: 'من أعمالنا', title_en: 'Lookbook', subtitle_ar: '', subtitle_en: '', columns: 3,
+      title_ar: 'من أعمالنا', title_en: 'Lookbook', eyebrow_ar: '', eyebrow_en: '', subtitle_ar: '', subtitle_en: '', columns: 3,
       images: [],
     },
     fields: [
       txt('title_ar', 'العنوان (عربي)', 'Title (AR)'),
       txt('title_en', 'العنوان (إنجليزي)', 'Title (EN)'),
+      txt('eyebrow_ar', 'سطر علوي (عربي)', 'Eyebrow (AR)'),
+      txt('eyebrow_en', 'سطر علوي (إنجليزي)', 'Eyebrow (EN)'),
       txt('subtitle_ar', 'الوصف (عربي)', 'Subtitle (AR)'),
       txt('subtitle_en', 'الوصف (إنجليزي)', 'Subtitle (EN)'),
       num('columns', 'عدد الأعمدة', 'Columns', { min: 2, max: 4 }),
@@ -160,10 +166,12 @@ export const SECTION_TYPES = {
     label_en: 'About',
     icon: '❖',
     group: 'content',
-    defaults: { title_ar: 'قصتنا', title_en: 'Our story', text_ar: '', text_en: '', image: '', signature: '', bullets: [] },
+    defaults: { title_ar: 'قصتنا', title_en: 'Our story', eyebrow_ar: '', eyebrow_en: '', text_ar: '', text_en: '', image: '', signature: '', bullets: [] },
     fields: [
       txt('title_ar', 'العنوان (عربي)', 'Title (AR)'),
       txt('title_en', 'العنوان (إنجليزي)', 'Title (EN)'),
+      txt('eyebrow_ar', 'سطر علوي (عربي)', 'Eyebrow (AR)'),
+      txt('eyebrow_en', 'سطر علوي (إنجليزي)', 'Eyebrow (EN)'),
       area('text_ar', 'النص (عربي)', 'Text (AR)'),
       area('text_en', 'النص (إنجليزي)', 'Text (EN)'),
       img('image', 'الصورة', 'Image'),
@@ -180,14 +188,16 @@ export const SECTION_TYPES = {
     label_en: 'Stats',
     icon: '#',
     group: 'content',
-    defaults: { title_ar: '', title_en: '', items: [] },
+    defaults: { title_ar: '', title_en: '', eyebrow_ar: '', eyebrow_en: '', items: [] },
     fields: [
       txt('title_ar', 'العنوان (عربي)', 'Title (AR)'),
       txt('title_en', 'العنوان (إنجليزي)', 'Title (EN)'),
+      txt('eyebrow_ar', 'سطر علوي (عربي)', 'Eyebrow (AR)'),
+      txt('eyebrow_en', 'سطر علوي (إنجليزي)', 'Eyebrow (EN)'),
       list('items', 'العناصر', 'Items', {
         titleKey: 'label_ar',
-        blank: () => ({ value: '', label_ar: '', label_en: '' }),
-        itemFields: [txt('value', 'القيمة', 'Value'), txt('label_ar', 'الوصف (عربي)', 'Label (AR)'), txt('label_en', 'الوصف (إنجليزي)', 'Label (EN)')],
+        blank: () => ({ value: '', suffix: '', label_ar: '', label_en: '' }),
+        itemFields: [txt('value', 'القيمة', 'Value'), txt('suffix', 'اللاحقة (+ , /5)', 'Suffix'), txt('label_ar', 'الوصف (عربي)', 'Label (AR)'), txt('label_en', 'الوصف (إنجليزي)', 'Label (EN)')],
       }),
     ],
   },
@@ -196,10 +206,12 @@ export const SECTION_TYPES = {
     label_en: 'Testimonials',
     icon: '❝',
     group: 'content',
-    defaults: { title_ar: 'ماذا يقول عملاؤنا', title_en: 'What clients say', items: [] },
+    defaults: { title_ar: 'ماذا يقول عملاؤنا', title_en: 'What clients say', eyebrow_ar: '', eyebrow_en: '', items: [] },
     fields: [
       txt('title_ar', 'العنوان (عربي)', 'Title (AR)'),
       txt('title_en', 'العنوان (إنجليزي)', 'Title (EN)'),
+      txt('eyebrow_ar', 'سطر علوي (عربي)', 'Eyebrow (AR)'),
+      txt('eyebrow_en', 'سطر علوي (إنجليزي)', 'Eyebrow (EN)'),
       list('items', 'الآراء', 'Reviews', {
         titleKey: 'name',
         blank: () => ({ name: '', role_ar: '', role_en: '', text_ar: '', text_en: '', avatar: '' }),
@@ -212,10 +224,12 @@ export const SECTION_TYPES = {
     label_en: 'FAQ',
     icon: '؟',
     group: 'content',
-    defaults: { title_ar: 'الأسئلة الشائعة', title_en: 'Frequently asked', items: [] },
+    defaults: { title_ar: 'الأسئلة الشائعة', title_en: 'Frequently asked', eyebrow_ar: '', eyebrow_en: '', items: [] },
     fields: [
       txt('title_ar', 'العنوان (عربي)', 'Title (AR)'),
       txt('title_en', 'العنوان (إنجليزي)', 'Title (EN)'),
+      txt('eyebrow_ar', 'سطر علوي (عربي)', 'Eyebrow (AR)'),
+      txt('eyebrow_en', 'سطر علوي (إنجليزي)', 'Eyebrow (EN)'),
       list('items', 'الأسئلة', 'Questions', {
         titleKey: 'q_ar',
         blank: () => ({ q_ar: '', q_en: '', a_ar: '', a_en: '' }),

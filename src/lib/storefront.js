@@ -86,21 +86,24 @@ export function defaultSlug(seller) {
 }
 
 export const PALETTES = [
-  { id: 'ember', label_ar: 'جمر', label_en: 'Ember', primary: '#ff6201', accent: '#a53c00', bg: '#fff8f4', surface: '#ffffff', ink: '#26160e' },
-  { id: 'ink', label_ar: 'حِبري', label_en: 'Ink', primary: '#111827', accent: '#6b7280', bg: '#fafafa', surface: '#ffffff', ink: '#111827' },
-  { id: 'rose', label_ar: 'وردي', label_en: 'Rose', primary: '#e11d6f', accent: '#9d174d', bg: '#fff5f8', surface: '#ffffff', ink: '#2a1018' },
-  { id: 'sage', label_ar: 'زيتي', label_en: 'Sage', primary: '#2f7d5c', accent: '#14532d', bg: '#f4faf6', surface: '#ffffff', ink: '#0f2a1d' },
-  { id: 'ocean', label_ar: 'محيطي', label_en: 'Ocean', primary: '#0ea5e9', accent: '#0c4a6e', bg: '#f2f9ff', surface: '#ffffff', ink: '#0b2239' },
-  { id: 'violet', label_ar: 'بنفسجي', label_en: 'Violet', primary: '#6d28d9', accent: '#4c1d95', bg: '#f8f6ff', surface: '#ffffff', ink: '#1e1140' },
-  { id: 'noir', label_ar: 'ليلي', label_en: 'Noir', primary: '#f5b642', accent: '#b45309', bg: '#0e0e10', surface: '#1a1a1e', ink: '#f7f5ef' },
-  { id: 'sand', label_ar: 'رملي', label_en: 'Sand', primary: '#b45309', accent: '#78350f', bg: '#fdf8ef', surface: '#ffffff', ink: '#2a1c0a' },
+  { id: 'ember', label_ar: 'جمر', label_en: 'Ember', primary: '#dd4f05', accent: '#9c3800', bg: '#fdf6ee', surface: '#ffffff', ink: '#2b190a' },
+  { id: 'sand', label_ar: 'ترابي', label_en: 'Sand', primary: '#b46518', accent: '#7c4708', bg: '#f9f3e6', surface: '#fffdf6', ink: '#2b1c07' },
+  { id: 'noir', label_ar: 'ليلي', label_en: 'Noir', primary: '#f0b23a', accent: '#b4670f', bg: '#0e0d0c', surface: '#1b1713', ink: '#f6f1e7' },
+  { id: 'rose', label_ar: 'وردي', label_en: 'Rose', primary: '#d92d72', accent: '#a1164f', bg: '#fef4f6', surface: '#ffffff', ink: '#35101c' },
+  { id: 'sage', label_ar: 'زيتي', label_en: 'Sage', primary: '#3a7d5e', accent: '#1f5c40', bg: '#f3f8f4', surface: '#ffffff', ink: '#11271b' },
+  { id: 'ocean', label_ar: 'محيطي', label_en: 'Ocean', primary: '#0f8fc4', accent: '#0a4f74', bg: '#f1f8fb', surface: '#ffffff', ink: '#0c2331' },
+  { id: 'violet', label_ar: 'بنفسجي', label_en: 'Violet', primary: '#6f3fd0', accent: '#4a2193', bg: '#f7f4fc', surface: '#ffffff', ink: '#201036' },
+  { id: 'choc', label_ar: 'شوكولاتة', label_en: 'Choc', primary: '#9c5a2c', accent: '#683518', bg: '#f7f0e7', surface: '#fffdf8', ink: '#2a1508' },
+  { id: 'plum', label_ar: 'خمري', label_en: 'Plum', primary: '#8a2440', accent: '#581124', bg: '#fbf1f2', surface: '#ffffff', ink: '#2c0e16' },
+  { id: 'ink', label_ar: 'حِبري', label_en: 'Ink', primary: '#16181d', accent: '#5a616e', bg: '#f7f7f5', surface: '#ffffff', ink: '#17181c' },
 ];
 
 export const FONT_PRESETS = [
   { id: 'modern', label_ar: 'عصري', label_en: 'Modern', head: "'Tajawal', 'SF Pro Display', system-ui, sans-serif", body: "'Tajawal', 'SF Pro Display', system-ui, sans-serif" },
-  { id: 'editorial', label_ar: 'تحريري', label_en: 'Editorial', head: "Georgia, 'GE SS', 'Tajawal', serif", body: "'Tajawal', 'SF Pro Display', Georgia, serif" },
-  { id: 'classic', label_ar: 'كلاسيكي', label_en: 'Classic', head: "Georgia, 'GE SS', serif", body: "'Tajawal', Georgia, serif" },
-  { id: 'display', label_ar: 'بارز', label_en: 'Display', head: "'Tajawal', 'SF Pro Display', sans-serif", body: "'Tajawal', 'SF Pro Display', system-ui, sans-serif" },
+  { id: 'editorial', label_ar: 'تحريري', label_en: 'Editorial', head: "'Playfair Display', 'Amiri', Georgia, serif", body: "'Tajawal', 'SF Pro Display', system-ui, sans-serif" },
+  { id: 'classic', label_ar: 'كلاسيكي', label_en: 'Classic', head: "'Amiri', 'Cormorant Garamond', Georgia, serif", body: "'Tajawal', 'Amiri', Georgia, serif" },
+  { id: 'display', label_ar: 'كوفي', label_en: 'Kufi', head: "'Cairo', 'Tajawal', sans-serif", body: "'Tajawal', 'SF Pro Display', system-ui, sans-serif" },
+  { id: 'chic', label_ar: 'أنيق', label_en: 'Chic', head: "'Almarai', 'Tajawal', sans-serif", body: "'Almarai', 'Tajawal', sans-serif" },
 ];
 
 export function getPalette(id) {
