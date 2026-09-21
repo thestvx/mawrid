@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { DEMO_LOOKS, DEMO_ABOUT_BULLETS, DEMO_TESTIMONIALS, DEMO_FAQ, DEMO_STATS } from '../../lib/demoCatalog';
 import { saveStorefront, slugify, isSlugAvailable, PALETTES, FONT_PRESETS, DEFAULT_THEME, getPalette } from '../../lib/storefront';
 import { SECTION_TYPES, sectionLabel, makeSection } from './sectionSchema';
 import './StoreStudio.css';
@@ -281,13 +282,24 @@ export default function StoreStudio({
     setPanel(null);
   };
 
-  const applyTemplate = (tpl) => {
-    const dir = rtl ? 'rtl' : 'ltr';
+  const seedSectionLists = (section) => {
+    const p = section.props || {};
+    const list = {
+      lookbook: () => (p.images && p.images.length ? null : { images: DEMO_LOOKS }),
+      about: () => (p.bullets && p.bullets.length ? null : { bullets: DEMO_ABOUT_BULLETS }),
+      testimonials: () => (p.items && p.items.length ? null : { items: DEMO_TESTIMONIALS }),
+      faq: () => (p.items && p.items.length ? null : { items: DEMO_FAQ }),
+      stats: () => (p.items && p.items.length ? null : { items: DEMO_STATS }),
+    }[section.type];
+    return list ? { ...section, props: { ...p, ...(list() || {}) } } : section;
+  };
+
+  const applyTemplate = (tpl) => {    const dir = rtl ? 'rtl' : 'ltr';
     const built = (tpl.sections || []).map(({ type, props }) => {
       const sec = makeSection(type, dir);
       if (!sec) return null;
       return { ...sec, props: { ...sec.props, ...props } };
-    }).filter(Boolean);
+    }).filter(Boolean).map(seedSectionLists);
     onChange({
       ...store,
       theme: { ...tpl.theme, custom: {} },

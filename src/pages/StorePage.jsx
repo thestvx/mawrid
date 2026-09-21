@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getStorefrontBySlug, saveStorefront } from '../lib/storefront';
+import { DEMO_PRODUCTS, DEMO_CATEGORIES } from '../lib/demoCatalog';
 import { makeSection } from '../components/store/sectionSchema';
+import { DEMO_PRODUCTS, DEMO_CATEGORIES } from '../lib/demoCatalog';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import StoreRenderer from '../components/store/StoreRenderer';
@@ -11,13 +13,13 @@ import MediaPicker from '../components/store/MediaPicker';
 import './StorePage.css';
 
 function fetchProducts(sellerId) {
-  if (!isSupabaseConfigured || !sellerId) return Promise.resolve([]);
+  if (!isSupabaseConfigured || !sellerId) return Promise.resolve(DEMO_PRODUCTS);
   return supabase
     .from('products')
     .select('*')
     .eq('seller_id', sellerId)
     .then(({ data, error }) => {
-      if (error || !data) return [];
+      if (error || !data || !data.length) return DEMO_PRODUCTS;
       return data.filter((p) => !['pending', 'rejected', 'hidden', 'draft'].includes(String(p.status || '').toLowerCase()));
     });
 }
