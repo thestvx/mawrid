@@ -50,7 +50,7 @@ export function SectionHead({ title, subtitle, align = 'center', dir, action }) 
   );
 }
 
-export function StoreProductCard({ product, dir, showPrice = true, compact = false }) {
+export function StoreProductCard({ product, dir, showPrice = true, compact = false, cartBtn = 'overlay' }) {
   const { add } = useCart();
   const { productPrices, fmtValue } = useCurrency();
   const [added, setAdded] = useState(false);
@@ -71,6 +71,17 @@ export function StoreProductCard({ product, dir, showPrice = true, compact = fal
     timer.current = setTimeout(() => setAdded(false), 1600);
   };
 
+  const cartBtnEl = cartBtn === 'hidden' ? null : (
+    <button
+      type="button"
+      className={`st-card__add${added ? ' is-added' : ''}${cartBtn !== 'overlay' ? ' st-card__add--inline' : ''}`}
+      onClick={handleAdd}
+      aria-label={dir === 'rtl' ? 'أضف للسلة' : 'Add to cart'}
+    >
+      {added ? '✓' : '+'}
+    </button>
+  );
+
   return (
     <article className={`st-card${compact ? ' st-card--compact' : ''}`}>
       <Link to={`/product/${product.id}`} className="st-card__media">
@@ -80,14 +91,7 @@ export function StoreProductCard({ product, dir, showPrice = true, compact = fal
           <span className="st-card__ph" />
         )}
         {hasSale && <span className="st-card__tag">{dir === 'rtl' ? 'خصم' : 'Sale'}</span>}
-        <button
-          type="button"
-          className={`st-card__add${added ? ' is-added' : ''}`}
-          onClick={handleAdd}
-          aria-label={dir === 'rtl' ? 'أضف للسلة' : 'Add to cart'}
-        >
-          {added ? '✓' : '+'}
-        </button>
+        {cartBtn === 'overlay' && cartBtnEl}
       </Link>
       <div className="st-card__body">
         <Link to={`/product/${product.id}`} className="st-card__name">{name}</Link>
@@ -97,15 +101,16 @@ export function StoreProductCard({ product, dir, showPrice = true, compact = fal
             {hasSale && <del>{fmtValue(price)}</del>}
           </div>
         )}
+        {cartBtn !== 'hidden' && cartBtnEl}
       </div>
     </article>
   );
 }
 
-function ProductGrid({ products, dir, showPrice, layout }) {
+function ProductGrid({ products, dir, showPrice, layout, cartBtn = 'overlay' }) {
   return (
     <div className={`st-grid st-grid--${layout} st-grid--n${Math.min(products.length, 4)}`}>
-      {products.map((p) => <StoreProductCard key={p.id} product={p} dir={dir} showPrice={showPrice} />)}
+      {products.map((p) => <StoreProductCard key={p.id} product={p} dir={dir} showPrice={showPrice} cartBtn={cartBtn} />)}
     </div>
   );
 }
@@ -188,10 +193,10 @@ export const SECTIONS = {
         />
         {props.layout === 'carousel' ? (
           <div className="st-scroller">
-            {list.map((p) => <StoreProductCard key={p.id} product={p} dir={dir} showPrice={props.showPrice} compact />)}
+            {list.map((p) => <StoreProductCard key={p.id} product={p} dir={dir} showPrice={props.showPrice} compact cartBtn={props.cartBtn} />)}
           </div>
         ) : (
-          <ProductGrid products={list} dir={dir} showPrice={props.showPrice !== false} layout={props.layout === 'editorial' ? 'editorial' : 'grid'} />
+          <ProductGrid products={list} dir={dir} showPrice={props.showPrice !== false} layout={props.layout === 'editorial' ? 'editorial' : 'grid'} cartBtn={props.cartBtn} />
         )}
       </section>
     );

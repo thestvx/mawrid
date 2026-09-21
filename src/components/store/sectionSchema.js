@@ -85,7 +85,7 @@ export const SECTION_TYPES = {
     label_en: 'Products',
     icon: '▦',
     group: 'shop',
-    defaults: { title_ar: 'منتجاتنا', title_en: 'Our products', subtitle_ar: '', subtitle_en: '', source: 'featured', limit: 8, layout: 'grid', showPrice: true },
+    defaults: { title_ar: 'منتجاتنا', title_en: 'Our products', subtitle_ar: '', subtitle_en: '', source: 'featured', limit: 8, layout: 'grid', showPrice: true, cartBtn: 'overlay' },
     fields: [
       txt('title_ar', 'العنوان (عربي)', 'Title (AR)'),
       txt('title_en', 'العنوان (إنجليزي)', 'Title (EN)'),
@@ -106,6 +106,13 @@ export const SECTION_TYPES = {
       }),
       num('limit', 'عدد المنتجات', 'Product count', { min: 2, max: 24 }),
       tog('showPrice', 'إظهار السعر', 'Show price'),
+      sel('cartBtn', 'زر إضافة للسلة', 'Add-to-cart', {
+        options: [
+          { value: 'overlay', label_ar: 'تراكب على الصورة', label_en: 'Overlay on image' },
+          { value: 'inline', label_ar: 'أسفل السعر', label_en: 'Inline under price' },
+          { value: 'hidden', label_ar: 'إخفاء', label_en: 'Hidden' },
+        ],
+      }),
     ],
   },
   categories: {

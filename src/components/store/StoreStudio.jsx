@@ -5,12 +5,72 @@ import { SECTION_TYPES, sectionLabel, makeSection } from './sectionSchema';
 import './StoreStudio.css';
 
 const TEMPLATES = [
-  { id: 'ember', icon: '🔥', label_ar: 'جمر', label_en: 'Ember', desc_ar: 'كلاسيكي دافئ بلمسة برتقالية', desc_en: 'Warm classic, orange pop', theme: { palette: 'ember', font: 'modern', radius: 18, density: 'comfy', custom: {} }, sections: ['hero', 'featured', 'categories', 'contact'] },
-  { id: 'editorial', icon: '📰', label_ar: 'تحريري فاخر', label_en: 'Editorial Luxe', desc_ar: 'مجلة فاخرة بخط سيريف وأناقة', desc_en: 'Luxury magazine serif', theme: { palette: 'sand', font: 'editorial', radius: 8, density: 'comfy', custom: {} }, sections: ['hero', 'lookbook', 'about', 'testimonials', 'contact'] },
-  { id: 'noir', icon: '🌙', label_ar: 'ليلي', label_en: 'Noir', desc_ar: 'داكن وجريء بأسلوب شارعي', desc_en: 'Dark & bold street style', theme: { palette: 'noir', font: 'display', radius: 12, density: 'airy', custom: {} }, sections: ['hero', 'marquee', 'featured', 'lookbook', 'cta', 'contact'] },
-  { id: 'boutique', icon: '🌸', label_ar: 'بوتيك', label_en: 'Boutique', desc_ar: 'وردي أنيق لمتاجر الأزياء', desc_en: 'Graceful pink boutique', theme: { palette: 'rose', font: 'editorial', radius: 24, density: 'airy', custom: {} }, sections: ['hero', 'featured', 'about', 'testimonials', 'contact'] },
-  { id: 'minimal', icon: '▫', label_ar: 'مينيمال', label_en: 'Minimal', desc_ar: 'نظيف وبلا تشتيت', desc_en: 'Clean, distraction-free', theme: { palette: 'ink', font: 'modern', radius: 10, density: 'compact', custom: {} }, sections: ['hero', 'featured', 'contact'] },
-  { id: 'organic', icon: '🌿', label_ar: 'طبيعي', label_en: 'Organic', desc_ar: 'أخضر هادئ يبني الثقة', desc_en: 'Calm green trust builder', theme: { palette: 'sage', font: 'classic', radius: 20, density: 'comfy', custom: {} }, sections: ['hero', 'featured', 'about', 'faq', 'testimonials', 'contact'] },
+  {
+    id: 'ember', icon: '🔥', label_ar: 'جمر', label_en: 'Ember', desc_ar: 'كلاسيكي دافئ بلمسة برتقالية', desc_en: 'Warm classic, orange pop',
+    theme: { palette: 'ember', font: 'modern', radius: 18, density: 'comfy', custom: {} },
+    sections: [
+      { type: 'hero', props: { layout: 'full', align: 'center', height: 'tall', title_ar: 'طيف', title_en: 'Taif', subtitle_ar: 'قطع مختارة بعناية', subtitle_en: 'Handpicked pieces', cta1Label_ar: 'تسوّق الآن', cta1Label_en: 'Shop now', cta1Href: '#products', cta2Label_ar: '', cta2Label_en: '' } },
+      { type: 'featured', props: { title_ar: 'منتجاتنا', title_en: 'Our products', subtitle_ar: '', subtitle_en: '', source: 'featured', limit: 8, layout: 'grid', showPrice: true, cartBtn: 'overlay' } },
+      { type: 'categories', props: { title_ar: 'تسوّق حسب القسم', title_en: 'Shop by category', layout: 'cards', limit: 8 } },
+      { type: 'contact', props: { title_ar: 'تواصل معنا', title_en: 'Get in touch', showWhatsapp: true, showEmail: true, showPhone: true, showAddress: true } },
+    ],
+  },
+  {
+    id: 'editorial', icon: '📰', label_ar: 'تحريري فاخر', label_en: 'Editorial Luxe', desc_ar: 'مجلة فاخرة بخط سيريف وأناقة', desc_en: 'Luxury magazine serif',
+    theme: { palette: 'sand', font: 'editorial', radius: 8, density: 'comfy', custom: {} },
+    sections: [
+      { type: 'hero', props: { layout: 'split', align: 'start', height: 'tall', eyebrow_ar: 'خريف ٢٠٢٦', eyebrow_en: 'Autumn 2026', title_ar: 'طيف', title_en: 'Taif', subtitle_ar: 'قصص تُروى بخيط واحد', subtitle_en: 'Stories told in one thread', cta1Label_ar: 'المجموعة الجديدة', cta1Label_en: 'New collection', cta1Href: '#products', cta2Label_ar: '', cta2Label_en: '' } },
+      { type: 'featured', props: { title_ar: 'القطع المميزة', title_en: 'Featured pieces', subtitle_ar: 'أيقونات لا تُنسى', subtitle_en: 'Timeless icons', source: 'featured', limit: 6, layout: 'editorial', showPrice: true, cartBtn: 'inline' } },
+      { type: 'lookbook', props: { title_ar: 'من أعمالنا', title_en: 'Lookbook', subtitle_ar: '', subtitle_en: '', columns: 3, images: [] } },
+      { type: 'about', props: { title_ar: 'قصتنا', title_en: 'Our story', text_ar: '', text_en: '', bullets: [] } },
+      { type: 'testimonials', props: { title_ar: 'قالوا عنا', title_en: 'Kind words', items: [] } },
+      { type: 'contact', props: { title_ar: 'تواصل معنا', title_en: 'Get in touch', showWhatsapp: true, showEmail: true, showPhone: false, showAddress: true } },
+    ],
+  },
+  {
+    id: 'noir', icon: '🌙', label_ar: 'ليلي', label_en: 'Noir', desc_ar: 'داكن وجريء بأسلوب شارعي', desc_en: 'Dark & bold street style',
+    theme: { palette: 'noir', font: 'display', radius: 12, density: 'airy', custom: {} },
+    sections: [
+      { type: 'hero', props: { layout: 'full', align: 'center', height: 'tall', title_ar: 'طيف', title_en: 'Taif', subtitle_ar: 'لا تتبع الموضة — أمليها', subtitle_en: 'Don\'t follow trends — set them', overlay: 62, cta1Label_ar: 'اكتشف', cta1Label_en: 'Discover', cta1Href: '#products', cta2Label_ar: '', cta2Label_en: '' } },
+      { type: 'marquee', props: { text_ar: 'شحن مجاني 🚚 جميع أنحاء السعودية', text_en: 'Free shipping 🚚 all across KSA', speed: 22 } },
+      { type: 'featured', props: { title_ar: 'الأحدث', title_en: 'Fresh drops', subtitle_ar: '', subtitle_en: '', source: 'all', limit: 10, layout: 'carousel', showPrice: true, cartBtn: 'overlay' } },
+      { type: 'lookbook', props: { title_ar: 'إطلالات', title_en: 'Looks', subtitle_ar: '', subtitle_en: '', columns: 4, images: [] } },
+      { type: 'cta', props: { title_ar: 'لا تفوّت الاقتناص', title_en: 'Never miss a drop', button_ar: 'انضم للقائمة', button_en: 'Join the list', href: '#contact' } },
+      { type: 'contact', props: { title_ar: 'تواصل معنا', title_en: 'Get in touch', showWhatsapp: true, showEmail: true, showPhone: true, showAddress: false } },
+    ],
+  },
+  {
+    id: 'boutique', icon: '🌸', label_ar: 'بوتيك', label_en: 'Boutique', desc_ar: 'وردي أنيق لمتاجر الأزياء', desc_en: 'Graceful pink boutique',
+    theme: { palette: 'rose', font: 'editorial', radius: 24, density: 'airy', custom: {} },
+    sections: [
+      { type: 'hero', props: { layout: 'center', align: 'center', height: 'tall', title_ar: 'طيف بوتيك', title_en: 'Taif Boutique', subtitle_ar: 'لمسة ناعمة لكل يوم', subtitle_en: 'A soft touch for every day', cta1Label_ar: 'تسوّق', cta1Label_en: 'Shop', cta1Href: '#products', cta2Label_ar: 'مواعيدنا', cta2Label_en: 'Book us', cta2Href: '#contact' } },
+      { type: 'featured', props: { title_ar: 'وصل حديثاً', title_en: 'New arrivals', subtitle_ar: '', subtitle_en: '', source: 'all', limit: 8, layout: 'grid', showPrice: true, cartBtn: 'inline' } },
+      { type: 'about', props: { title_ar: 'فلسفتنا', title_en: 'Our philosophy', text_ar: '', text_en: '', bullets: [] } },
+      { type: 'testimonials', props: { title_ar: 'آراء عميلاتنا', title_en: 'Client love', items: [] } },
+      { type: 'contact', props: { title_ar: 'احجزي موعدك', title_en: 'Book an appointment', showWhatsapp: true, showEmail: true, showPhone: true, showAddress: true } },
+    ],
+  },
+  {
+    id: 'minimal', icon: '▫', label_ar: 'مينيمال', label_en: 'Minimal', desc_ar: 'نظيف وبلا تشتيت', desc_en: 'Clean, distraction-free',
+    theme: { palette: 'ink', font: 'modern', radius: 10, density: 'compact', custom: {} },
+    sections: [
+      { type: 'hero', props: { layout: 'full', align: 'center', height: 'medium', title_ar: 'طيف', title_en: 'Taif', subtitle_ar: 'أقل هو أكثر', subtitle_en: 'Less is more', cta1Label_ar: 'تسوّق', cta1Label_en: 'Shop', cta1Href: '#products', cta2Label_ar: '', cta2Label_en: '' } },
+      { type: 'featured', props: { title_ar: 'تشكيلتنا', title_en: 'The Edit', subtitle_ar: '', subtitle_en: '', source: 'featured', limit: 6, layout: 'grid', showPrice: true, cartBtn: 'hidden' } },
+      { type: 'contact', props: { title_ar: 'تواصل معنا', title_en: 'Get in touch', showWhatsapp: true, showEmail: true, showPhone: false, showAddress: false } },
+    ],
+  },
+  {
+    id: 'organic', icon: '🌿', label_ar: 'طبيعي', label_en: 'Organic', desc_ar: 'أخضر هادئ يبني الثقة', desc_en: 'Calm green trust builder',
+    theme: { palette: 'sage', font: 'classic', radius: 20, density: 'comfy', custom: {} },
+    sections: [
+      { type: 'hero', props: { layout: 'full', align: 'center', height: 'tall', title_ar: 'طيف', title_en: 'Taif', subtitle_ar: 'طبيعي أصيل من الأرض', subtitle_en: 'Honest, from the earth', cta1Label_ar: 'اكتشف', cta1Label_en: 'Explore', cta1Href: '#products', cta2Label_ar: '', cta2Label_en: '' } },
+      { type: 'featured', props: { title_ar: 'منتجاتنا', title_en: 'Our products', subtitle_ar: '', subtitle_en: '', source: 'all', limit: 8, layout: 'grid', showPrice: true, cartBtn: 'inline' } },
+      { type: 'about', props: { title_ar: 'من نحن', title_en: 'Who we are', text_ar: '', text_en: '', bullets: [] } },
+      { type: 'faq', props: { title_ar: 'أسئلة شائعة', title_en: 'FAQ', items: [] } },
+      { type: 'testimonials', props: { title_ar: 'قالوا عنا', title_en: 'Kind words', items: [] } },
+      { type: 'contact', props: { title_ar: 'تواصل معنا', title_en: 'Get in touch', showWhatsapp: true, showEmail: true, showPhone: true, showAddress: true } },
+    ],
+  },
 ];
 
 function Field({ field, value, onChange, dir, onPickImage, sectionId }) {
@@ -222,7 +282,17 @@ export default function StoreStudio({
   };
 
   const applyTemplate = (tpl) => {
-    onChange({ ...store, theme: { ...tpl.theme, custom: {} } });
+    const dir = rtl ? 'rtl' : 'ltr';
+    const built = (tpl.sections || []).map(({ type, props }) => {
+      const sec = makeSection(type, dir);
+      if (!sec) return null;
+      return { ...sec, props: { ...sec.props, ...props } };
+    }).filter(Boolean);
+    onChange({
+      ...store,
+      theme: { ...tpl.theme, custom: {} },
+      sections: built.length ? built : store.sections,
+    });
     setPanel('design');
   };
 
