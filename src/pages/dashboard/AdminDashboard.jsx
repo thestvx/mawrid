@@ -972,7 +972,8 @@ export default function AdminDashboard() {
     const catSeries = categories.map((_, i) => i + 1);
     return (
       <>
-        <div className="d-welcome">
+        <img src="/images/lines/admindashboardline.png" alt="" className="d-overview-strip" />
+      <div className="d-welcome">
           <h2 className="d-welcome__title">{dir === 'rtl' ? 'نظرة عامة على المنصة' : 'Platform Overview'}</h2>
           <p className="d-welcome__sub">{dir === 'rtl' ? 'التحكم الكامل في منصة مَورد — كل شيء يعمل بالبيانات الحية' : 'Full control of the Mawrid platform — all powered by live data'}</p>
         </div>
@@ -1771,7 +1772,20 @@ export default function AdminDashboard() {
     );
   };
 
-  const [settingsForm, setSettingsForm] = useState({ name: 'مَورد', commission: 15, minPayout: 50, supportEmail: 'support@mawrid.com' });
+  const [settingsForm, setSettingsForm] = useState({ name: 'مَورد', commission: 15, minPayout: 50, supportEmail: 'support@mawrid.com', adminName: user?.username || 'Admin', adminAvatar: '', adminCover: '' });
+  const pickFile = (field) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => setSettingsForm(f => ({ ...f, [field]: ev.target.result }));
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
 
   const renderSettings = () => (
     <div className="d-card">
@@ -1784,6 +1798,45 @@ export default function AdminDashboard() {
           </div>
           <div className="d-form__group">
             <label>{dir === 'rtl' ? 'نسبة العمولة (%)' : 'Commission Rate (%)'}</label>
+            <input type="number" value={settingsForm.commission} onChange={e => setSettingsForm(f => ({ ...f, commission: e.target.value }))} className="d-form__input" />
+          </div>
+        </div>
+        <div className="d-form__row">
+          <div className="d-form__group">
+            <label>Profile Avatar</label>
+            <div className="d-avatar-picker">
+              <div className="d-avatar-picker__preview">
+                {settingsForm.avatarUrl ? <img src={settingsForm.avatarUrl} alt="" className="d-avatar-picker__img" /> : <span className="d-avatar-picker__empty">Upload</span>}
+              </div>
+              <input type="file" accept="image/*" onChange={e => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => setSettingsForm(f => ({ ...f, avatarUrl: ev.target.result }));
+                reader.readAsDataURL(file);
+              }} className="d-from__file" />
+            </div>
+          </div>
+          <div className="d-form__group">
+            <label>Profile Cover</label>
+            <div className="d-cover-picker">
+              <input type="file" accept="image/*" onChange={e => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => setSettingsForm(f => ({ ...f, coverUrl: ev.target.result }));
+                reader.readAsDataURL(file);
+              }} className="d-from__file" />
+            </div>
+          </div>
+          <div className="d-form__group">
+            <label>Display Name</label>
+            <input type="text" value={settingsForm.displayName} onChange={e => setSettingsForm(f => ({ ...f, displayName: e.target.value }))} className="d-form__input" placeholder="Appears in the top navbar" />
+          </div>
+        </div>
+        <div className="d-form__row">
+          <div className="d-form__group">
+            <label>Commission Rate (%)</label>
             <input type="number" value={settingsForm.commission} onChange={e => setSettingsForm(f => ({ ...f, commission: e.target.value }))} className="d-form__input" />
           </div>
         </div>
@@ -1873,9 +1926,9 @@ export default function AdminDashboard() {
         <div className="d-topbar__right">
           <span className="d-live-badge">LIVE · {dir === 'rtl' ? 'بيانات حية' : 'Live data'}</span>
           <div className="d-user-chip">
-            <InitialsAvatar name={user?.email || user?.username || 'A'} bg="linear-gradient(135deg, #FF6201, #B24300)" size={32} />
+            {settingsForm.avatarUrl ? <img src={settingsForm.avatarUrl} alt="" className="d-chip-avatar" /> : <InitialsAvatar name={user?.email || user?.username || 'A'} bg="linear-gradient(135deg, #FF6201, #B24300)" size={32} />}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <span className="d-user-chip__name">{user?.username || user?.email?.split('@')[0] || 'Admin'}</span>
+              <span className="d-user-chip__name">{settingsForm.displayName || (dir === 'rtl' ? 'ادمين' : 'Admin')}</span>
               <span className="d-user-chip__role">{roleName}</span>
             </div>
           </div>

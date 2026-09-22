@@ -1,6 +1,7 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import Hero from '../components/sections/Hero';
+import SixOffers from '../components/sections/SixOffers';
 import SubscriptionCards from '../components/sections/SubscriptionCards';
 import WhyMawrid from '../components/sections/WhyMawrid';
 import Testimonials from '../components/sections/Testimonials';
@@ -64,6 +65,8 @@ export default function Home() {
           className="why-banner__img"
         />
       </SectionReveal>
+
+      <SixOffers />
 
       <SectionReveal>
         <WhyMawrid />

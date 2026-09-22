@@ -1,0 +1,125 @@
+.so {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 54px 16px 40px;
+  overflow: hidden;
+}
+
+.so__line {
+  width: min(860px, 92%);
+  height: auto;
+  display: block;
+}
+
+.so__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  width: min(1120px, 100%);
+  direction: rtl;
+}
+
+.so__cell {
+  background: linear-gradient(160deg, #ffffff, #fff7ee);
+  border: 1px solid rgba(200, 165, 150, 0.38);
+  border-radius: 18px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 12px 30px rgba(74, 47, 29, 0.10);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.so__cell:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 38px rgba(74, 47, 29, 0.16);
+}
+
+.so__thumb {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.so__thumb img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.so__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 6px 6px;
+}
+
+.so__name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.5;
+  color: var(--color-on-surface);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.so__dur {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.so__price {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.so__price-new {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.so__price-old {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-on-surface-variant);
+}
+
+.so__extra {
+  width: min(1120px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.so__extra-line {
+  width: min(980px, 100%);
+  height: auto;
+  align-self: center;
+}
+
+.so__bg {
+  position: relative;
+  width: min(1160px, 100%);
+  border-radius: 22px;
+  overflow: hidden;
+  margin-top: 18px;
+}
+
+.so__bg-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.so__catalog {
+  margin-top: 6px;
+}

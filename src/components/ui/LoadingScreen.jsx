@@ -8,19 +8,20 @@ export default function LoadingScreen({ onFinish }) {
 
   useEffect(() => {
     const start = performance.now();
-    const duration = 2000;
+    const duration = 2100;
     let frame;
 
     const animate = (now) => {
       const elapsed = now - start;
       const t = Math.min(elapsed / duration, 1);
-      const pct = Math.round(t * 100);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const pct = Math.round(eased * 100);
       setProgress(pct);
 
       if (t >= 1 && !doneRef.current) {
         doneRef.current = true;
         setStage('exit');
-        setTimeout(() => onFinish?.(), 500);
+        setTimeout(() => onFinish?.(), 650);
         return;
       }
       frame = requestAnimationFrame(animate);
@@ -32,20 +33,21 @@ export default function LoadingScreen({ onFinish }) {
 
   return (
     <div className={`loading-screen loading-screen--${stage}`}>
+      <div className="loading-screen__halo" aria-hidden="true" />
       <div className="loading-screen__ring-wrap">
         <div className="loading-screen__ring">
           <svg viewBox="0 0 100 100" className="loading-screen__svg">
             <defs>
-              <linearGradient id="loadingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient id="loadingGradSm" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#ff6201" />
                 <stop offset="100%" stopColor="#fbbf24" />
               </linearGradient>
             </defs>
-            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,98,1,0.1)" strokeWidth="3" />
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,98,1,0.12)" strokeWidth="3" />
             <circle
               cx="50" cy="50" r="42"
               fill="none"
-              stroke="url(#loadingGrad)"
+              stroke="url(#loadingGradSm)"
               strokeWidth="3"
               strokeLinecap="round"
               strokeDasharray={`${2 * Math.PI * 42}`}
