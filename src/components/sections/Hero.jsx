@@ -1,135 +1,180 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import {
+  motion,
+  useSpring,
+  useMotionValue,
+  useReducedMotion,
+} from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { fetchStoreStats } from '../../lib/supabase';
-import Button from '../ui/Button';
 import './Hero.css';
 
-function SearchIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-      <circle cx="11" cy="11" r="7" />
-      <path d="M21 21l-4.35-4.35" />
-    </svg>
-  );
+const EASE = [0.16, 1, 0.3, 1];
+
+function AnimatedCounter({ end, suffix, isVisible }) {
+  const [display, setDisplay] = useState('0');
+  const reduce = useReducedMotion();
+
+  useEffect(() => {
+    if (!isVisible) return;
+    if (reduce) {
+      setDisplay(end.toLocaleString('en-US'));
+      return;
+    }
+    const duration = 2000;
+    const startTime = performance.now();
+
+    function tick(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(eased * end);
+      setDisplay(current.toLocaleString('en-US'));
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }, [isVisible, end, reduce]);
+
+  return <>{display}{suffix}</>;
 }
 
-function ArrowIcon() {
+const ctaVariants = {
+  hidden: { opacity: 0, y: 32 },
+  visible: {
+    opacity: 1, y: 0,
+    transition: { duration: 0.8, ease: EASE, delay: 0.3 },
+  },
+};
+
+const statVariants = {
+  hidden: { opacity: 0, y: 26 },
+  visible: (i) => ({
+    opacity: 1, y: 0,
+    transition: { duration: 0.7, ease: EASE, delay: 0.4 + i * 0.15 },
+  }),
+};
+
+function GlowCursor() {
+  const reduce = useReducedMotion();
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 80, damping: 25 });
+  const springY = useSpring(mouseY, { stiffness: 80, damping: 25 });
+
+  useEffect(() => {
+    const handler = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    window.addEventListener('mousemove', handler);
+    return () => window.removeEventListener('mousemove', handler);
+  }, [mouseX, mouseY]);
+
+  if (reduce) return null;
+
   return (
-    <svg className="mw-flip" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M5 12h14M12 5l7 7-7 7" />
-    </svg>
+    <motion.div
+      className="hero__glow-cursor"
+      style={{ x: springX, y: springY }}
+    />
   );
 }
 
 export default function Hero() {
-  const { t, lang } = useLanguage();
-  const isRtl = lang === 'ar';
-  const navigate = useNavigate();
-  const [query, setQuery] = useState('');
+  const sectionRef = useRef(null);
+  const statsRef = useRef(null);
+  const [statsVisible, setStatsVisible] = useState(false);
   const [stats, setStats] = useState([
-    { value: 0, key: 'hero.stat.products' },
-    { value: 0, key: 'hero.stat.sellers' },
-    { value: 0, key: 'hero.stat.buyers' },
+    { end: 0, suffix: '+', key: 'hero.stat.products' },
+    { end: 0, suffix: '+', key: 'hero.stat.sellers' },
+    { end: 0, suffix: '+', key: 'hero.stat.buyers' },
   ]);
+  const { t, dir } = useLanguage();
 
   useEffect(() => {
     let active = true;
     fetchStoreStats().then((counts) => {
       if (!active) return;
       setStats([
-        { value: counts.products, key: 'hero.stat.products' },
-        { value: counts.sellers, key: 'hero.stat.sellers' },
-        { value: counts.users, key: 'hero.stat.buyers' },
+        { end: counts.products, suffix: '+', key: 'hero.stat.products' },
+        { end: counts.sellers, suffix: '+', key: 'hero.stat.sellers' },
+        { end: counts.users, suffix: '+', key: 'hero.stat.buyers' },
       ]);
     });
     return () => { active = false; };
   }, []);
 
-  const submitSearch = (e) => {
-    e.preventDefault();
-    const q = query.trim();
-    navigate(q ? `/marketplace?q=${encodeURIComponent(q)}` : '/marketplace');
-  };
-
-  const fmt = (n) => (Number(n) || 0).toLocaleString('en-US');
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setStatsVisible(true); },
+      { threshold: 0.3 }
+    );
+    if (statsRef.current) observer.observe(statsRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <section className="mw-hero">
-      <div className="mw-container mw-hero__grid">
-        <div className="mw-hero__copy">
-          <span className="mw-section-head__eyebrow">{t('hero.badge')}</span>
-          <h1 className="mw-hero__title">
-            <span className="mw-hero__title-brand">{t('hero.title.mawrid')}</span>
-            <br />
-            {t('hero.title.line1')}
-            <br />
-            {t('hero.title.line2')}
-          </h1>
-          <p className="mw-hero__subtitle">{t('hero.subtitle')}</p>
+    <section className="hero" ref={sectionRef}>
+      <GlowCursor />
 
-          <form className="mw-search-wrap mw-hero__search" onSubmit={submitSearch} role="search">
-            <span className="mw-search-wrap__icon"><SearchIcon /></span>
-            <input
-              type="search"
-              className="mw-search"
-              placeholder={t('hero.searchPlaceholder')}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              aria-label={t('hero.searchPlaceholder')}
-            />
-            <button type="submit" className="mw-btn mw-btn--primary mw-btn--md mw-hero__search-btn">
-              {t('hero.cta.shop')}
-            </button>
-          </form>
+      <div className="hero__dot-grid" />
 
-          <div className="mw-hero__ctas">
-            <Button to="/sellers" variant="secondary" size="md">
-              {t('hero.cta.suppliers')}
-              <ArrowIcon />
-            </Button>
-            <Button to="/auth?mode=signup&role=seller" variant="ghost" size="md">
-              {t('hero.cta.store')}
-            </Button>
-          </div>
-        </div>
+      <div className="hero__media">
+        <img
+          src="/images/backgrounds/herobackground01.png"
+          alt=""
+          className="hero__img"
+          loading="eager"
+        />
+        <div className="hero__overlay" />
 
-        <div className="mw-hero__visual" aria-hidden="true">
-          <div className="mw-hero__blob mw-hero__blob--a" />
-          <div className="mw-hero__blob mw-hero__blob--b" />
-          <div className="mw-hero__blob mw-hero__blob--c" />
-          <div className="mw-hero__card mw-hero__card--1">
-            <span className="mw-hero__card-ico">◈</span>
-            <div>
-              <strong>{t('hero.card.uiKit')}</strong>
-              <span>{t('hero.card.uiKitComp')}</span>
+        <div className="container hero__content">
+          <motion.div className="hero__cta" variants={ctaVariants} initial="hidden" animate="visible">
+            <Link to="/marketplace" className="hero__btn hero__btn--primary">
+              <span>{t('hero.cta.shop')}</span>
+              <span className="hero__btn-arrow">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={dir === 'rtl' ? { transform: 'scaleX(-1)' } : undefined}>
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </span>
+              <span className="hero__btn-shine" />
+            </Link>
+            <div className="hero__cta-row">
+              <Link to="/sellers" className="hero__btn hero__btn--suppliers">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span>{t('hero.cta.suppliers')}</span>
+                <span className="hero__btn-shine" />
+              </Link>
+              <Link to="/auth?mode=signup&role=seller" className="hero__btn hero__btn--secondary">
+                {t('hero.cta.store')}
+              </Link>
             </div>
-          </div>
-          <div className="mw-hero__card mw-hero__card--2">
-            <span className="mw-hero__card-ico">▣</span>
-            <div>
-              <strong>{t('hero.card.dashboard')}</strong>
-              <span>{t('hero.card.dashboardDesc')}</span>
-            </div>
-          </div>
-          <div className="mw-hero__card mw-hero__card--3">
-            <span className="mw-hero__card-ico">✦</span>
-            <div>
-              <strong>{t('hero.card.chatgpt')}</strong>
-              <span>{t('hero.card.monthly')}</span>
-            </div>
-          </div>
-          <div className="mw-hero__ring" />
+          </motion.div>
         </div>
       </div>
 
-      <div className="mw-container">
-        <div className="mw-hero__stats">
-          {stats.map((s, i) => (
-            <div className="mw-stat" key={i}>
-              <span className="mw-stat__value mw-stat__value--brand">{fmt(s.value)}+</span>
-              <span className="mw-stat__label">{t(s.key)}</span>
-            </div>
+      <div className="hero__stats" ref={statsRef}>
+        <div className="container hero__stats-inner">
+          {stats.map((stat, i) => (
+            <motion.div
+              key={i}
+              className="hero__stat-item"
+              custom={i}
+              variants={statVariants}
+              initial="hidden"
+              animate={statsVisible ? 'visible' : 'hidden'}
+            >
+              <span className="hero__stat-number">
+                <AnimatedCounter end={stat.end} suffix={stat.suffix} isVisible={statsVisible} />
+              </span>
+              <span className="hero__stat-desc">{t(stat.key)}</span>
+            </motion.div>
           ))}
         </div>
       </div>
