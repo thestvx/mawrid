@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ============================================================
+   Mawrid — Figma Design System tokens ("Mawrid / Light")
+   Source: https://www.figma.com/design/41WPnJUNI1mXZTu5mUV5SM
+   ============================================================ */
+
+:root {
+  /* ---- Brand ---- */
+  --mw-brand-600: #A53C00;
+  --mw-brand-500: #FF6201;
+  --mw-brand-100: #FFE8D9;
+  --mw-brand-050: #FFF4EC;
+
+  /* ---- Surfaces ---- */
+  --mw-surface-0: #FFFFFF;
+  --mw-surface-50: #F8F9FA;
+  --mw-surface-200: #E1E3E4;
+
+  /* ---- Ink ---- */
+  --mw-ink-900: #1C1B1F;
+  --mw-ink-500: #6E6A68;
+
+  /* ---- Line ---- */
+  --mw-line: #E1E3E4;
+
+  /* ---- Accents ---- */
+  --mw-indigo: #494BD6;
+  --mw-error: #BA1A1A;
+  --mw-success: #1E7E34;
+
+  /* ---- Type scale (Figma) ---- */
+  --mw-fs-display: 2.5rem;    /* 40 / Bold   */
+  --mw-fs-h1: 2rem;           /* 32 / Bold   */
+  --mw-fs-h2: 1.5rem;         /* 24 / Bold   */
+  --mw-fs-h3: 1.25rem;        /* 20 / SemiBold */
+  --mw-fs-body: 1rem;         /* 16 / Regular */
+  --mw-fs-caption: 0.8125rem; /* 13 / Regular */
+
+  --mw-fw-regular: 400;
+  --mw-fw-medium: 500;
+  --mw-fw-semibold: 600;
+  --mw-fw-bold: 700;
+  --mw-fw-extrabold: 800;
+
+  --mw-lh-tight: 1.25;
+  --mw-lh-normal: 1.6;
+  --mw-lh-loose: 1.8;
+
+  /* ---- Spacing (8px unit) ---- */
+  --mw-space-1: 8px;
+  --mw-space-2: 16px;
+  --mw-space-3: 24px;
+  --mw-space-4: 32px;
+  --mw-space-6: 48px;
+  --mw-space-8: 64px;
+  --mw-space-10: 80px;
+  --mw-space-12: 96px;
+
+  /* ---- Radii ---- */
+  --mw-radius-sm: 4px;
+  --mw-radius-md: 8px;
+  --mw-radius-lg: 12px;
+  --mw-radius-xl: 20px;
+  --mw-radius-full: 9999px;
+
+  /* ---- Shadows (soft, premium) ---- */
+  --mw-shadow-sm: 0 1px 2px rgba(28, 27, 31, 0.06);
+  --mw-shadow-md: 0 4px 16px rgba(28, 27, 31, 0.08);
+  --mw-shadow-lg: 0 12px 40px rgba(28, 27, 31, 0.12);
+  --mw-shadow-brand: 0 8px 24px rgba(255, 98, 1, 0.28);
+
+  /* ---- Layout ---- */
+  --mw-container: 1280px;
+  --mw-gutter: 24px;
+
+  /* ---- Motion ---- */
+  --mw-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --mw-duration: 240ms;
+}
+
+/* Latin-first font stack (Inter), Arabic falls back to Tajawal */
+:root,
+[dir="ltr"] {
+  --mw-font: 'Inter', 'Tajawal', -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Arabic-first font stack (Tajawal) */
+[dir="rtl"] {
+  --mw-font: 'Tajawal', 'Inter', -apple-system, 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* Base application of the type system on redesigned surfaces.
+   Scoped to .mw-* so legacy pages keep their own typography. */
+.mw {
+  font-family: var(--mw-font);
+  color: var(--mw-ink-900);
+  background: var(--mw-surface-0);
+  line-height: var(--mw-lh-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+.mw-container {
+  width: 100%;
+  max-width: var(--mw-container);
+  margin-inline: auto;
+  padding-inline: var(--mw-gutter);
+}
+
+.mw-section {
+  padding-block: var(--mw-space-10);
+}
+
+@media (max-width: 768px) {
+  .mw-section {
+    padding-block: var(--mw-space-8);
+  }
+}

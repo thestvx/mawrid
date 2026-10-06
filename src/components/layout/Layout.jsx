@@ -1,15 +1,15 @@
 import { Outlet } from 'react-router-dom';
-import GooeyNavBar from './GooeyNavBar';
+import Navbar from './Navbar';
 import Footer from './Footer';
 
 export default function Layout() {
   return (
-    <>
-      <GooeyNavBar />
+    <div className="mw">
+      <Navbar />
       <main style={{ minHeight: '100vh' }}>
         <Outlet />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

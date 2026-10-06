@@ -9,6 +9,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import Lenis from 'lenis';
 import './styles/globals.css';
+import './styles/tokens.css';
+import './styles/primitives.css';
 import App from './App.jsx';
 
 gsap.registerPlugin(ScrollTrigger);

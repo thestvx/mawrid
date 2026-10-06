@@ -1,0 +1,115 @@
+/* Figma: SellerCard */
+.mw-seller-card {
+  background: var(--mw-surface-0);
+  border: 1px solid var(--mw-line);
+  border-radius: var(--mw-radius-lg);
+  box-shadow: var(--mw-shadow-sm);
+  padding: var(--mw-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--mw-space-2);
+  height: 100%;
+  transition: transform var(--mw-duration) var(--mw-ease), box-shadow var(--mw-duration) var(--mw-ease);
+}
+
+.mw-seller-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--mw-shadow-md);
+}
+
+.mw-seller-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mw-seller-card__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--mw-radius-full);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: var(--mw-fw-bold);
+  font-size: 1.125rem;
+  overflow: hidden;
+}
+
+.mw-seller-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mw-seller-card__id {
+  flex: 1;
+  min-width: 0;
+}
+
+.mw-seller-card__name {
+  margin: 0;
+  font-size: var(--mw-fs-body);
+  font-weight: var(--mw-fw-bold);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: var(--mw-lh-tight);
+}
+
+.mw-seller-card__verified {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--mw-radius-full);
+  background: var(--mw-success);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mw-seller-card__role {
+  margin: 4px 0 0;
+  font-size: var(--mw-fs-caption);
+  color: var(--mw-ink-500);
+}
+
+.mw-seller-card__head .mw-badge {
+  flex-shrink: 0;
+}
+
+.mw-seller-card__stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--mw-space-1) 0;
+  border-top: 1px solid var(--mw-line);
+  border-bottom: 1px solid var(--mw-line);
+}
+
+.mw-seller-card__stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #e8a020;
+}
+
+.mw-seller-card__stars b {
+  color: var(--mw-ink-900);
+  font-size: var(--mw-fs-caption);
+  margin-inline-start: 4px;
+}
+
+.mw-seller-card__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--mw-radius-full);
+  background: var(--mw-line);
+}
+
+.mw-seller-card__works {
+  font-size: var(--mw-fs-caption);
+  color: var(--mw-ink-500);
+}
