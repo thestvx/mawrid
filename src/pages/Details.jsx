@@ -4,13 +4,54 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { useCart } from '../contexts/CartContext';
 import { fetchCategories, fetchProductById, fetchProducts } from '../lib/supabase';
+import ProductCard from '../components/marketplace/ProductCard';
+import SectionHeading from '../components/ui/SectionHeading';
+import Button from '../components/ui/Button';
+import Badge from '../components/ui/Badge';
 import './Details.css';
+
+const TABS = [
+  { key: 'description', labelKey: 'details.description' },
+  { key: 'specs', labelKey: 'details.specs' },
+  { key: 'reviews', labelKey: 'details.reviews' },
+];
+
+const GUARANTEES = [
+  { key: 'details.guarantee1', icon: 'shield' },
+  { key: 'details.guarantee2', icon: 'truck' },
+  { key: 'details.guarantee3', icon: 'chat' },
+];
+
+function GuaranteeIcon({ name }) {
+  const paths = {
+    shield: <path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10Z" />,
+    truck: <path d="M5 18H3V5h13v13M16 9h4l3 4v5h-3M7 18a2 2 0 1 0 4 0 2 2 0 1 0-4 0ZM16 18a2 2 0 1 0 4 0 2 2 0 1 0-4 0Z" />,
+    chat: <path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.38 9 9 0 0 1-3.9-.9L3 20l1.02-5.6A8.38 8.38 0 1 1 21 11.5Z" />,
+  };
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {paths[name]}
+    </svg>
+  );
+}
+
+function Stars({ rating }) {
+  return (
+    <span className="mw-details__stars" aria-label={`${rating} / 5`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <svg key={i} width="15" height="15" viewBox="0 0 24 24" fill={i <= Math.round(rating) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      ))}
+    </span>
+  );
+}
 
 export default function Details() {
   const { id } = useParams();
-  const { dir } = useLanguage();
+  const { t, dir } = useLanguage();
   const isRtl = dir === 'rtl';
-  const { add } = useCart();
+  const { add, updateQty, items } = useCart();
   const { productPrices, fmtValue } = useCurrency();
   const navigate = useNavigate();
 
@@ -20,6 +61,9 @@ export default function Details() {
   const [related, setRelated] = useState([]);
   const [state, setState] = useState('loading');
   const [activeImage, setActiveImage] = useState(0);
+  const [tab, setTab] = useState('description');
+  const [qty, setQty] = useState(1);
+  const [following, setFollowing] = useState(false);
 
   const productId = product ? product.id : null;
   const categoryId = product ? product.category_id : null;
@@ -30,12 +74,11 @@ export default function Details() {
       setState('loading');
       const { data } = await fetchProductById(id);
       if (!active) return;
-      if (!data) {
-        setState('notfound');
-        return;
-      }
+      if (!data) { setState('notfound'); return; }
       setProduct(data);
       setActiveImage(0);
+      setQty(1);
+      setTab('description');
       setState('ready');
     })();
     return () => { active = false; };
@@ -70,20 +113,19 @@ export default function Details() {
 
   if (state === 'loading') {
     return (
-      <div className="details" style={{ paddingTop: '100px' }}>
-        <div className="container details__state">{isRtl ? 'جارٍ التحميل...' : 'Loading...'}</div>
+      <div className="mw mw-details">
+        <div className="mw-container mw-details__state">{t('marketplace.loading')}</div>
       </div>
     );
   }
 
   if (state === 'notfound' || !product) {
     return (
-      <div className="details" style={{ paddingTop: '100px' }}>
-        <div className="container details__state">
-          <span className="material-symbols-outlined details__state-icon">search_off</span>
-          <h1>{isRtl ? 'المنتج غير موجود' : 'Product not found'}</h1>
-          <p>{isRtl ? 'ربما تم حذف المنتج أو أن الرابط غير صحيح.' : 'This product may have been removed or the link is broken.'}</p>
-          <Link to="/marketplace" className="btn btn--primary">{isRtl ? 'العودة إلى السوق' : 'Back to Marketplace'}</Link>
+      <div className="mw mw-details">
+        <div className="mw-container mw-details__state">
+          <h1>{t('details.notFound')}</h1>
+          <p>{t('details.notFoundDesc')}</p>
+          <Button to="/marketplace" variant="primary">{t('details.backToMarket')}</Button>
         </div>
       </div>
     );
@@ -101,134 +143,193 @@ export default function Details() {
   const { price, salePrice } = productPrices(product);
   const hasSale = salePrice > 0 && salePrice < price;
   const shownPrice = hasSale ? salePrice : price;
+  const rating = Number(product.rating) || 0;
+  const idStr = String(product.id);
+
+  const applyQty = () => {
+    const existing = items.find((i) => i.id === idStr);
+    add(product);
+    const target = (existing ? existing.qty : 0) + qty;
+    updateQty(idStr, target);
+  };
+
+  const handleAddToCart = () => { applyQty(); };
+  const handleBuyNow = () => { applyQty(); navigate('/cart'); };
 
   return (
-    <div className="details" style={{ paddingTop: '100px' }}>
-      <div className="container">
-        <nav className="details__breadcrumb">
-          <Link to="/">{isRtl ? 'الرئيسية' : 'Home'}</Link>
-          <span className="details__breadcrumb-sep">‹</span>
-          <Link to="/marketplace">{isRtl ? 'السوق' : 'Marketplace'}</Link>
+    <div className="mw mw-details">
+      <div className="mw-container">
+        <nav className="mw-details__crumbs" aria-label="breadcrumb">
+          <Link to="/">{t('details.home')}</Link>
+          <span aria-hidden="true">‹</span>
+          <Link to="/marketplace">{t('marketplace.title')}</Link>
           {cat && (
             <>
-              <span className="details__breadcrumb-sep">‹</span>
+              <span aria-hidden="true">‹</span>
               <Link to={`/marketplace?cat=${encodeURIComponent(cat.slug)}`}>
                 {isRtl ? cat.name : cat.name_en || cat.name}
               </Link>
             </>
           )}
-          <span className="details__breadcrumb-sep">‹</span>
-          <span>{title}</span>
+          <span aria-hidden="true">‹</span>
+          <span className="is-current">{title}</span>
         </nav>
 
-        <div className="details__layout">
-          <div className="details__gallery">
-            <div className="details__main-image">
-              {gallery[0] ? (
-                <img src={gallery[activeImage] || gallery[0]} alt={title} />
-              ) : (
-                <div className="details__main-image--placeholder">
-                  <span className="material-symbols-outlined">inventory_2</span>
-                </div>
+        <div className="mw-details__layout">
+          <div className="mw-details__gallery">
+            <div className="mw-card mw-details__main">
+              {gallery[0]
+                ? <img src={gallery[activeImage] || gallery[0]} alt={title} />
+                : <div className="mw-details__placeholder" aria-hidden="true" />}
+              {hasSale && (
+                <span className="mw-details__sale">
+                  <Badge tone="hot">-{Math.round((1 - salePrice / price) * 100)}%</Badge>
+                </span>
               )}
-              <button className="details__fav-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
-              </button>
             </div>
             {gallery.length > 1 && (
-              <div className="details__thumbs">
+              <div className="mw-details__thumbs">
                 {gallery.map((src, i) => (
                   <button
                     key={i}
-                    className={`details__thumb ${i === activeImage ? 'details__thumb--active' : ''}`}
+                    type="button"
+                    className={`mw-details__thumb${i === activeImage ? ' mw-details__thumb--active' : ''}`}
                     onClick={() => setActiveImage(i)}
+                    aria-label={`${t('details.gallery')} ${i + 1}`}
                   >
-                    <img src={src} alt="" />
+                    <img src={src} alt="" loading="lazy" />
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          <div className="details__info">
-            <div className="details__card">
-              {cat && <span className="details__tag">{isRtl ? cat.name : cat.name_en || cat.name}</span>}
-              {product.featured && !cat && <span className="details__tag">{isRtl ? 'مميز' : 'Featured'}</span>}
-              <h1 className="details__title">{title}</h1>
+          <div className="mw-details__info">
+            <div className="mw-card mw-details__card">
+              <div className="mw-details__tags">
+                {cat && <Badge tone="soft">{isRtl ? cat.name : cat.name_en || cat.name}</Badge>}
+                {product.featured && <Badge tone="hot">{t('details.featured')}</Badge>}
+              </div>
+              <h1 className="mw-details__title">{title}</h1>
+
+              <div className="mw-details__rating-row">
+                {rating > 0 ? (
+                  <>
+                    <Stars rating={rating} />
+                    <b>{rating.toFixed(1)}</b>
+                    <span className="mw-details__sold">{product.sales ? `${Number(product.sales).toLocaleString('en-US')} ${t('details.sold')}` : ''}</span>
+                  </>
+                ) : (
+                  <span className="mw-details__sold">{t('details.new')}</span>
+                )}
+              </div>
+
+              <div className="mw-details__price">
+                <span className="mw-details__price-now">{fmtValue(shownPrice)}</span>
+                {hasSale && <span className="mw-details__price-old">{fmtValue(price)}</span>}
+              </div>
+
+              <div className="mw-details__buy-row">
+                <div className="mw-details__stepper" role="group" aria-label={t('details.quantity')}>
+                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="−">−</button>
+                  <span aria-live="polite">{qty}</span>
+                  <button type="button" onClick={() => setQty((q) => Math.min(99, q + 1))} aria-label="+">+</button>
+                </div>
+                <Button variant="secondary" size="md" onClick={handleAddToCart} className="mw-details__add">
+                  {t('details.addToCart')}
+                </Button>
+              </div>
+              <Button variant="primary" size="md" block onClick={handleBuyNow}>
+                {t('details.buyNow')}
+              </Button>
 
               {product.seller_name && (
-                <div className="details__seller-row">
-                  <span className="details__seller-label">{isRtl ? 'البائع:' : 'Seller:'}</span>
-                  <span className="details__seller-value">{product.seller_name}</span>
+                <div className="mw-details__seller">
+                  <span className="mw-details__seller-avatar" aria-hidden="true">
+                    {product.seller_name.slice(0, 1)}
+                  </span>
+                  <div className="mw-details__seller-id">
+                    <strong>{product.seller_name}</strong>
+                    <span><Badge tone="verified">{t('details.verifiedSeller')}</Badge></span>
+                  </div>
+                  <button
+                    type="button"
+                    className={`mw-btn mw-btn--sm ${following ? 'mw-btn--secondary' : 'mw-btn--primary'}`}
+                    onClick={() => setFollowing((v) => !v)}
+                    aria-pressed={following}
+                  >
+                    {following ? t('details.following') : t('details.follow')}
+                  </button>
                 </div>
               )}
 
-              <div className="details__price">
-                <span className="details__price-current">{fmtValue(shownPrice)}</span>
-                {hasSale && <span className="details__price-old">{fmtValue(price)}</span>}
-              </div>
-
-              <div className="details__actions">
-                <button className="btn btn--primary details__buy-btn" onClick={() => { add(product); navigate('/cart'); }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <path d="M16 10a4 4 0 0 1-8 0" />
-                  </svg>
-                  {isRtl ? 'شراء الآن' : 'Buy Now'}
-                </button>
-                <button className="details__wishlist-btn">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                </button>
+              <div className="mw-details__guarantees">
+                {GUARANTEES.map((g) => (
+                  <div key={g.key} className="mw-details__guarantee">
+                    <span className="mw-details__guarantee-ico"><GuaranteeIcon name={g.icon} /></span>
+                    <span>{t(g.key)}</span>
+                  </div>
+                ))}
               </div>
             </div>
+          </div>
+        </div>
 
-            {(product.description || product.notes) && (
-              <div className="details__specs">
-                <h3>{isRtl ? 'وصف المنتج' : 'About'}</h3>
-                <p className="details__desc-text">{isRtl ? product.description : product.description}</p>
+        <div className="mw-card mw-details__tabs-card">
+          <div className="mw-details__tabs" role="tablist">
+            {TABS.map((tb) => (
+              <button
+                key={tb.key}
+                type="button"
+                role="tab"
+                aria-selected={tab === tb.key}
+                className={`mw-details__tab${tab === tb.key ? ' mw-details__tab--active' : ''}`}
+                onClick={() => setTab(tb.key)}
+              >
+                {t(tb.labelKey)}
+              </button>
+            ))}
+          </div>
+          <div className="mw-details__panel">
+            {tab === 'description' && (
+              <p>{product.description || product.description_en || t('details.noDescription')}</p>
+            )}
+            {tab === 'specs' && (
+              <div className="mw-details__specs">
+                {Array.isArray(product.tags) && product.tags.length > 0 ? (
+                  <div className="mw-details__tags">
+                    {product.tags.map((tag, i) => <Badge key={i} tone="muted">{tag}</Badge>)}
+                  </div>
+                ) : (
+                  <p className="mw-details__muted">{t('details.noSpecs')}</p>
+                )}
               </div>
             )}
-
-            {Array.isArray(product.tags) && product.tags.length > 0 && (
-              <div className="details__tags">
-                {product.tags.map((tag, i) => (
-                  <span key={i} className="details__tag">{tag}</span>
-                ))}
+            {tab === 'reviews' && (
+              <div className="mw-details__reviews">
+                {rating > 0 ? (
+                  <div className="mw-details__rating-summary">
+                    <span className="mw-details__rating-big">{rating.toFixed(1)}</span>
+                    <Stars rating={rating} />
+                  </div>
+                ) : (
+                  <p className="mw-details__muted">{t('details.noReviews')}</p>
+                )}
               </div>
             )}
           </div>
         </div>
 
         {related.length > 0 && (
-          <div className="details__related">
-            <div className="details__related-header">
-              <h2>{isRtl ? 'منتجات ذات صلة' : 'Related Products'}</h2>
-              <Link to={cat ? `/marketplace?cat=${encodeURIComponent(cat.slug)}` : '/marketplace'}>
-                {isRtl ? 'عرض الكل' : 'View All'} →
-              </Link>
-            </div>
-            <div className="details__related-grid">
-              {related.map((item) => {
-                const rThumb = item.thumbnail || (Array.isArray(item.images) ? item.images[0] : '') || '';
-                const rPrices = productPrices(item);
-                const rShown = rPrices.salePrice > 0 && rPrices.salePrice < rPrices.price ? rPrices.salePrice : rPrices.price;
-                return (
-                  <Link key={item.id} to={`/product/${item.id}`} className="details__related-card">
-                    <div className="details__related-image">
-                      {rThumb ? <img src={rThumb} alt="" loading="lazy" /> : <span className="material-symbols-outlined">inventory_2</span>}
-                    </div>
-                    <div className="details__related-body">
-                      <h3>{isRtl ? item.name : item.name_en || item.name}</h3>
-                      <span className="details__related-price">{fmtValue(rShown)}</span>
-                    </div>
-                  </Link>
-                );
-              })}
+          <div className="mw-details__related">
+            <SectionHeading
+              align="start"
+              title={t('details.related')}
+            />
+            <div className="mw-details__related-grid">
+              {related.map((item, i) => (
+                <ProductCard key={item.id} product={item} index={i} />
+              ))}
             </div>
           </div>
         )}

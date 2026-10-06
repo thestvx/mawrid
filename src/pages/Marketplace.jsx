@@ -1,25 +1,40 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { fetchCategories, fetchProducts } from '../lib/supabase';
 import ProductCard from '../components/marketplace/ProductCard';
-import AnimatedContent from '../components/ui/AnimatedContent';
+import SectionHeading from '../components/ui/SectionHeading';
+import Button from '../components/ui/Button';
 import './Marketplace.css';
 
 const PAGE_SIZE = 12;
 
+const RATING_OPTIONS = [
+  { value: 0, label: 'marketplace.allRatings' },
+  { value: 4, label: 'marketplace.rating4' },
+  { value: 3, label: 'marketplace.rating3' },
+];
+
 export default function Marketplace() {
-  const { dir } = useLanguage();
+  const { t, dir } = useLanguage();
   const isRtl = dir === 'rtl';
   const [searchParams] = useSearchParams();
   const activeSlug = searchParams.get('cat') || '';
+  const queryParam = searchParams.get('q') || '';
 
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(queryParam);
   const [sort, setSort] = useState('newest');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [minRating, setMinRating] = useState(0);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  useEffect(() => {
+    setSearch(queryParam);
+  }, [queryParam]);
 
   useEffect(() => {
     fetchCategories().then(({ data }) => setCategories(data || []));
@@ -42,132 +57,180 @@ export default function Marketplace() {
     let list = products;
     const q = search.trim().toLowerCase();
     if (q) {
-      list = list.filter((p) =>
-        (p.name || '').toLowerCase().includes(q) ||
-        (p.name_en || '').toLowerCase().includes(q)
+      list = list.filter(
+        (p) => (p.name || '').toLowerCase().includes(q) || (p.name_en || '').toLowerCase().includes(q)
       );
     }
+    const lo = parseFloat(minPrice);
+    const hi = parseFloat(maxPrice);
+    if (!Number.isNaN(lo)) list = list.filter((p) => Number(p.sale_price > 0 ? p.sale_price : p.price) >= lo);
+    if (!Number.isNaN(hi)) list = list.filter((p) => Number(p.sale_price > 0 ? p.sale_price : p.price) <= hi);
+    if (minRating > 0) list = list.filter((p) => (Number(p.rating) || 0) >= minRating);
+
     const sorted = [...list];
     if (sort === 'price-asc') sorted.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
     else if (sort === 'price-desc') sorted.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
+    else if (sort === 'popular') sorted.sort((a, b) => Number(b.sales || 0) - Number(a.sales || 0));
     return sorted;
-  }, [products, search, sort]);
+  }, [products, search, sort, minPrice, maxPrice, minRating]);
 
   const activeCat = categories.find((c) => c.slug === activeSlug);
   const title = activeCat
     ? (isRtl ? activeCat.name : activeCat.name_en || activeCat.name)
-    : (isRtl ? 'سوق المنتجات' : 'Marketplace');
+    : t('marketplace.title');
+
+  const resetFilters = () => {
+    setSearch('');
+    setMinPrice('');
+    setMaxPrice('');
+    setMinRating(0);
+    setSort('newest');
+    setVisibleCount(PAGE_SIZE);
+  };
 
   return (
-    <div className="marketplace" style={{ paddingTop: '100px' }}>
-      <div className="container">
-        <div className="marketplace__layout">
-          <aside className="marketplace__sidebar">
-            <div className="marketplace__sidebar-header">
-              <h3>{isRtl ? 'الأقسام' : 'Categories'}</h3>
-              <p>{isRtl ? 'تصفح حسب التصنيف' : 'Browse by category'}</p>
-            </div>
-            <nav className="marketplace__filter-nav">
-              <a
-                href="#"
-                onClick={(e) => { e.preventDefault(); setVisibleCount(PAGE_SIZE); return true; }}
-                className={`marketplace__filter-link ${!activeSlug ? 'marketplace__filter-link--active' : ''}`}
-              >
-                {isRtl ? 'كل المنتجات' : 'All Categories'}
-              </a>
-              {categories.map((c) => (
-                <a
-                  key={c.id}
-                  href={`/marketplace?cat=${encodeURIComponent(c.slug)}`}
-                  onClick={(e) => { if (c.slug === activeSlug) e.preventDefault(); }}
-                  className={`marketplace__filter-link ${c.slug === activeSlug ? 'marketplace__filter-link--active' : ''}`}
-                >
-                  {isRtl ? c.name : c.name_en || c.name}
-                </a>
-              ))}
-            </nav>
+    <div className="mw mw-marketplace">
+      <div className="mw-container">
+        <div className="mw-marketplace__head">
+          <SectionHeading align="start" title={title} subtitle={t('marketplace.subtitle')} />
+          {!loading && (
+            <span className="mw-marketplace__count">
+              {filtered.length} {t('marketplace.items')}
+            </span>
+          )}
+        </div>
 
-            <div className="marketplace__sidebar-controls">
-              <input
-                type="search"
-                className="marketplace__search"
-                placeholder={isRtl ? 'ابحث عن منتج...' : 'Search products...'}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <select className="marketplace__sort-select" value={sort} onChange={(e) => setSort(e.target.value)}>
-                <option value="newest">{isRtl ? 'الأحدث' : 'Newest'}</option>
-                <option value="price-asc">{isRtl ? 'السعر: الأقل أولاً' : 'Price: Low to High'}</option>
-                <option value="price-desc">{isRtl ? 'السعر: الأعلى أولاً' : 'Price: High to Low'}</option>
-              </select>
+        <div className="mw-marketplace__layout">
+          <aside className="mw-marketplace__sidebar" aria-label={t('marketplace.filters')}>
+            <div className="mw-card mw-marketplace__panel">
+              <h3 className="mw-marketplace__panel-title">{t('marketplace.filters')}</h3>
+
+              <div className="mw-marketplace__field">
+                <input
+                  type="search"
+                  className="mw-search"
+                  placeholder={t('marketplace.search')}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  aria-label={t('marketplace.search')}
+                />
+              </div>
+
+              <div className="mw-marketplace__group">
+                <h4>{t('marketplace.allCategories')}</h4>
+                <nav className="mw-marketplace__cats">
+                  <Link
+                    to="/marketplace"
+                    className={`mw-marketplace__cat${!activeSlug ? ' mw-marketplace__cat--active' : ''}`}
+                  >
+                    {t('marketplace.allCategories')}
+                  </Link>
+                  {categories.map((c) => (
+                    <Link
+                      key={c.id}
+                      to={`/marketplace?cat=${encodeURIComponent(c.slug)}`}
+                      className={`mw-marketplace__cat${c.slug === activeSlug ? ' mw-marketplace__cat--active' : ''}`}
+                    >
+                      {isRtl ? c.name : c.name_en || c.name}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+
+              <div className="mw-marketplace__group">
+                <h4>{t('marketplace.priceRange')}</h4>
+                <div className="mw-marketplace__prices">
+                  <input
+                    type="number"
+                    min="0"
+                    className="mw-input"
+                    placeholder={t('marketplace.minPrice')}
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    aria-label={t('marketplace.minPrice')}
+                  />
+                  <span className="mw-marketplace__dash">–</span>
+                  <input
+                    type="number"
+                    min="0"
+                    className="mw-input"
+                    placeholder={t('marketplace.maxPrice')}
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    aria-label={t('marketplace.maxPrice')}
+                  />
+                </div>
+              </div>
+
+              <div className="mw-marketplace__group">
+                <h4>{t('marketplace.ratings')}</h4>
+                <div className="mw-marketplace__ratings">
+                  {RATING_OPTIONS.map((r) => (
+                    <button
+                      key={r.value}
+                      type="button"
+                      className={`mw-marketplace__rating${minRating === r.value ? ' mw-marketplace__rating--active' : ''}`}
+                      onClick={() => setMinRating(r.value)}
+                    >
+                      {t(r.label)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button type="button" className="mw-btn mw-btn--ghost mw-btn--sm" onClick={resetFilters}>
+                {t('marketplace.reset')}
+              </button>
+            </div>
+
+            <div className="mw-marketplace__promo">
+              <h4>{t('marketplace.promoTitle')}</h4>
+              <p>{t('marketplace.promoText')}</p>
+              <Button to="/auth?mode=signup&role=seller" variant="primary" size="sm">
+                {t('marketplace.promoCta')}
+              </Button>
             </div>
           </aside>
 
-          <main className="marketplace__main">
-            <div className="marketplace__title-row">
-              <h1 className="marketplace__heading">{title}</h1>
-              <span className="marketplace__count">
-                {loading ? '' : `${filtered.length} ${isRtl ? 'منتج' : 'items'}`}
-              </span>
-            </div>
-
-            <div className="marketplace__chips">
-              {[{ id: 'all', slug: '', name: 'All', name_en: 'All' }, ...categories].map((cat) => {
-                const isActive = cat.slug === activeSlug;
-                return (
-                  <a
-                    key={cat.id}
-                    href={cat.slug ? `/marketplace?cat=${encodeURIComponent(cat.slug)}` : '/marketplace'}
-                    onClick={(e) => { if (isActive) e.preventDefault(); }}
-                    className={`marketplace__chip ${isActive ? 'marketplace__chip--active' : ''}`}
-                  >
-                    {isRtl ? cat.name : cat.name_en || cat.name}
-                  </a>
-                );
-              })}
+          <div className="mw-marketplace__main">
+            <div className="mw-marketplace__toolbar">
+              <label className="mw-marketplace__sort">
+                <span>{t('marketplace.sortBy')}</span>
+                <select className="mw-input mw-marketplace__sort-select" value={sort} onChange={(e) => setSort(e.target.value)}>
+                  <option value="newest">{t('marketplace.newest')}</option>
+                  <option value="popular">{t('marketplace.popular')}</option>
+                  <option value="price-asc">{t('marketplace.priceLow')}</option>
+                  <option value="price-desc">{t('marketplace.priceHigh')}</option>
+                </select>
+              </label>
             </div>
 
             {loading ? (
-              <div className="marketplace__empty">
-                {isRtl ? 'جارٍ التحميل...' : 'Loading...'}
-              </div>
+              <div className="mw-marketplace__state">{t('marketplace.loading')}</div>
             ) : filtered.length === 0 ? (
-              <div className="marketplace__empty">
-                <span className="material-symbols-outlined marketplace__empty-icon">inventory_2</span>
-                <p>{isRtl ? 'لا توجد منتجات بعد في هذا القسم' : 'No products here yet.'}</p>
-                <a href="/marketplace" className="marketplace__empty-link">
-                  {isRtl ? 'عرض كل المنتجات' : 'View all products'}
-                </a>
+              <div className="mw-marketplace__state">
+                <p>{t('marketplace.empty')}</p>
+                <Button to="/marketplace" variant="secondary" size="sm" onClick={resetFilters}>
+                  {t('marketplace.reset')}
+                </Button>
               </div>
             ) : (
-              <div className="marketplace__grid">
-                {filtered.slice(0, visibleCount).map((product, i) => (
-                  <AnimatedContent
-                    key={product.id}
-                    distance={40}
-                    direction="vertical"
-                    duration={0.7}
-                    threshold={0.1}
-                    delay={i * 0.06}
-                    className="marketplace__card-wrap"
-                  >
-                    <ProductCard product={product} index={i} />
-                  </AnimatedContent>
-                ))}
-              </div>
+              <>
+                <div className="mw-marketplace__grid">
+                  {filtered.slice(0, visibleCount).map((product, i) => (
+                    <ProductCard key={product.id} product={product} index={i} />
+                  ))}
+                </div>
+                {filtered.length > visibleCount && (
+                  <div className="mw-marketplace__pagination">
+                    <Button variant="secondary" size="md" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+                      {t('marketplace.loadMore')}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
-
-            {filtered.length > visibleCount && (
-              <div className="marketplace__pagination">
-                <button
-                  className="marketplace__page-btn"
-                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                >
-                  {isRtl ? 'عرض المزيد' : 'Load more'}
-                </button>
-              </div>
-            )}
-          </main>
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,94 @@
+/* Figma: gradient CTA banner */
+.mw-cta-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: linear-gradient(120deg, #a53c00 0%, #ff6201 55%, #c24e00 100%);
+  padding: var(--mw-space-10) var(--mw-space-6);
+  text-align: center;
+  box-shadow: var(--mw-shadow-brand);
+}
+
+.mw-cta-banner__glow {
+  position: absolute;
+  border-radius: var(--mw-radius-full);
+  filter: blur(60px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.mw-cta-banner__glow--a {
+  width: 380px;
+  height: 380px;
+  background: #ffd9bd;
+  top: -140px;
+  inset-inline-start: -100px;
+}
+
+.mw-cta-banner__glow--b {
+  width: 300px;
+  height: 300px;
+  background: #7a2c00;
+  bottom: -120px;
+  inset-inline-end: -80px;
+}
+
+.mw-cta-banner__content {
+  position: relative;
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.mw-cta-banner__title {
+  margin: 0 0 var(--mw-space-2);
+  color: #fff;
+  font-size: var(--mw-fs-h1);
+  font-weight: var(--mw-fw-extrabold);
+  line-height: var(--mw-lh-tight);
+}
+
+.mw-cta-banner__subtitle {
+  margin: 0 0 var(--mw-space-4);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 1.0625rem;
+  line-height: var(--mw-lh-loose);
+}
+
+.mw-cta-banner__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.mw-cta-banner__btn.mw-btn--primary {
+  background: #fff;
+  color: var(--mw-brand-600);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.mw-cta-banner__btn.mw-btn--primary:hover {
+  background: var(--mw-surface-50);
+}
+
+.mw-cta-banner__btn.mw-btn--secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+.mw-cta-banner__btn.mw-btn--secondary:hover {
+  border-color: #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 640px) {
+  .mw-cta-banner {
+    padding: var(--mw-space-8) var(--mw-space-3);
+  }
+
+  .mw-cta-banner__title {
+    font-size: var(--mw-fs-h2);
+  }
+}

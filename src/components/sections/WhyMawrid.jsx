@@ -1,80 +1,66 @@
-import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
-import SplitText from '../ui/SplitText';
-import Stepper, { Step } from '../ui/Stepper';
+import SectionHeading from '../ui/SectionHeading';
 import './WhyMawrid.css';
 
-const stepContent = [
+const FEATURES = [
   {
     key: 'whymawrid.step1',
     descKey: 'whymawrid.step1desc',
-    icon: <><circle cx="12" cy="8" r="4" /><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" /></>,
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10Z" />
+        <path d="M9 12l2 2 4-4" />
+      </svg>
+    ),
+    tone: 'brand',
   },
   {
     key: 'whymawrid.step2',
     descKey: 'whymawrid.step2desc',
-    icon: <><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></>,
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <path d="M21 21l-4.35-4.35" />
+      </svg>
+    ),
+    tone: 'indigo',
   },
   {
     key: 'whymawrid.step3',
     descKey: 'whymawrid.step3desc',
-    icon: <><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></>,
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+        <path d="M3 6h18" />
+        <path d="M16 10a4 4 0 0 1-8 0" />
+      </svg>
+    ),
+    tone: 'green',
   },
 ];
 
 export default function WhyMawrid() {
-  const { t, lang } = useLanguage();
-  const dir = lang === 'ar' ? 'rtl' : 'ltr';
-
-  const completedContent = (
-    <div className="stepper__completed-inner">
-      <span className="stepper__completed-icon" aria-hidden="true">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 13l4 4L19 7" />
-        </svg>
-      </span>
-      <h3 className="stepper__completed-title">{t('whymawrid.done')}</h3>
-      <p className="stepper__completed-desc">{t('whymawrid.doneDesc')}</p>
-      <Link to="/auth?mode=signup" className="stepper__completed-cta">
-        {t('whymawrid.cta')}
-      </Link>
-    </div>
-  );
+  const { t } = useLanguage();
 
   return (
-    <section className="whymawrid" id="howitworks">
-      <div className="container">
-        <SplitText
-          text={t('whymawrid.howTitle')}
-          tag="h2"
-          className="whymawrid__title"
-          textAlign="center"
-          delay={26}
-          duration={1}
-          threshold={0.15}
-          from={{ opacity: 0, y: 30 }}
+    <section className="mw-section" id="howitworks">
+      <div className="mw-container">
+        <SectionHeading
+          eyebrow={t('whymawrid.eyebrow')}
+          title={t('whymawrid.howTitle')}
+          subtitle={t('whymawrid.subtitle')}
         />
-
-        <Stepper
-          initialStep={1}
-          dir={dir}
-          backButtonText={t('whymawrid.back')}
-          nextButtonText={t('whymawrid.next')}
-          completeButtonText={t('whymawrid.finish')}
-          completedContent={completedContent}
-        >
-          {stepContent.map((s) => (
-            <Step key={s.key}>
-              <span className="stepper__step-icon" aria-hidden="true">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  {s.icon}
-                </svg>
+        <div className="mw-why__grid">
+          {FEATURES.map((f) => (
+            <article key={f.key} className="mw-why__card">
+              <span className={`mw-why__icon mw-why__icon--${f.tone}`} aria-hidden="true">
+                {f.icon}
               </span>
-              <h4 className="stepper__step-title">{t(s.key)}</h4>
-              <p className="stepper__step-desc">{t(s.descKey)}</p>
-            </Step>
+              <h3 className="mw-why__title">{t(f.key)}</h3>
+              <p className="mw-why__desc">{t(f.descKey)}</p>
+            </article>
           ))}
-        </Stepper>
+        </div>
       </div>
     </section>
   );

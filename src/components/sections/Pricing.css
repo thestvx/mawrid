@@ -1,0 +1,121 @@
+/* Figma: PricingCards */
+.mw-pricing {
+  background: var(--mw-surface-50);
+}
+
+.mw-pricing__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--mw-space-3);
+  align-items: stretch;
+}
+
+.mw-pricing-card {
+  position: relative;
+  background: var(--mw-surface-0);
+  border: 1px solid var(--mw-line);
+  border-radius: var(--mw-radius-xl);
+  padding: var(--mw-space-4);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--mw-shadow-sm);
+  transition: transform var(--mw-duration) var(--mw-ease), box-shadow var(--mw-duration) var(--mw-ease);
+}
+
+.mw-pricing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--mw-shadow-md);
+}
+
+.mw-pricing-card--featured {
+  border: 2px solid var(--mw-brand-500);
+  box-shadow: var(--mw-shadow-brand);
+}
+
+.mw-pricing-card__flag {
+  position: absolute;
+  top: -14px;
+  inset-inline-start: 50%;
+  transform: translateX(50%);
+}
+
+[dir="ltr"] .mw-pricing-card__flag {
+  transform: translateX(-50%);
+}
+
+.mw-pricing-card__name {
+  margin: 0;
+  font-size: var(--mw-fs-h3);
+  font-weight: var(--mw-fw-bold);
+}
+
+.mw-pricing-card__desc {
+  margin: 8px 0 0;
+  font-size: 0.9375rem;
+  color: var(--mw-ink-500);
+  line-height: var(--mw-lh-loose);
+  min-height: 3.2em;
+}
+
+.mw-pricing-card__price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: var(--mw-space-3) 0;
+  padding-bottom: var(--mw-space-3);
+  border-bottom: 1px solid var(--mw-line);
+}
+
+.mw-pricing-card__amount {
+  font-size: var(--mw-fs-h1);
+  font-weight: var(--mw-fw-extrabold);
+  color: var(--mw-ink-900);
+}
+
+.mw-pricing-card--featured .mw-pricing-card__amount {
+  color: var(--mw-brand-600);
+}
+
+.mw-pricing-card__period {
+  font-size: var(--mw-fs-caption);
+  color: var(--mw-ink-500);
+}
+
+.mw-pricing-card__features {
+  list-style: none;
+  margin: 0 0 var(--mw-space-4);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.mw-pricing-card__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9375rem;
+  color: var(--mw-ink-900);
+}
+
+.mw-pricing-card__check {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--mw-radius-full);
+  background: var(--mw-brand-100);
+  color: var(--mw-brand-600);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+@media (max-width: 960px) {
+  .mw-pricing__grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    margin-inline: auto;
+  }
+}

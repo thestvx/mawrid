@@ -1,38 +1,10 @@
-/* ── Hero Divider (Full Width) ── */
-.hero-divider-fullwidth {
-  position: relative;
-  z-index: 10;
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
-  margin-top: -60px;
-  line-height: 0;
-  font-size: 0;
-  pointer-events: none;
-  overflow: visible;
+/* Figma: Home page rhythm — generous whitespace */
+.mw-home {
+  background: var(--mw-surface-0);
 }
 
-.hero-divider-fullwidth__img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1920 / 635;
-  object-fit: cover;
-  object-position: center;
-}
-
-/* ── Why Mawrid banner (fade in on scroll) ── */
-.why-banner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: center;
-  padding: 8px 0;
-}
-
-.why-banner__img {
-  display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 85vh;
+/* Alternate section backgrounds are set per-section;
+   keep a calm vertical rhythm between blocks. */
+.mw-home > .mw-section + .mw-section {
+  border-top: 1px solid var(--mw-surface-50);
 }
