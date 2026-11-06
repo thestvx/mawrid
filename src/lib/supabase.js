@@ -9,6 +9,13 @@ export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
+let supabaseDisabled = false;
+function isNetworkError(err) {
+  const m = (err && (err.message || String(err))) || '';
+  return /failed to fetch|networkerror|err_name_not_resolved|load failed/i.test(m);
+}
+function markDisabled() { supabaseDisabled = true; }
+
 export function getUserProfile(firebaseUid) {
   if (!supabase || !firebaseUid) return null;
   return supabase
@@ -23,14 +30,24 @@ function emptyResult(data = []) {
 }
 
 export async function fetchCategories() {
-  if (!supabase) return emptyResult();
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .eq('enabled', true)
-    .order('sort_order', { ascending: true });
-  if (error) { console.warn('categories load failed:', error.message); return emptyResult(); }
-  return { data: data || [], error: null };
+  if (!supabase || supabaseDisabled) return emptyResult();
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('enabled', true)
+      .order('sort_order', { ascending: true });
+    if (error) {
+      console.warn('categories load failed:', error.message);
+      if (isNetworkError(error)) markDisabled();
+      return emptyResult();
+    }
+    return { data: data || [], error: null };
+  } catch (e) {
+    console.warn('categories load failed:', e && e.message);
+    if (isNetworkError(e)) markDisabled();
+    return emptyResult();
+  }
 }
 
 export async function resolveCategoryId(slug) {
@@ -45,21 +62,27 @@ export async function resolveCategoryId(slug) {
 }
 
 export async function fetchProducts(filter = {}) {
-  if (!supabase) return emptyResult();
-  let q = supabase.from('products').select('*').eq('status', 'active');
-  if (filter.categoryId) {
-    q = q.eq('category_id', filter.categoryId);
-  } else if (filter.categorySlug) {
-    const id = await resolveCategoryId(filter.categorySlug);
-    if (id) q = q.eq('category_id', id);
-    else return emptyResult();
+  if (!supabase || supabaseDisabled) return emptyResult();
+  try {
+    let q = supabase.from('products').select('*').eq('status', 'active');
+    if (filter.categoryId) {
+      q = q.eq('category_id', filter.categoryId);
+    } else if (filter.categorySlug) {
+      const id = await resolveCategoryId(filter.categorySlug);
+      if (id) q = q.eq('category_id', id);
+      else return emptyResult();
+    }
+    if (filter.featuredOnly) q = q.eq('featured', true);
+    q = q.order('created_at', { ascending: false });
+    if (filter.limit) q = q.limit(filter.limit);
+    const { data, error } = await q;
+    if (error) { console.warn('products load failed:', error.message); if (isNetworkError(error)) markDisabled(); return emptyResult(); }
+    return { data: data || [], error: null };
+  } catch (e) {
+    console.warn('products load failed:', e && e.message);
+    if (isNetworkError(e)) markDisabled();
+    return emptyResult();
   }
-  if (filter.featuredOnly) q = q.eq('featured', true);
-  q = q.order('created_at', { ascending: false });
-  if (filter.limit) q = q.limit(filter.limit);
-  const { data, error } = await q;
-  if (error) { console.warn('products load failed:', error.message); return emptyResult(); }
-  return { data: data || [], error: null };
 }
 
 export async function fetchProductById(id) {
@@ -104,25 +127,37 @@ export function hasUserColumn(name) {
 }
 
 export async function fetchSellers() {
-  if (!supabase) return emptyResult();
-  const ready = await hasSellerColumns();
-  let q = supabase.from('users').select('*').eq('role', 'seller');
-  if (ready) q = q.eq('seller_status', 'verified');
-  const { data, error } = await q.order('created_at', { ascending: true });
-  if (error) { console.warn('sellers load failed:', error.message); return emptyResult(); }
-  return { data: data || [], error: null };
+  if (!supabase || supabaseDisabled) return emptyResult();
+  try {
+    const ready = await hasSellerColumns();
+    let q = supabase.from('users').select('*').eq('role', 'seller');
+    if (ready) q = q.eq('seller_status', 'verified');
+    const { data, error } = await q.order('created_at', { ascending: true });
+    if (error) { console.warn('sellers load failed:', error.message); if (isNetworkError(error)) markDisabled(); return emptyResult(); }
+    return { data: data || [], error: null };
+  } catch (e) {
+    console.warn('sellers load failed:', e && e.message);
+    if (isNetworkError(e)) markDisabled();
+    return emptyResult();
+  }
 }
 
 export async function fetchStoreStats() {
-  if (!supabase) return { products: 0, sellers: 0, users: 0 };
-  const [p, u, s] = await Promise.all([
-    supabase.from('products').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-    supabase.from('users').select('*', { count: 'exact', head: true }),
-    supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'seller'),
-  ]);
-  return {
-    products: p.count ?? 0,
-    users: u.count ?? 0,
-    sellers: s.count ?? 0,
-  };
+  if (!supabase || supabaseDisabled) return { products: 0, sellers: 0, users: 0 };
+  try {
+    const [p, u, s] = await Promise.all([
+      supabase.from('products').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+      supabase.from('users').select('*', { count: 'exact', head: true }),
+      supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'seller'),
+    ]);
+    if (isNetworkError(p.error) || isNetworkError(u.error) || isNetworkError(s.error)) markDisabled();
+    return {
+      products: p.count ?? 0,
+      users: u.count ?? 0,
+      sellers: s.count ?? 0,
+    };
+  } catch (e) {
+    if (isNetworkError(e)) markDisabled();
+    return { products: 0, sellers: 0, users: 0 };
+  }
 }
