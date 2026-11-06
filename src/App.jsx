@@ -51,12 +51,12 @@ export default function App() {
   return (
     <>
       {loading && <LoadingScreen onFinish={() => setLoading(false)} />}
-      <ClickSpark sparkColor="#F97316" sparkSize={16} sparkRadius={22} sparkCount={12} duration={400}>
+      <ClickSpark sparkColor="#F97316" sparkSize={12} sparkRadius={18} sparkCount={6} duration={300}>
         <ScrollToTop />
         <div className="site-dotfield" aria-hidden="true">
           <DotField
-            dotRadius={3}
-            dotSpacing={15}
+            dotRadius={2}
+            dotSpacing={24}
             bulgeStrength={72}
             sparkle={false}
             waveAmplitude={0}

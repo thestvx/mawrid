@@ -31,7 +31,7 @@ const DotField = memo(({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { alpha: true });
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
     let resizeTimer;
 
     function resize() {
@@ -200,12 +200,22 @@ const DotField = memo(({
       if (w > 0 && h > 0) buildDots(w, h);
     };
 
+    function handleVisibility() {
+      if (document.hidden) {
+        if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+      } else if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
       cancelAnimationFrame(rafRef.current);
       clearInterval(speedInterval);
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
