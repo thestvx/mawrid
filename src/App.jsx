@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import LoadingScreen from './components/ui/LoadingScreen';
 import ClickSpark from './components/ui/ClickSpark';
 import DotField from './components/ui/DotField';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
+import About from './pages/About';
+import ServiceChat from './pages/ServiceChat';
 import Marketplace from './pages/Marketplace';
 import Storefront from './components/storefront/Storefront';
 import Details from './pages/Details';
@@ -69,6 +71,8 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/service/:sellerId" element={<ServiceChat />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/storefront" element={<Storefront />} />
               <Route path="/sellers" element={<SellersPage />} />

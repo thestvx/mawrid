@@ -290,6 +290,9 @@ export default function SellerStorefront() {
             </div>
           </div>
           <div className="store-head__actions">
+            <Link className="store-btn store-btn--outline" to={`/service/${profile.id}`}>
+              {isRtl ? 'طلب خدمة (شات)' : 'Request service (chat)'}
+            </Link>
             <button className="store-btn store-btn--dark" onClick={openPrimary}>
               {isRtl ? (isBrand ? 'اطلب موديل' : 'اطلب خدمة') : (isBrand ? 'Request a model' : 'Hire now')}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isRtl ? 'scaleX(-1)' : undefined }}>

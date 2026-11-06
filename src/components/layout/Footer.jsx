@@ -48,6 +48,7 @@ export default function Footer() {
           <div className="footer__section">
             <h4 className="footer__heading">{t('footer.about')}</h4>
             <div className="footer__links">
+              <Link to="/about" className="footer__link">{t('footer.about')}</Link>
               <Link to="/marketplace" className="footer__link">{t('nav.marketplace')}</Link>
               <Link to="/auth?mode=signup&role=seller" className="footer__link">{t('nav.openShop')}</Link>
               <a href="#" className="footer__link">{t('footer.sellerGuide')}</a>
