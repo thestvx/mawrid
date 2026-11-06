@@ -10,19 +10,55 @@ export const supabase = isSupabaseConfigured
   : null;
 
 let supabaseDisabled = false;
+try { if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('supabase_dead') === '1') supabaseDisabled = true; } catch {}
+
+let healthPromise = null;
+function checkHealth() {
+  if (supabaseDisabled) return Promise.resolve(false);
+  if (healthPromise) return healthPromise;
+  healthPromise = (async () => {
+    if (!supabase) return false;
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 2500);
+      const r = await fetch(supabaseUrl + '/rest/v1/', { method: 'HEAD', headers: { apikey: supabaseAnonKey }, signal: ctrl.signal });
+      clearTimeout(t);
+      const ok = r.status > 0 && r.status < 500;
+      if (!ok) { supabaseDisabled = true; try { sessionStorage.setItem('supabase_dead', '1'); } catch {} }
+      return ok;
+    } catch {
+      supabaseDisabled = true;
+      try { sessionStorage.setItem('supabase_dead', '1'); } catch {}
+      return false;
+    }
+  })();
+  return healthPromise;
+}
 function isNetworkError(err) {
   const m = (err && (err.message || String(err))) || '';
-  return /failed to fetch|networkerror|err_name_not_resolved|load failed/i.test(m);
+  return /failed to fetch|networkerror|err_name_not_resolved|load failed|aborted/i.test(m);
 }
-function markDisabled() { supabaseDisabled = true; }
+function markDisabled() {
+  supabaseDisabled = true;
+  try { sessionStorage.setItem('supabase_dead', '1'); } catch {}
+}
 
-export function getUserProfile(firebaseUid) {
-  if (!supabase || !firebaseUid) return null;
-  return supabase
-    .from('users')
-    .select('*')
-    .eq('firebase_uid', firebaseUid)
-    .maybeSingle();
+export async function getUserProfile(firebaseUid) {
+  if (!supabase || supabaseDisabled || !firebaseUid) return { data: null, error: null };
+  const ok = await checkHealth();
+  if (!ok) return { data: null, error: null };
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('firebase_uid', firebaseUid)
+      .maybeSingle();
+    if (error) { if (isNetworkError(error)) markDisabled(); }
+    return { data: data || null, error: error || null };
+  } catch (e) {
+    if (isNetworkError(e)) markDisabled();
+    return { data: null, error: e };
+  }
 }
 
 function emptyResult(data = []) {
@@ -31,6 +67,8 @@ function emptyResult(data = []) {
 
 export async function fetchCategories() {
   if (!supabase || supabaseDisabled) return emptyResult();
+  const ok = await checkHealth();
+  if (!ok) return emptyResult();
   try {
     const { data, error } = await supabase
       .from('categories')
@@ -51,18 +89,24 @@ export async function fetchCategories() {
 }
 
 export async function resolveCategoryId(slug) {
-  if (!supabase || !slug) return null;
-  const { data } = await supabase
-    .from('categories')
-    .select('id, slug')
-    .eq('slug', slug)
-    .eq('enabled', true)
-    .maybeSingle();
-  return data ? data.id : null;
+  if (!supabase || supabaseDisabled || !slug) return null;
+  const ok = await checkHealth();
+  if (!ok) return null;
+  try {
+    const { data } = await supabase
+      .from('categories')
+      .select('id, slug')
+      .eq('slug', slug)
+      .eq('enabled', true)
+      .maybeSingle();
+    return data ? data.id : null;
+  } catch { return null; }
 }
 
 export async function fetchProducts(filter = {}) {
   if (!supabase || supabaseDisabled) return emptyResult();
+  const ok = await checkHealth();
+  if (!ok) return emptyResult();
   try {
     let q = supabase.from('products').select('*').eq('status', 'active');
     if (filter.categoryId) {
@@ -86,27 +130,36 @@ export async function fetchProducts(filter = {}) {
 }
 
 export async function fetchProductById(id) {
-  if (!supabase || !id) return { data: null, error: null };
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
-  if (error) { console.warn('product load failed:', error.message); return { data: null, error }; }
-  return { data, error: null };
+  if (!supabase || supabaseDisabled || !id) return { data: null, error: null };
+  const ok = await checkHealth();
+  if (!ok) return { data: null, error: null };
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) { console.warn('product load failed:', error.message); if (isNetworkError(error)) markDisabled(); return { data: null, error }; }
+    return { data, error: null };
+  } catch (e) {
+    if (isNetworkError(e)) markDisabled();
+    return { data: null, error: e };
+  }
 }
 
 let sellerColumnsPromise = null;
 
 export function hasSellerColumns() {
-  if (!supabase) return Promise.resolve(false);
+  if (!supabase || supabaseDisabled) return Promise.resolve(false);
   if (!sellerColumnsPromise) {
-    sellerColumnsPromise = supabase
-      .from('users')
-      .select('seller_status')
-      .limit(1)
-      .then(({ error }) => !(error && /seller_status/.test(error.message || '')))
-      .catch(() => false);
+    sellerColumnsPromise = (async () => {
+      const ok = await checkHealth();
+      if (!ok) return false;
+      try {
+        const { error } = await supabase.from('users').select('seller_status').limit(1);
+        return !(error && /seller_status/.test(error.message || ''));
+      } catch { return false; }
+    })();
   }
   return sellerColumnsPromise;
 }
@@ -114,20 +167,24 @@ export function hasSellerColumns() {
 const userColumnCache = new Map();
 
 export function hasUserColumn(name) {
-  if (!supabase) return Promise.resolve(false);
+  if (!supabase || supabaseDisabled) return Promise.resolve(false);
   if (userColumnCache.has(name)) return userColumnCache.get(name);
-  const p = supabase
-    .from('users')
-    .select(name)
-    .limit(1)
-    .then(({ error }) => !(error && (error.message || '').includes(name)))
-    .catch(() => false);
+  const p = (async () => {
+    const ok = await checkHealth();
+    if (!ok) return false;
+    try {
+      const { error } = await supabase.from('users').select(name).limit(1);
+      return !(error && (error.message || '').includes(name));
+    } catch { return false; }
+  })();
   userColumnCache.set(name, p);
   return p;
 }
 
 export async function fetchSellers() {
   if (!supabase || supabaseDisabled) return emptyResult();
+  const ok = await checkHealth();
+  if (!ok) return emptyResult();
   try {
     const ready = await hasSellerColumns();
     let q = supabase.from('users').select('*').eq('role', 'seller');
@@ -144,6 +201,8 @@ export async function fetchSellers() {
 
 export async function fetchStoreStats() {
   if (!supabase || supabaseDisabled) return { products: 0, sellers: 0, users: 0 };
+  const ok = await checkHealth();
+  if (!ok) return { products: 0, sellers: 0, users: 0 };
   try {
     const [p, u, s] = await Promise.all([
       supabase.from('products').select('*', { count: 'exact', head: true }).eq('status', 'active'),
