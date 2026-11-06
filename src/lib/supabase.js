@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+﻿import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -10,7 +10,6 @@ export const supabase = isSupabaseConfigured
   : null;
 
 let supabaseDisabled = false;
-try { if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('supabase_dead') === '1') supabaseDisabled = true; } catch {}
 
 let healthPromise = null;
 function checkHealth() {
@@ -24,11 +23,10 @@ function checkHealth() {
       const r = await fetch(supabaseUrl + '/rest/v1/', { method: 'HEAD', headers: { apikey: supabaseAnonKey }, signal: ctrl.signal });
       clearTimeout(t);
       const ok = r.status > 0 && r.status < 500;
-      if (!ok) { supabaseDisabled = true; try { sessionStorage.setItem('supabase_dead', '1'); } catch {} }
+      if (!ok) { supabaseDisabled = true; }
       return ok;
     } catch {
       supabaseDisabled = true;
-      try { sessionStorage.setItem('supabase_dead', '1'); } catch {}
       return false;
     }
   })();
@@ -40,7 +38,6 @@ function isNetworkError(err) {
 }
 function markDisabled() {
   supabaseDisabled = true;
-  try { sessionStorage.setItem('supabase_dead', '1'); } catch {}
 }
 
 export async function getUserProfile(firebaseUid) {
